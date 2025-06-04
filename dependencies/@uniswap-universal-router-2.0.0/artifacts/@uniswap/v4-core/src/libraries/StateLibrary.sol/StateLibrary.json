@@ -1,0 +1,89 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "StateLibrary",
+  "sourceName": "@uniswap/v4-core/src/libraries/StateLibrary.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "FEE_GROWTH_GLOBAL0_OFFSET",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "LIQUIDITY_OFFSET",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "POOLS_SLOT",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "POSITIONS_OFFSET",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "TICKS_OFFSET",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "TICK_BITMAP_OFFSET",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523460185760e4908161001d823930815050f35b5f80fdfe60808060405260043610156011575f80fd5b5f3560e01c9081632ba31c531460c45750806357eb1da71460af578063769323e314609a5780637d35604a146085578063b432004a1460705763ca24e3b5146057575f80fd5b5f366003190112606c57602060405160018152f35b5f80fd5b5f366003190112606c57602060405160038152f35b5f366003190112606c57602060405160058152f35b5f366003190112606c57602060405160048152f35b5f366003190112606c57602060405160068152f35b5f366003190112606c5780600660209252f3fea164736f6c634300081a000a",
+  "deployedBytecode": "0x60808060405260043610156011575f80fd5b5f3560e01c9081632ba31c531460c45750806357eb1da71460af578063769323e314609a5780637d35604a146085578063b432004a1460705763ca24e3b5146057575f80fd5b5f366003190112606c57602060405160018152f35b5f80fd5b5f366003190112606c57602060405160038152f35b5f366003190112606c57602060405160058152f35b5f366003190112606c57602060405160048152f35b5f366003190112606c57602060405160068152f35b5f366003190112606c5780600660209252f3fea164736f6c634300081a000a",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -1,0 +1,28 @@
+name: Lint Code
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Solidity Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 1
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@de808b1eea699e761c404bda44ba8f21aba30b2c # v1.3.1
+        with:
+          version: nightly
+          cache-key: ${{ github.job }}-${{ github.sha }}
+
+      - name: Run forge fmt
+        run: forge fmt --check

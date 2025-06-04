@@ -1,0 +1,6088 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/home/runner/work/universal-router/universal-router/contracts/UniversalRouter.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "a8fefd12e018e74df556d9bcb61598d6",
+      "sourceName": "contracts/UniversalRouter.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./base/Dispatcher.sol",
+        "./types/RouterParameters.sol",
+        "./modules/PaymentsImmutables.sol",
+        "./modules/uniswap/UniswapImmutables.sol",
+        "./modules/uniswap/v4/V4SwapRouter.sol",
+        "./libraries/Commands.sol",
+        "./interfaces/IUniversalRouter.sol",
+        "./modules/MigratorImmutables.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "UniversalRouter"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/types/RouterParameters.sol": {
+      "lastModificationDate": 1739283418641,
+      "contentHash": "845c0f16acb27d6f60ed180164aa31f5",
+      "sourceName": "contracts/types/RouterParameters.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": []
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/base/Dispatcher.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "7a1897f700ccc5c200ef67521c2c3bfe",
+      "sourceName": "contracts/base/Dispatcher.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../modules/uniswap/v2/V2SwapRouter.sol",
+        "../modules/uniswap/v3/V3SwapRouter.sol",
+        "../modules/uniswap/v4/V4SwapRouter.sol",
+        "../modules/uniswap/v3/BytesLib.sol",
+        "../modules/Payments.sol",
+        "../modules/PaymentsImmutables.sol",
+        "../modules/V3ToV4Migrator.sol",
+        "../libraries/Commands.sol",
+        "./Lock.sol",
+        "solmate/src/tokens/ERC20.sol",
+        "permit2/src/interfaces/IAllowanceTransfer.sol",
+        "@uniswap/v4-periphery/src/libraries/ActionConstants.sol",
+        "@uniswap/v4-periphery/src/libraries/CalldataDecoder.sol",
+        "@uniswap/v4-core/src/types/PoolKey.sol",
+        "@uniswap/v4-core/src/interfaces/IPoolManager.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "Dispatcher"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/modules/PaymentsImmutables.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "a97e4acdec22b22fdc4915e7c8f7cfb4",
+      "sourceName": "contracts/modules/PaymentsImmutables.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol",
+        "permit2/src/interfaces/IPermit2.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "PaymentsImmutables"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/modules/uniswap/UniswapImmutables.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "ab4518c07a60277eee4d4ae7ab0e9900",
+      "sourceName": "contracts/modules/uniswap/UniswapImmutables.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "UniswapImmutables"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/modules/uniswap/v4/V4SwapRouter.sol": {
+      "lastModificationDate": 1739283418641,
+      "contentHash": "733a4e352a3364935f7cd3b43fcda7f2",
+      "sourceName": "contracts/modules/uniswap/v4/V4SwapRouter.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../UniswapImmutables.sol",
+        "../../Permit2Payments.sol",
+        "@uniswap/v4-periphery/src/V4Router.sol",
+        "@uniswap/v4-core/src/interfaces/IPoolManager.sol",
+        "@uniswap/v4-core/src/types/Currency.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "V4SwapRouter"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/libraries/Commands.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "72f2d8f8145763d937317341d3bb4f59",
+      "sourceName": "contracts/libraries/Commands.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "Commands"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/interfaces/IUniversalRouter.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "62d5b5e75e306d1f1816b2741131f9e7",
+      "sourceName": "contracts/interfaces/IUniversalRouter.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "IUniversalRouter"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/modules/MigratorImmutables.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "53bc81bb2867e2d12e8b3c9282f7dfe9",
+      "sourceName": "contracts/modules/MigratorImmutables.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol",
+        "@uniswap/v4-periphery/src/interfaces/IPositionManager.sol",
+        "@uniswap/v4-core/src/interfaces/IPoolManager.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "MigratorImmutables"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/modules/uniswap/v2/V2SwapRouter.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "559ada3cf5d9c8d3c91bdf270c74ee85",
+      "sourceName": "contracts/modules/uniswap/v2/V2SwapRouter.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol",
+        "./UniswapV2Library.sol",
+        "../UniswapImmutables.sol",
+        "../../Permit2Payments.sol",
+        "../../../libraries/Constants.sol",
+        "solmate/src/tokens/ERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "V2SwapRouter"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/modules/uniswap/v3/V3SwapRouter.sol": {
+      "lastModificationDate": 1739283418641,
+      "contentHash": "76462dfc9a16068aad0863eb97962c63",
+      "sourceName": "contracts/modules/uniswap/v3/V3SwapRouter.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./V3Path.sol",
+        "./BytesLib.sol",
+        "@uniswap/v3-core/contracts/libraries/SafeCast.sol",
+        "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol",
+        "@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback.sol",
+        "@uniswap/v4-periphery/src/libraries/ActionConstants.sol",
+        "@uniswap/v4-periphery/src/libraries/CalldataDecoder.sol",
+        "../../Permit2Payments.sol",
+        "../UniswapImmutables.sol",
+        "../../../libraries/MaxInputAmount.sol",
+        "solmate/src/tokens/ERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "V3SwapRouter"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/modules/uniswap/v3/BytesLib.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "f0ceaef505997a802572ce107d9f1c5c",
+      "sourceName": "contracts/modules/uniswap/v3/BytesLib.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../../libraries/Constants.sol",
+        "@uniswap/v4-periphery/src/libraries/CalldataDecoder.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "BytesLib"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/modules/Payments.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "2fc257c2c165e039e17d5911d9647cce",
+      "sourceName": "contracts/modules/Payments.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../libraries/Constants.sol",
+        "@uniswap/v4-periphery/src/libraries/ActionConstants.sol",
+        "@uniswap/v4-periphery/src/libraries/BipsLibrary.sol",
+        "../modules/PaymentsImmutables.sol",
+        "solmate/src/utils/SafeTransferLib.sol",
+        "solmate/src/tokens/ERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "Payments"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/modules/V3ToV4Migrator.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "7068c9a83c86609057a29977012fa8ce",
+      "sourceName": "contracts/modules/V3ToV4Migrator.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../modules/MigratorImmutables.sol",
+        "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol",
+        "@uniswap/v4-periphery/src/libraries/Actions.sol",
+        "@uniswap/v3-periphery/contracts/interfaces/IERC721Permit.sol",
+        "@uniswap/v4-periphery/src/libraries/CalldataDecoder.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "V3ToV4Migrator"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/base/Lock.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "f516f63276619049604b380812310057",
+      "sourceName": "contracts/base/Lock.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../libraries/Locker.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "Lock"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/solmate/src/tokens/ERC20.sol": {
+      "lastModificationDate": 1739283457594,
+      "contentHash": "0c7c7ada139062536af09d69d96d395c",
+      "sourceName": "solmate/src/tokens/ERC20.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.8.0"
+      ],
+      "artifacts": [
+        "ERC20"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/permit2/src/interfaces/IAllowanceTransfer.sol": {
+      "lastModificationDate": 1739283452534,
+      "contentHash": "06d31910ea7b998cbe0dd20d8cde38e1",
+      "sourceName": "permit2/src/interfaces/IAllowanceTransfer.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IEIP712.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IAllowanceTransfer"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/libraries/ActionConstants.sol": {
+      "lastModificationDate": 1739283457791,
+      "contentHash": "a602839d87c83283ab7b57b74de33b83",
+      "sourceName": "@uniswap/v4-periphery/src/libraries/ActionConstants.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ActionConstants"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/libraries/CalldataDecoder.sol": {
+      "lastModificationDate": 1739283457791,
+      "contentHash": "21ba61dfdd4d9fe4f8ff20629923820b",
+      "sourceName": "@uniswap/v4-periphery/src/libraries/CalldataDecoder.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/types/Currency.sol",
+        "../interfaces/IV4Router.sol",
+        "@uniswap/v4-core/src/types/PoolKey.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "CalldataDecoder"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/interfaces/IPoolManager.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "180f7401cebd7be5a4ba30ab4d46c76a",
+      "sourceName": "@uniswap/v4-core/src/interfaces/IPoolManager.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../types/Currency.sol",
+        "../types/PoolKey.sol",
+        "./IHooks.sol",
+        "./external/IERC6909Claims.sol",
+        "./IProtocolFees.sol",
+        "../types/BalanceDelta.sol",
+        "../types/PoolId.sol",
+        "./IExtsload.sol",
+        "./IExttload.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "IPoolManager"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/types/PoolKey.sol": {
+      "lastModificationDate": 1739283466383,
+      "contentHash": "398fad21745911bc900a2554be64c61a",
+      "sourceName": "@uniswap/v4-core/src/types/PoolKey.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Currency.sol",
+        "../interfaces/IHooks.sol",
+        "./PoolId.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": []
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/modules/Permit2Payments.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "cce79fd2a3940cb7a67eacc255ebf8df",
+      "sourceName": "contracts/modules/Permit2Payments.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "permit2/src/interfaces/IAllowanceTransfer.sol",
+        "permit2/src/libraries/SafeCast160.sol",
+        "./Payments.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "Permit2Payments"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/libraries/Constants.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "5549ab481b2a2b93aaac6f8dfb39881d",
+      "sourceName": "contracts/libraries/Constants.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "Constants"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/modules/uniswap/v2/UniswapV2Library.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "a4a49c18371a8fa69b6591fd4f102ae6",
+      "sourceName": "contracts/modules/uniswap/v2/UniswapV2Library.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.0"
+      ],
+      "artifacts": [
+        "UniswapV2Library"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/node_modules/@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol": {
+      "lastModificationDate": 1739283448374,
+      "contentHash": "3fa31c3860f2b9585c3a98c64850829e",
+      "sourceName": "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV2Pair"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/permit2/src/libraries/SafeCast160.sol": {
+      "lastModificationDate": 1739283452534,
+      "contentHash": "e814317c3c5f82f1c1afc445efda7e23",
+      "sourceName": "permit2/src/libraries/SafeCast160.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.17"
+      ],
+      "artifacts": [
+        "SafeCast160"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/libraries/BipsLibrary.sol": {
+      "lastModificationDate": 1739283457791,
+      "contentHash": "a3c05fa43f0d523c1a43ea93e7c5204e",
+      "sourceName": "@uniswap/v4-periphery/src/libraries/BipsLibrary.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "BipsLibrary"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/solmate/src/utils/SafeTransferLib.sol": {
+      "lastModificationDate": 1739283457594,
+      "contentHash": "668dd0a8a175344c51036ae7fcb01d36",
+      "sourceName": "solmate/src/utils/SafeTransferLib.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../tokens/ERC20.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.0"
+      ],
+      "artifacts": [
+        "SafeTransferLib"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/permit2/src/interfaces/IPermit2.sol": {
+      "lastModificationDate": 1739283452534,
+      "contentHash": "1186e406ac0acbb224428a4b1152dbf9",
+      "sourceName": "permit2/src/interfaces/IPermit2.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ISignatureTransfer.sol",
+        "./IAllowanceTransfer.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IPermit2"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/interfaces/external/IWETH9.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "72604c7c076c1ff9dc1cfd84889addf8",
+      "sourceName": "@uniswap/v4-periphery/src/interfaces/external/IWETH9.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IWETH9"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/permit2/src/interfaces/ISignatureTransfer.sol": {
+      "lastModificationDate": 1739283452534,
+      "contentHash": "5b4840f0f27510533ad19650d56757dd",
+      "sourceName": "permit2/src/interfaces/ISignatureTransfer.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IEIP712.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ISignatureTransfer"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/permit2/src/interfaces/IEIP712.sol": {
+      "lastModificationDate": 1739283452534,
+      "contentHash": "24e4255a1510a83f1fc7ee1ec490c2b0",
+      "sourceName": "permit2/src/interfaces/IEIP712.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IEIP712"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol": {
+      "lastModificationDate": 1739283470445,
+      "contentHash": "5517c8678c18eb1a8ba58810e7ca39ca",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC20"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/libraries/MaxInputAmount.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "47e75f674783e1ca3715a3ea9f764014",
+      "sourceName": "contracts/libraries/MaxInputAmount.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "MaxInputAmount"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/modules/uniswap/v3/V3Path.sol": {
+      "lastModificationDate": 1739283418641,
+      "contentHash": "c9014cf312ce8ac115991dfccd3ff9f8",
+      "sourceName": "contracts/modules/uniswap/v3/V3Path.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./BytesLib.sol",
+        "../../../libraries/Constants.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.0"
+      ],
+      "artifacts": [
+        "V3Path"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/node_modules/@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol": {
+      "lastModificationDate": 1739283448376,
+      "contentHash": "e6badd8268772b99e7ca397aff11a965",
+      "sourceName": "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./pool/IUniswapV3PoolImmutables.sol",
+        "./pool/IUniswapV3PoolState.sol",
+        "./pool/IUniswapV3PoolDerivedState.sol",
+        "./pool/IUniswapV3PoolActions.sol",
+        "./pool/IUniswapV3PoolOwnerActions.sol",
+        "./pool/IUniswapV3PoolEvents.sol"
+      ],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3Pool"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/node_modules/@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback.sol": {
+      "lastModificationDate": 1739283449685,
+      "contentHash": "a8ba2d37b0107911ae0e3b0e123cbd83",
+      "sourceName": "@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3SwapCallback"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/node_modules/@uniswap/v3-core/contracts/libraries/SafeCast.sol": {
+      "lastModificationDate": 1739283448377,
+      "contentHash": "c89128b97d009587db99cae7763cfef0",
+      "sourceName": "@uniswap/v3-core/contracts/libraries/SafeCast.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "SafeCast"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/types/Currency.sol": {
+      "lastModificationDate": 1739283466383,
+      "contentHash": "291e0c95e9368cfc77d3f730d602131e",
+      "sourceName": "@uniswap/v4-core/src/types/Currency.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/external/IERC20Minimal.sol",
+        "../libraries/CustomRevert.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "CurrencyLibrary"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/interfaces/IV4Router.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "9d097300f3b52faaeb8c1970f165584b",
+      "sourceName": "@uniswap/v4-periphery/src/interfaces/IV4Router.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/types/PoolKey.sol",
+        "@uniswap/v4-core/src/types/Currency.sol",
+        "../libraries/PathKey.sol",
+        "./IImmutableState.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IV4Router"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/CustomRevert.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "7c5352bf0b75f406d539e91f39d86627",
+      "sourceName": "@uniswap/v4-core/src/libraries/CustomRevert.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "CustomRevert"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/interfaces/external/IERC20Minimal.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "673e0abee46eec8a1fe8b7fd9670aeb6",
+      "sourceName": "@uniswap/v4-core/src/interfaces/external/IERC20Minimal.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC20Minimal"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/interfaces/IHooks.sol": {
+      "lastModificationDate": 1739283466379,
+      "contentHash": "753015bd38c14f4bab14f362b5a2fde4",
+      "sourceName": "@uniswap/v4-core/src/interfaces/IHooks.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../types/PoolKey.sol",
+        "../types/BalanceDelta.sol",
+        "./IPoolManager.sol",
+        "../types/BeforeSwapDelta.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IHooks"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/types/PoolId.sol": {
+      "lastModificationDate": 1739283466383,
+      "contentHash": "a6e85b945451c582bcf7de3452c782cb",
+      "sourceName": "@uniswap/v4-core/src/types/PoolId.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./PoolKey.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "PoolIdLibrary"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/types/BalanceDelta.sol": {
+      "lastModificationDate": 1739283466383,
+      "contentHash": "dec730cf97f8429624545ffff69e7909",
+      "sourceName": "@uniswap/v4-core/src/types/BalanceDelta.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../libraries/SafeCast.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "BalanceDeltaLibrary"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/types/BeforeSwapDelta.sol": {
+      "lastModificationDate": 1739283466383,
+      "contentHash": "ae7541dc512b8b3131e5ef904f047a72",
+      "sourceName": "@uniswap/v4-core/src/types/BeforeSwapDelta.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "BeforeSwapDeltaLibrary"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/SafeCast.sol": {
+      "lastModificationDate": 1739283466381,
+      "contentHash": "7efd56acc85f88254a521ab4e32f1247",
+      "sourceName": "@uniswap/v4-core/src/libraries/SafeCast.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./CustomRevert.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "SafeCast"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/interfaces/IProtocolFees.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "0c0f37b4a5a4e73b58020f6af846b977",
+      "sourceName": "@uniswap/v4-core/src/interfaces/IProtocolFees.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../types/Currency.sol",
+        "../types/PoolId.sol",
+        "../types/PoolKey.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IProtocolFees"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/interfaces/IExtsload.sol": {
+      "lastModificationDate": 1739283466379,
+      "contentHash": "d6736ed46cbb3b677519964ffea3ce9c",
+      "sourceName": "@uniswap/v4-core/src/interfaces/IExtsload.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IExtsload"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/interfaces/IExttload.sol": {
+      "lastModificationDate": 1739283466379,
+      "contentHash": "c565abf89714dff14e9d67c9d72d028b",
+      "sourceName": "@uniswap/v4-core/src/interfaces/IExttload.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "IExttload"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/interfaces/external/IERC6909Claims.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "4fc5d7c51f35f6a84ebffdfb9015a66d",
+      "sourceName": "@uniswap/v4-core/src/interfaces/external/IERC6909Claims.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC6909Claims"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/libraries/PathKey.sol": {
+      "lastModificationDate": 1739283457791,
+      "contentHash": "387d28b3026f18523fd70d1e06f12ecf",
+      "sourceName": "@uniswap/v4-periphery/src/libraries/PathKey.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/types/Currency.sol",
+        "@uniswap/v4-core/src/interfaces/IHooks.sol",
+        "@uniswap/v4-core/src/types/PoolKey.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "PathKeyLibrary"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/interfaces/IImmutableState.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "567fc9a99078de8bc375eb41b9d024af",
+      "sourceName": "@uniswap/v4-periphery/src/interfaces/IImmutableState.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/interfaces/IPoolManager.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IImmutableState"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/node_modules/@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolState.sol": {
+      "lastModificationDate": 1739283449687,
+      "contentHash": "0488495ef9087b4513d3b43634035ef9",
+      "sourceName": "@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolState.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3PoolState"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/node_modules/@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolDerivedState.sol": {
+      "lastModificationDate": 1739283449685,
+      "contentHash": "25b71180ec9f5132a158334971ee2ace",
+      "sourceName": "@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolDerivedState.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3PoolDerivedState"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/node_modules/@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolActions.sol": {
+      "lastModificationDate": 1739283449685,
+      "contentHash": "83d338eb1394008c808a20ac7c5bab0c",
+      "sourceName": "@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolActions.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3PoolActions"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/node_modules/@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolOwnerActions.sol": {
+      "lastModificationDate": 1739283449685,
+      "contentHash": "1b06ecc79e75f836c446ccf286e671e4",
+      "sourceName": "@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolOwnerActions.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3PoolOwnerActions"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/node_modules/@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolEvents.sol": {
+      "lastModificationDate": 1739283449686,
+      "contentHash": "05abb59ec113db1046f7dadc78bb297b",
+      "sourceName": "@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolEvents.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3PoolEvents"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/node_modules/@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolImmutables.sol": {
+      "lastModificationDate": 1739283449685,
+      "contentHash": "e236e09a9d654fb2f20a6da5dba2bd2f",
+      "sourceName": "@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolImmutables.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3PoolImmutables"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/V4Router.sol": {
+      "lastModificationDate": 1739283457789,
+      "contentHash": "16c8552867d5361ccdc674afbe4d8e5b",
+      "sourceName": "@uniswap/v4-periphery/src/V4Router.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/interfaces/IPoolManager.sol",
+        "@uniswap/v4-core/src/types/BalanceDelta.sol",
+        "@uniswap/v4-core/src/types/PoolKey.sol",
+        "@uniswap/v4-core/src/types/Currency.sol",
+        "@uniswap/v4-core/src/libraries/TickMath.sol",
+        "@uniswap/v4-core/src/libraries/SafeCast.sol",
+        "./libraries/PathKey.sol",
+        "./libraries/CalldataDecoder.sol",
+        "./interfaces/IV4Router.sol",
+        "./base/BaseActionsRouter.sol",
+        "./base/DeltaResolver.sol",
+        "./libraries/Actions.sol",
+        "./libraries/ActionConstants.sol",
+        "./libraries/BipsLibrary.sol"
+      ],
+      "versionPragmas": [
+        "0.8.26"
+      ],
+      "artifacts": [
+        "V4Router"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/libraries/Actions.sol": {
+      "lastModificationDate": 1739283457791,
+      "contentHash": "1820f782dc9eab7f8d9b7b36c0aff2c0",
+      "sourceName": "@uniswap/v4-periphery/src/libraries/Actions.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Actions"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/base/BaseActionsRouter.sol": {
+      "lastModificationDate": 1739283457789,
+      "contentHash": "651b1b9c563356dc5c2db90c193005c1",
+      "sourceName": "@uniswap/v4-periphery/src/base/BaseActionsRouter.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/interfaces/IPoolManager.sol",
+        "./SafeCallback.sol",
+        "../libraries/CalldataDecoder.sol",
+        "../libraries/ActionConstants.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "BaseActionsRouter"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/base/DeltaResolver.sol": {
+      "lastModificationDate": 1739283457789,
+      "contentHash": "e3c7f64af0aadbccc094ef9edfd50645",
+      "sourceName": "@uniswap/v4-periphery/src/base/DeltaResolver.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/types/Currency.sol",
+        "@uniswap/v4-core/src/libraries/TransientStateLibrary.sol",
+        "@uniswap/v4-core/src/interfaces/IPoolManager.sol",
+        "./ImmutableState.sol",
+        "../libraries/ActionConstants.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "DeltaResolver"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/TickMath.sol": {
+      "lastModificationDate": 1739283466381,
+      "contentHash": "5a64ebeb2ad0d4d53dbfadab198190ea",
+      "sourceName": "@uniswap/v4-core/src/libraries/TickMath.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./BitMath.sol",
+        "./CustomRevert.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "TickMath"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/base/SafeCallback.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "f3870abddac4a0d9d47aece3e63fbcd3",
+      "sourceName": "@uniswap/v4-periphery/src/base/SafeCallback.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/interfaces/callback/IUnlockCallback.sol",
+        "@uniswap/v4-core/src/interfaces/IPoolManager.sol",
+        "./ImmutableState.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "SafeCallback"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/interfaces/callback/IUnlockCallback.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "43f66660291be4d6aad9bdcc895462ba",
+      "sourceName": "@uniswap/v4-core/src/interfaces/callback/IUnlockCallback.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IUnlockCallback"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/base/ImmutableState.sol": {
+      "lastModificationDate": 1739283457789,
+      "contentHash": "7042f1a5ecba4547ee409ead91f636a2",
+      "sourceName": "@uniswap/v4-periphery/src/base/ImmutableState.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/interfaces/IPoolManager.sol",
+        "../interfaces/IImmutableState.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ImmutableState"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/TransientStateLibrary.sol": {
+      "lastModificationDate": 1739283466381,
+      "contentHash": "5915c3538eb806d92604d860fdb51613",
+      "sourceName": "@uniswap/v4-core/src/libraries/TransientStateLibrary.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IPoolManager.sol",
+        "../types/Currency.sol",
+        "./CurrencyReserves.sol",
+        "./NonzeroDeltaCount.sol",
+        "./Lock.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "TransientStateLibrary"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/CurrencyReserves.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "281683f328e83c65da1b3ccae5cda57b",
+      "sourceName": "@uniswap/v4-core/src/libraries/CurrencyReserves.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../types/Currency.sol",
+        "./CustomRevert.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "CurrencyReserves"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/Lock.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "d3a4be9a156d9a9930a7cf18366192c8",
+      "sourceName": "@uniswap/v4-core/src/libraries/Lock.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "Lock"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/NonzeroDeltaCount.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "e897ca20f7ea8258eb2dcc17319dc233",
+      "sourceName": "@uniswap/v4-core/src/libraries/NonzeroDeltaCount.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "NonzeroDeltaCount"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/BitMath.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "633655f1ca090751fa0071b6ff5cae08",
+      "sourceName": "@uniswap/v4-core/src/libraries/BitMath.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "BitMath"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol": {
+      "lastModificationDate": 1739283457745,
+      "contentHash": "78ea5e100826615428583761926066f3",
+      "sourceName": "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
+        "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol",
+        "./IPoolInitializer.sol",
+        "./IERC721Permit.sol",
+        "./IPeripheryPayments.sol",
+        "./IPeripheryImmutableState.sol",
+        "../libraries/PoolAddress.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "INonfungiblePositionManager"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v3-periphery/contracts/interfaces/IERC721Permit.sol": {
+      "lastModificationDate": 1739283457745,
+      "contentHash": "9073d26f60e6253b2dfbc103c78cf70d",
+      "sourceName": "@uniswap/v3-periphery/contracts/interfaces/IERC721Permit.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/IERC721.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "IERC721Permit"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/interfaces/IPositionManager.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "5314065f46a238b34c6495501c65f6cb",
+      "sourceName": "@uniswap/v4-periphery/src/interfaces/IPositionManager.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/types/PoolKey.sol",
+        "../libraries/PositionInfoLibrary.sol",
+        "./INotifier.sol",
+        "./IImmutableState.sol",
+        "./IERC721Permit_v4.sol",
+        "./IEIP712_v4.sol",
+        "./IMulticall_v4.sol",
+        "./IPoolInitializer_v4.sol",
+        "./IUnorderedNonce.sol",
+        "./IPermit2Forwarder.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IPositionManager"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v3-periphery/contracts/libraries/PoolAddress.sol": {
+      "lastModificationDate": 1739283457747,
+      "contentHash": "d928327a13dd928fa88273ef22539bef",
+      "sourceName": "@uniswap/v3-periphery/contracts/libraries/PoolAddress.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "PoolAddress"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v3-periphery/contracts/interfaces/IPoolInitializer.sol": {
+      "lastModificationDate": 1739283457746,
+      "contentHash": "11600b3ed90d17aa07e53a77430a6d6c",
+      "sourceName": "@uniswap/v3-periphery/contracts/interfaces/IPoolInitializer.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "IPoolInitializer"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v3-periphery/contracts/interfaces/IPeripheryPayments.sol": {
+      "lastModificationDate": 1739283457745,
+      "contentHash": "8aa07bcaad7779d2bae8089adef235bf",
+      "sourceName": "@uniswap/v3-periphery/contracts/interfaces/IPeripheryPayments.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "IPeripheryPayments"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v3-periphery/contracts/interfaces/IPeripheryImmutableState.sol": {
+      "lastModificationDate": 1739283457745,
+      "contentHash": "e68917661480772223d87a606afb29cd",
+      "sourceName": "@uniswap/v3-periphery/contracts/interfaces/IPeripheryImmutableState.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IPeripheryImmutableState"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol": {
+      "lastModificationDate": 1739283470446,
+      "contentHash": "12c206f185cb951213799561fdcaa40d",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC721.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC721Metadata"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Enumerable.sol": {
+      "lastModificationDate": 1739283470446,
+      "contentHash": "3fdc14aab706458ae99314f6f7f529a2",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC721.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC721Enumerable"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol": {
+      "lastModificationDate": 1739283470446,
+      "contentHash": "5df8fdb527e563085847cad29e3c5f2e",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../utils/introspection/IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC721"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol": {
+      "lastModificationDate": 1739283470448,
+      "contentHash": "de0163561b417b800d01749cbbe2147e",
+      "sourceName": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC165"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/libraries/PositionInfoLibrary.sol": {
+      "lastModificationDate": 1739283457791,
+      "contentHash": "665df71c1aee1be6aa7c8693d172dd0b",
+      "sourceName": "@uniswap/v4-periphery/src/libraries/PositionInfoLibrary.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/types/PoolKey.sol",
+        "@uniswap/v4-core/src/types/PoolId.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "PositionInfoLibrary"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/interfaces/IERC721Permit_v4.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "1a26e530fa8191d9ad091718ba5c8501",
+      "sourceName": "@uniswap/v4-periphery/src/interfaces/IERC721Permit_v4.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC721Permit_v4"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/interfaces/IEIP712_v4.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "6ee844510736854c32712ba2edb741d1",
+      "sourceName": "@uniswap/v4-periphery/src/interfaces/IEIP712_v4.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IEIP712_v4"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/interfaces/INotifier.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "8f82b8e2640096227d4d5ef24a30db26",
+      "sourceName": "@uniswap/v4-periphery/src/interfaces/INotifier.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ISubscriber.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "INotifier"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/interfaces/IMulticall_v4.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "d2c8b4c699f481783a42f4cfe71b9de0",
+      "sourceName": "@uniswap/v4-periphery/src/interfaces/IMulticall_v4.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IMulticall_v4"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/interfaces/IPoolInitializer_v4.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "50d165d8610cefc03ac18d4089d416ac",
+      "sourceName": "@uniswap/v4-periphery/src/interfaces/IPoolInitializer_v4.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/types/PoolKey.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IPoolInitializer_v4"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/interfaces/IUnorderedNonce.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "defa16ee07839caee3f75d1c67e4173b",
+      "sourceName": "@uniswap/v4-periphery/src/interfaces/IUnorderedNonce.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IUnorderedNonce"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/interfaces/IPermit2Forwarder.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "ae2370a4fadca4b8a62949a4f16471d4",
+      "sourceName": "@uniswap/v4-periphery/src/interfaces/IPermit2Forwarder.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "permit2/src/interfaces/IAllowanceTransfer.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IPermit2Forwarder"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/interfaces/ISubscriber.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "05b6736d495ba5ccdb5fa57019779d67",
+      "sourceName": "@uniswap/v4-periphery/src/interfaces/ISubscriber.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/types/BalanceDelta.sol",
+        "../libraries/PositionInfoLibrary.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ISubscriber"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/libraries/Locker.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "f6279d84cc68d03a89821cfcb8d4a788",
+      "sourceName": "contracts/libraries/Locker.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "Locker"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/PositionManager.sol": {
+      "lastModificationDate": 1739283457789,
+      "contentHash": "e6a3c8f9d96a4eeaecfbfffda64225aa",
+      "sourceName": "@uniswap/v4-periphery/src/PositionManager.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/interfaces/IPoolManager.sol",
+        "@uniswap/v4-core/src/types/PoolKey.sol",
+        "@uniswap/v4-core/src/types/Currency.sol",
+        "@uniswap/v4-core/src/types/BalanceDelta.sol",
+        "@uniswap/v4-core/src/libraries/SafeCast.sol",
+        "@uniswap/v4-core/src/libraries/Position.sol",
+        "@uniswap/v4-core/src/libraries/StateLibrary.sol",
+        "@uniswap/v4-core/src/libraries/TransientStateLibrary.sol",
+        "permit2/src/interfaces/IAllowanceTransfer.sol",
+        "@uniswap/v4-core/src/libraries/TickMath.sol",
+        "./interfaces/IPositionDescriptor.sol",
+        "./base/ERC721Permit_v4.sol",
+        "./base/ReentrancyLock.sol",
+        "./interfaces/IPositionManager.sol",
+        "./base/Multicall_v4.sol",
+        "./base/PoolInitializer_v4.sol",
+        "./base/DeltaResolver.sol",
+        "./base/BaseActionsRouter.sol",
+        "./libraries/Actions.sol",
+        "./base/Notifier.sol",
+        "./libraries/CalldataDecoder.sol",
+        "./base/Permit2Forwarder.sol",
+        "./libraries/SlippageCheck.sol",
+        "./libraries/PositionInfoLibrary.sol",
+        "./libraries/LiquidityAmounts.sol",
+        "./base/NativeWrapper.sol",
+        "./interfaces/external/IWETH9.sol"
+      ],
+      "versionPragmas": [
+        "0.8.26"
+      ],
+      "artifacts": [
+        "PositionManager"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/base/ERC721Permit_v4.sol": {
+      "lastModificationDate": 1739283457789,
+      "contentHash": "2c979dffa51ae4fd403511c6f9bcec35",
+      "sourceName": "@uniswap/v4-periphery/src/base/ERC721Permit_v4.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "solmate/src/tokens/ERC721.sol",
+        "./EIP712_v4.sol",
+        "../libraries/ERC721PermitHash.sol",
+        "permit2/src/libraries/SignatureVerification.sol",
+        "../interfaces/IERC721Permit_v4.sol",
+        "./UnorderedNonce.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC721Permit_v4"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/base/ReentrancyLock.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "81d67e099aa7407e069dfe7d54520b0b",
+      "sourceName": "@uniswap/v4-periphery/src/base/ReentrancyLock.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../libraries/Locker.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "ReentrancyLock"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/interfaces/IPositionDescriptor.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "a68646a3baa1f8eef1bbfb91c9af1651",
+      "sourceName": "@uniswap/v4-periphery/src/interfaces/IPositionDescriptor.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IPositionManager.sol",
+        "@uniswap/v4-core/src/interfaces/IPoolManager.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "IPositionDescriptor"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/base/Multicall_v4.sol": {
+      "lastModificationDate": 1739283457789,
+      "contentHash": "cf277aaeaed7dd1f513f42e836892539",
+      "sourceName": "@uniswap/v4-periphery/src/base/Multicall_v4.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IMulticall_v4.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Multicall_v4"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/base/PoolInitializer_v4.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "e7d5404be8ddb3b55fe20423ef102082",
+      "sourceName": "@uniswap/v4-periphery/src/base/PoolInitializer_v4.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ImmutableState.sol",
+        "@uniswap/v4-core/src/types/PoolKey.sol",
+        "../interfaces/IPoolInitializer_v4.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "PoolInitializer_v4"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/base/Notifier.sol": {
+      "lastModificationDate": 1739283457789,
+      "contentHash": "958e059d7d24cfef10d63c00cb201ed8",
+      "sourceName": "@uniswap/v4-periphery/src/base/Notifier.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/ISubscriber.sol",
+        "../interfaces/INotifier.sol",
+        "@uniswap/v4-core/src/libraries/CustomRevert.sol",
+        "@uniswap/v4-core/src/types/BalanceDelta.sol",
+        "../libraries/PositionInfoLibrary.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Notifier"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/base/Permit2Forwarder.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "4c5218f1ebd4748b0da428f93cc20a39",
+      "sourceName": "@uniswap/v4-periphery/src/base/Permit2Forwarder.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IPermit2Forwarder.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Permit2Forwarder"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/libraries/SlippageCheck.sol": {
+      "lastModificationDate": 1739283457792,
+      "contentHash": "85e8f720b04e50ea8abf351e4738c3dd",
+      "sourceName": "@uniswap/v4-periphery/src/libraries/SlippageCheck.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/types/BalanceDelta.sol",
+        "@uniswap/v4-core/src/libraries/SafeCast.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "SlippageCheck"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/libraries/LiquidityAmounts.sol": {
+      "lastModificationDate": 1739283457791,
+      "contentHash": "3c6b81dca144717d8955168d02c6d3df",
+      "sourceName": "@uniswap/v4-periphery/src/libraries/LiquidityAmounts.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-core/src/libraries/FullMath.sol",
+        "@uniswap/v4-core/src/libraries/FixedPoint96.sol",
+        "@uniswap/v4-core/src/libraries/SafeCast.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "LiquidityAmounts"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/base/NativeWrapper.sol": {
+      "lastModificationDate": 1739283457789,
+      "contentHash": "bf2aa9499f1df02f5f70c9e40e1434e0",
+      "sourceName": "@uniswap/v4-periphery/src/base/NativeWrapper.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/external/IWETH9.sol",
+        "../libraries/ActionConstants.sol",
+        "./ImmutableState.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "NativeWrapper"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/Position.sol": {
+      "lastModificationDate": 1739283466381,
+      "contentHash": "7e454522b69c5bbc56674c99ac1c5ef9",
+      "sourceName": "@uniswap/v4-core/src/libraries/Position.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./FullMath.sol",
+        "./FixedPoint128.sol",
+        "./LiquidityMath.sol",
+        "./CustomRevert.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Position"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/StateLibrary.sol": {
+      "lastModificationDate": 1739283466381,
+      "contentHash": "a99a8691d0a9c2fe271e514e6732bc16",
+      "sourceName": "@uniswap/v4-core/src/libraries/StateLibrary.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../types/PoolId.sol",
+        "../interfaces/IPoolManager.sol",
+        "./Position.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "StateLibrary"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/solmate/src/tokens/ERC721.sol": {
+      "lastModificationDate": 1739283457594,
+      "contentHash": "ecc06cefc5404b9e1adbc2e459d5757e",
+      "sourceName": "solmate/src/tokens/ERC721.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.8.0"
+      ],
+      "artifacts": [
+        "ERC721",
+        "ERC721TokenReceiver"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/libraries/ERC721PermitHash.sol": {
+      "lastModificationDate": 1739283457791,
+      "contentHash": "bf9b52087567e349113bde25351a3a4c",
+      "sourceName": "@uniswap/v4-periphery/src/libraries/ERC721PermitHash.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC721PermitHash"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/base/EIP712_v4.sol": {
+      "lastModificationDate": 1739283457789,
+      "contentHash": "5fd32b5483a899511259368efdbee4e6",
+      "sourceName": "@uniswap/v4-periphery/src/base/EIP712_v4.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IEIP712_v4.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "EIP712_v4"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/base/UnorderedNonce.sol": {
+      "lastModificationDate": 1739283457790,
+      "contentHash": "9a381d9bc6a6d29df01b8cc13a19d11e",
+      "sourceName": "@uniswap/v4-periphery/src/base/UnorderedNonce.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IUnorderedNonce.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "UnorderedNonce"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/permit2/src/libraries/SignatureVerification.sol": {
+      "lastModificationDate": 1739283452534,
+      "contentHash": "3e5229f0ce8c70433798eed9a2f68489",
+      "sourceName": "permit2/src/libraries/SignatureVerification.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/IERC1271.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.17"
+      ],
+      "artifacts": [
+        "SignatureVerification"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/permit2/src/interfaces/IERC1271.sol": {
+      "lastModificationDate": 1739283452534,
+      "contentHash": "200a7beb10a45c41d49fa862295545af",
+      "sourceName": "permit2/src/interfaces/IERC1271.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC1271"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/src/libraries/Locker.sol": {
+      "lastModificationDate": 1739283457791,
+      "contentHash": "8a02d1d8bb451e44c79c133cd77bba9b",
+      "sourceName": "@uniswap/v4-periphery/src/libraries/Locker.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "Locker"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/FullMath.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "065f312b89d9a0a2ae30f7eb1075a9a1",
+      "sourceName": "@uniswap/v4-core/src/libraries/FullMath.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "FullMath"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/FixedPoint96.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "8eea75c6982f168bbbdd38070f7a9622",
+      "sourceName": "@uniswap/v4-core/src/libraries/FixedPoint96.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "FixedPoint96"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/LiquidityMath.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "9ae2feefc960d9918c75d91cf2fde383",
+      "sourceName": "@uniswap/v4-core/src/libraries/LiquidityMath.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "LiquidityMath"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/FixedPoint128.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "9a9bdb7b1c2b3dcd5696781da269b664",
+      "sourceName": "@uniswap/v4-core/src/libraries/FixedPoint128.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "FixedPoint128"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/Pool.sol": {
+      "lastModificationDate": 1739283466381,
+      "contentHash": "b285898db2f357fb234906f9aad5272a",
+      "sourceName": "@uniswap/v4-core/src/libraries/Pool.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./SafeCast.sol",
+        "./TickBitmap.sol",
+        "./Position.sol",
+        "./UnsafeMath.sol",
+        "./FixedPoint128.sol",
+        "./TickMath.sol",
+        "./SqrtPriceMath.sol",
+        "./SwapMath.sol",
+        "../types/BalanceDelta.sol",
+        "../types/Slot0.sol",
+        "./ProtocolFeeLibrary.sol",
+        "./LiquidityMath.sol",
+        "./LPFeeLibrary.sol",
+        "./CustomRevert.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Pool"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/LPFeeLibrary.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "9c43170b9172c58fc7e369ef622a3f52",
+      "sourceName": "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./CustomRevert.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "LPFeeLibrary"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/types/Slot0.sol": {
+      "lastModificationDate": 1739283466383,
+      "contentHash": "3cc5b5f57bbaf0d584980900f98c956c",
+      "sourceName": "@uniswap/v4-core/src/types/Slot0.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Slot0Library"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/TickBitmap.sol": {
+      "lastModificationDate": 1739283466381,
+      "contentHash": "463ec79d0ec75f44c0875910423683dc",
+      "sourceName": "@uniswap/v4-core/src/libraries/TickBitmap.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./BitMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "TickBitmap"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/UnsafeMath.sol": {
+      "lastModificationDate": 1739283466381,
+      "contentHash": "5449f5bdc2713693c70bfc25b2154e7c",
+      "sourceName": "@uniswap/v4-core/src/libraries/UnsafeMath.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "UnsafeMath"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/SwapMath.sol": {
+      "lastModificationDate": 1739283466381,
+      "contentHash": "d535ac6e26806351d2fbed88ec7ce6dd",
+      "sourceName": "@uniswap/v4-core/src/libraries/SwapMath.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./FullMath.sol",
+        "./SqrtPriceMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "SwapMath"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/SqrtPriceMath.sol": {
+      "lastModificationDate": 1739283466381,
+      "contentHash": "2cbf02cff5d8c660890fa6163e930e3b",
+      "sourceName": "@uniswap/v4-core/src/libraries/SqrtPriceMath.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./SafeCast.sol",
+        "./FullMath.sol",
+        "./UnsafeMath.sol",
+        "./FixedPoint96.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "SqrtPriceMath"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/ProtocolFeeLibrary.sol": {
+      "lastModificationDate": 1739283466381,
+      "contentHash": "259d5255041bf91bf9f09f98bd940933",
+      "sourceName": "@uniswap/v4-core/src/libraries/ProtocolFeeLibrary.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ProtocolFeeLibrary"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/ProtocolFees.sol": {
+      "lastModificationDate": 1739283466379,
+      "contentHash": "b8a8b1936c1e940645f0dfdd30c1f32e",
+      "sourceName": "@uniswap/v4-core/src/ProtocolFees.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./types/Currency.sol",
+        "./libraries/CurrencyReserves.sol",
+        "./interfaces/IProtocolFees.sol",
+        "./types/PoolKey.sol",
+        "./libraries/ProtocolFeeLibrary.sol",
+        "solmate/src/auth/Owned.sol",
+        "./types/PoolId.sol",
+        "./libraries/Pool.sol",
+        "./libraries/CustomRevert.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ProtocolFees"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/solmate/src/auth/Owned.sol": {
+      "lastModificationDate": 1739283457591,
+      "contentHash": "11fec455b72d2743b77d783d6017e1e9",
+      "sourceName": "solmate/src/auth/Owned.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.8.0"
+      ],
+      "artifacts": [
+        "Owned"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/CurrencyDelta.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "b3c4b835c0314375f24eeafda83949f1",
+      "sourceName": "@uniswap/v4-core/src/libraries/CurrencyDelta.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../types/Currency.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "CurrencyDelta"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/PoolManager.sol": {
+      "lastModificationDate": 1739283466379,
+      "contentHash": "5df7417da3586ac200bf14b25e075501",
+      "sourceName": "@uniswap/v4-core/src/PoolManager.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./libraries/Hooks.sol",
+        "./libraries/Pool.sol",
+        "./libraries/SafeCast.sol",
+        "./libraries/Position.sol",
+        "./libraries/LPFeeLibrary.sol",
+        "./types/Currency.sol",
+        "./types/PoolKey.sol",
+        "./libraries/TickMath.sol",
+        "./NoDelegateCall.sol",
+        "./interfaces/IHooks.sol",
+        "./interfaces/IPoolManager.sol",
+        "./interfaces/callback/IUnlockCallback.sol",
+        "./ProtocolFees.sol",
+        "./ERC6909Claims.sol",
+        "./types/PoolId.sol",
+        "./types/BalanceDelta.sol",
+        "./types/BeforeSwapDelta.sol",
+        "./libraries/Lock.sol",
+        "./libraries/CurrencyDelta.sol",
+        "./libraries/NonzeroDeltaCount.sol",
+        "./libraries/CurrencyReserves.sol",
+        "./Extsload.sol",
+        "./Exttload.sol",
+        "./libraries/CustomRevert.sol"
+      ],
+      "versionPragmas": [
+        "0.8.26"
+      ],
+      "artifacts": [
+        "PoolManager"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/NoDelegateCall.sol": {
+      "lastModificationDate": 1739283466379,
+      "contentHash": "0d73efdda00941855b3e20ea146ade1e",
+      "sourceName": "@uniswap/v4-core/src/NoDelegateCall.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./libraries/CustomRevert.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "NoDelegateCall"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/ERC6909Claims.sol": {
+      "lastModificationDate": 1739283466379,
+      "contentHash": "eb6c1a6628b0493d14995ae92d79f5ba",
+      "sourceName": "@uniswap/v4-core/src/ERC6909Claims.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ERC6909.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC6909Claims"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/Extsload.sol": {
+      "lastModificationDate": 1739283466379,
+      "contentHash": "0addb64c0ff3539539ec6e7d2d03a10a",
+      "sourceName": "@uniswap/v4-core/src/Extsload.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/IExtsload.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Extsload"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/Exttload.sol": {
+      "lastModificationDate": 1739283466379,
+      "contentHash": "5790a3ab16d768fbea25a72a4cd70059",
+      "sourceName": "@uniswap/v4-core/src/Exttload.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/IExttload.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "Exttload"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/Hooks.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "3ec42bfa3dbfbc56522dad6a11ff9c70",
+      "sourceName": "@uniswap/v4-core/src/libraries/Hooks.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../types/PoolKey.sol",
+        "../interfaces/IHooks.sol",
+        "./SafeCast.sol",
+        "./LPFeeLibrary.sol",
+        "../types/BalanceDelta.sol",
+        "../types/BeforeSwapDelta.sol",
+        "../interfaces/IPoolManager.sol",
+        "./ParseBytes.sol",
+        "./CustomRevert.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Hooks"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/ERC6909.sol": {
+      "lastModificationDate": 1739283466379,
+      "contentHash": "8febb763d806ff871dc3c12e3508f015",
+      "sourceName": "@uniswap/v4-core/src/ERC6909.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/external/IERC6909Claims.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC6909"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/lib/v4-periphery/lib/v4-core/src/libraries/ParseBytes.sol": {
+      "lastModificationDate": 1739283466380,
+      "contentHash": "4c3500fba937fb3c35ceffdd9da1181a",
+      "sourceName": "@uniswap/v4-core/src/libraries/ParseBytes.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ParseBytes"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/test/ReenteringWETH.sol": {
+      "lastModificationDate": 1739283418641,
+      "contentHash": "51e2033f7a12d3617432ff2d78c2e85e",
+      "sourceName": "contracts/test/ReenteringWETH.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "solmate/src/tokens/ERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.15"
+      ],
+      "artifacts": [
+        "ReenteringWETH"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/test/MintableERC20.sol": {
+      "lastModificationDate": 1739283418641,
+      "contentHash": "e3c85af9a6be5d37cd93e7b7439338fa",
+      "sourceName": "contracts/test/MintableERC20.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "solmate/src/tokens/ERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.15"
+      ],
+      "artifacts": [
+        "MintableERC20"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/test/ImportsForTypechain.sol": {
+      "lastModificationDate": 1739283418641,
+      "contentHash": "59752a1755aff5da100697bcdbdb898a",
+      "sourceName": "contracts/test/ImportsForTypechain.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v4-periphery/src/PositionManager.sol",
+        "@uniswap/v4-core/src/PoolManager.sol",
+        "solmate/src/tokens/ERC721.sol",
+        "@uniswap/v4-core/src/ERC6909.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.17"
+      ],
+      "artifacts": [
+        "ImportsForTypechain"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/deploy/UnsupportedProtocol.sol": {
+      "lastModificationDate": 1739283418640,
+      "contentHash": "89d0abaaf9862d064006a64955513cd4",
+      "sourceName": "contracts/deploy/UnsupportedProtocol.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "UnsupportedProtocol"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/test/ExampleModule.sol": {
+      "lastModificationDate": 1739283418641,
+      "contentHash": "252a46caa04e4314ce16043fa40c482f",
+      "sourceName": "contracts/test/ExampleModule.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "ExampleModule"
+      ]
+    },
+    "/home/runner/work/universal-router/universal-router/contracts/test/TestCustomErrors.sol": {
+      "lastModificationDate": 1739283418641,
+      "contentHash": "23d15d227649dc52711b33fb41a45872",
+      "sourceName": "contracts/test/TestCustomErrors.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "viaIR": true,
+          "evmVersion": "cancun",
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "TestCustomErrors"
+      ]
+    }
+  }
+}

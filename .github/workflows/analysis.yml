@@ -1,0 +1,14 @@
+name: Static Analysis
+
+on: [push]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      
+      - name: Run Slither Analysis
+        uses: docker://trailofbits/eth-security-toolbox:latest
+        with:
+          args: slither /github/workspace --exclude-dependencies --checklist

@@ -1,0 +1,39 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["dependencies"]
+solc_version = "0.8.26"
+evm_version = "prague"
+bytecode_hash = "none"
+cbor_metadata = false
+optimizer = true
+optimizer_runs = 1000
+always_use_create_2_factory = true
+remappings = [
+    "@chainlink-contracts/=dependencies/smartcontractkit-chainlink-2.22.0/contracts",
+    "@openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.2/contracts/",
+    "@openzeppelin/contracts/=dependencies/@openzeppelin-contracts-5.0.2/contracts/",
+    "@uniswap-universal-router/=dependencies/@uniswap-universal-router-2.0.0/",
+    "@uniswap-v3-core/=dependencies/@uniswap-v3-core-1.0.2-solc-0.8-simulate/",
+    "@uniswap-v3-periphery/=dependencies/@uniswap-v3-periphery-1.4.4/",
+    "forge-std/=dependencies/forge-std-1.9.5/",
+    "forge-std/=dependencies/forge-std-1.9.7/",
+]
+
+fs_permissions = [{ access = "read-write", path = "./deployment_addresses.json"},{ access = "read-write", path = "./deployed_fee_contract_addresses.json"},{ access = "read-write", path = "./deployed_v0_action_addresses.json"}]
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
+[dependencies]
+"forge-std" = "1.9.7"
+"@openzeppelin-contracts" = { version = "5.0.2", git = "https://github.com/OpenZeppelin/openzeppelin-contracts.git", rev = "3f901696f77997c060cc4c43fb77bfbd104713f3" }
+"@uniswap-universal-router" = "2.0.0"
+smartcontractkit-chainlink = "2.22.0"
+"@uniswap-v3-core" = "1.0.2-solc-0.8-simulate"
+"@uniswap-v3-periphery" = "1.4.4"
+
+[soldeer]
+remappings_generated = true
+remappings_regenerate = false
+remappings_version = false
+remappings_location = "config"

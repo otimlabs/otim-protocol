@@ -1,0 +1,22 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Solidity specific hooks
+  - repo: local
+    hooks:
+      - id: forge-fmt
+        name: forge fmt
+        description: Formats Solidity code according to the official style guidelines
+        entry: forge fmt
+        language: system
+        files: \.sol$
+        pass_filenames: false

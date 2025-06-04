@@ -1,0 +1,20 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "UnsupportedProtocol",
+  "sourceName": "contracts/deploy/UnsupportedProtocol.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "UnsupportedProtocolError",
+      "type": "error"
+    },
+    {
+      "stateMutability": "nonpayable",
+      "type": "fallback"
+    }
+  ],
+  "bytecode": "0x608080604052346013576023908160188239f35b5f80fdfe3460125763ea3559ef60e01b5f5260045ffd5b5f80fdfea164736f6c634300081a000a",
+  "deployedBytecode": "0x3460125763ea3559ef60e01b5f5260045ffd5b5f80fdfea164736f6c634300081a000a",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

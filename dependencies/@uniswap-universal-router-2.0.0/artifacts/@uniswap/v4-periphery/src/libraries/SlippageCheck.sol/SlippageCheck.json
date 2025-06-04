@@ -1,0 +1,43 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "SlippageCheck",
+  "sourceName": "@uniswap/v4-periphery/src/libraries/SlippageCheck.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint128",
+          "name": "maximumAmount",
+          "type": "uint128"
+        },
+        {
+          "internalType": "uint128",
+          "name": "amountRequested",
+          "type": "uint128"
+        }
+      ],
+      "name": "MaximumAmountExceeded",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint128",
+          "name": "minimumAmount",
+          "type": "uint128"
+        },
+        {
+          "internalType": "uint128",
+          "name": "amountReceived",
+          "type": "uint128"
+        }
+      ],
+      "name": "MinimumAmountInsufficient",
+      "type": "error"
+    }
+  ],
+  "bytecode": "0x6080806040523460175760109081601c823930815050f35b5f80fdfe5f80fdfea164736f6c634300081a000a",
+  "deployedBytecode": "0x5f80fdfea164736f6c634300081a000a",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

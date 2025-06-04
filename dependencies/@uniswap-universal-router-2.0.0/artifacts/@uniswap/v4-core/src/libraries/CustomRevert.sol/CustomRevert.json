@@ -1,0 +1,37 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "CustomRevert",
+  "sourceName": "@uniswap/v4-core/src/libraries/CustomRevert.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "selector",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "bytes",
+          "name": "reason",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "details",
+          "type": "bytes"
+        }
+      ],
+      "name": "WrappedError",
+      "type": "error"
+    }
+  ],
+  "bytecode": "0x6080806040523460175760109081601c823930815050f35b5f80fdfe5f80fdfea164736f6c634300081a000a",
+  "deployedBytecode": "0x5f80fdfea164736f6c634300081a000a",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

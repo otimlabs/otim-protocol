@@ -1,0 +1,107 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "Pool",
+  "sourceName": "@uniswap/v4-core/src/libraries/Pool.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "InvalidFeeForExactOut",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoLiquidityToReceiveFees",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PoolAlreadyInitialized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PoolNotInitialized",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint160",
+          "name": "sqrtPriceCurrentX96",
+          "type": "uint160"
+        },
+        {
+          "internalType": "uint160",
+          "name": "sqrtPriceLimitX96",
+          "type": "uint160"
+        }
+      ],
+      "name": "PriceLimitAlreadyExceeded",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint160",
+          "name": "sqrtPriceLimitX96",
+          "type": "uint160"
+        }
+      ],
+      "name": "PriceLimitOutOfBounds",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "int24",
+          "name": "tick",
+          "type": "int24"
+        }
+      ],
+      "name": "TickLiquidityOverflow",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "int24",
+          "name": "tickLower",
+          "type": "int24"
+        }
+      ],
+      "name": "TickLowerOutOfBounds",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "int24",
+          "name": "tickUpper",
+          "type": "int24"
+        }
+      ],
+      "name": "TickUpperOutOfBounds",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "int24",
+          "name": "tickLower",
+          "type": "int24"
+        },
+        {
+          "internalType": "int24",
+          "name": "tickUpper",
+          "type": "int24"
+        }
+      ],
+      "name": "TicksMisordered",
+      "type": "error"
+    }
+  ],
+  "bytecode": "0x6080806040523460175760109081601c823930815050f35b5f80fdfe5f80fdfea164736f6c634300081a000a",
+  "deployedBytecode": "0x5f80fdfea164736f6c634300081a000a",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

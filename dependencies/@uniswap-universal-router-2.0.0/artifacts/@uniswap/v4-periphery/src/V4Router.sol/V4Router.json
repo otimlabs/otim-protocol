@@ -1,0 +1,141 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "V4Router",
+  "sourceName": "@uniswap/v4-periphery/src/V4Router.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "Currency",
+          "name": "currency",
+          "type": "address"
+        }
+      ],
+      "name": "DeltaNotNegative",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "Currency",
+          "name": "currency",
+          "type": "address"
+        }
+      ],
+      "name": "DeltaNotPositive",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InputLengthMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InsufficientBalance",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidBips",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotPoolManager",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "action",
+          "type": "uint256"
+        }
+      ],
+      "name": "UnsupportedAction",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "minAmountOutReceived",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountReceived",
+          "type": "uint256"
+        }
+      ],
+      "name": "V4TooLittleReceived",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "maxAmountInRequested",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountRequested",
+          "type": "uint256"
+        }
+      ],
+      "name": "V4TooMuchRequested",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "msgSender",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "poolManager",
+      "outputs": [
+        {
+          "internalType": "contract IPoolManager",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "unlockCallback",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

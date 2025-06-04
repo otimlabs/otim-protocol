@@ -1,0 +1,34 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "PaymentsImmutables",
+  "sourceName": "contracts/modules/PaymentsImmutables.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "permit2",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "weth9",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct PaymentsParameters",
+          "name": "params",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    }
+  ],
+  "bytecode": "0x60c0604052346100c157604051601f6100ea38819003918201601f19168301916001600160401b038311848410176100ad5780849260409485528339810103126100c15760408051919082016001600160401b038111838210176100ad5761007891602091604052610070816100c5565b8452016100c5565b602082018190526001600160a01b0390811660805290511660a052604051601090816100da823960805181505060a051815050f35b634e487b7160e01b5f52604160045260245ffd5b5f80fd5b51906001600160a01b03821682036100c15756fe5f80fdfea164736f6c634300081a000a",
+  "deployedBytecode": "0x5f80fdfea164736f6c634300081a000a",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

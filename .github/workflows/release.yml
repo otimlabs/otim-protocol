@@ -1,0 +1,67 @@
+name: Create Release
+
+on:
+  workflow_call:
+    inputs:
+      generate_tag:
+        description: Generate a new tag
+        type: boolean
+        default: true
+      custom_tag:
+        description: Specific tag to use when generate_tag is false
+        required: false
+        type: string
+      release_notes:
+        description: Additional custom release notes
+        type: string
+        default: ''
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+    - name: Find Next Patch SemVer Number
+      if: ${{ inputs.generate_tag }}
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        # Fetch all tags to ensure we have the complete version history
+        git fetch --tags
+        
+        # Retrieve latest tag, default to v0.0.0 if no releases exist
+        LATEST_TAG=$(gh api repos/:owner/:repo/releases/latest --jq '.tag_name' || echo "v0.0.0")
+        if [[ "$LATEST_TAG" == *"Not Found"* ]]; then
+          LATEST_TAG="v0.0.0"
+        fi
+        
+        # Increment the patch version by 1 while preserving major and minor versions
+        VERSION_NEXT="$(echo "$LATEST_TAG" | awk -F. '{$NF++; print $1"."$2"."$NF}')"
+        
+        # Make version available to subsequent steps
+        echo "VERSION_NEXT=$VERSION_NEXT" >> $GITHUB_ENV
+
+    - name: Use Custom Tag
+      if: ${{ !inputs.generate_tag }}
+      run: |
+        echo "VERSION_NEXT=${{ inputs.custom_tag }}" >> $GITHUB_ENV
+
+    - name: Create and publish the release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        # Create a draft release with auto-generated notes
+        gh release create $VERSION_NEXT --generate-notes --draft
+        
+        # Retrieve the auto-generated release notes
+        gh release view $VERSION_NEXT --json body -q .body > release_notes.md
+        
+        # Append custom release notes if provided
+        if [ -n "${{ inputs.release_notes }}" ]; then
+          echo "${{ inputs.release_notes }}" >> release_notes.md
+        fi
+        
+        # Update the release with the final notes and publish it
+        gh release edit $VERSION_NEXT --notes-file release_notes.md --draft=false --latest

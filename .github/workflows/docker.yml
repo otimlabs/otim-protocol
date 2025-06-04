@@ -1,0 +1,106 @@
+name: Build and Publish Images
+
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  PROD_PUSH_REF: "refs/heads/main"
+  AWS_REGION: "us-east-2"
+
+permissions:
+  packages: write
+  contents: read
+  id-token: write
+
+jobs:
+  docker:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0  # Needed for proper versioning with git tags
+          submodules: true
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+  
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure AWS Credentials (Dev)
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        with:
+          role-to-assume: "${{ secrets.DEV_AWS_ECR_OPERATOR_ROLE_ARN }}"
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to AWS ECR (Dev)
+        id: dev-ecr-login
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
+
+      - name: Configure AWS Credentials (Prod)
+        if: github.ref == env.PROD_PUSH_REF
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        with:
+          role-to-assume: "${{ secrets.PROD_AWS_ECR_OPERATOR_ROLE_ARN }}"
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to AWS ECR (Prod)
+        if: github.ref == env.PROD_PUSH_REF
+        id: prod-ecr-login
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+            ${{ steps.dev-ecr-login.outputs.registry }}/${{ github.event.repository.name }}
+            ${{ github.ref == env.PROD_PUSH_REF && format('{0}/{1}', steps.prod-ecr-login.outputs.registry, github.event.repository.name) || '' }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=semver,pattern=v{{version}}
+            type=semver,pattern=v{{major}}.{{minor}}
+            type=semver,pattern=v{{major}}
+            type=sha
+
+      - name: Build Docker images
+        id: docker_build
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false  # Build locally first
+          load: true   # Load into Docker daemon for subsequent push
+          tags: ${{ steps.meta.outputs.tags }}
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Push Docker tags
+        run: |
+          TAGS="${{ steps.meta.outputs.tags }}"
+          for tag in $TAGS; do
+            # Skip empty tags (could happen if prod condition wasn't met)
+            if [ -z "$tag" ]; then
+              continue
+            fi
+            echo "Pushing $tag"
+            docker push "$tag"
+          done

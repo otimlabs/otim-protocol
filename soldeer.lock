@@ -1,0 +1,40 @@
+[[dependencies]]
+name = "@openzeppelin-contracts"
+version = "5.0.2"
+git = "https://github.com/OpenZeppelin/openzeppelin-contracts.git"
+rev = "3f901696f77997c060cc4c43fb77bfbd104713f3"
+
+[[dependencies]]
+name = "@uniswap-universal-router"
+version = "2.0.0"
+url = "https://soldeer-revisions.s3.amazonaws.com/@uniswap-universal-router/2_0_0_12-02-2025_17:38:08_universal-router.zip"
+checksum = "d3533879c7de40c73fb390af04b096929ac0b3dbe535282a8225e799cea0c64e"
+integrity = "2df833e1e402ec836a2e591d8ac4ae7123b87d0e53598534ce00fff1c357f1d6"
+
+[[dependencies]]
+name = "@uniswap-v3-core"
+version = "1.0.2-solc-0.8-simulate"
+url = "https://soldeer-revisions.s3.amazonaws.com/@uniswap-v3-core/1_0_2-solc-0_8-simulate_22-01-2024_13:19:54_v3-core.zip"
+checksum = "68949c67a4f22044e4c8dc716362b6d79b07e8990e720bec9b116f54b233ef57"
+integrity = "697a089ffe197580b6cfe07f0c4dd8a35da0836fd1d9e522f73efda4b7314e01"
+
+[[dependencies]]
+name = "@uniswap-v3-periphery"
+version = "1.4.4"
+url = "https://soldeer-revisions.s3.amazonaws.com/@uniswap-v3-periphery/1_4_4_22-01-2024_13:20:51_v3-periphery.zip"
+checksum = "f1ce151585a084bb3ec6fb9cbce4520924d41398c3ce8979169de6f7f70d6a81"
+integrity = "e101a06117b3274cd21a3032fa9a55446e842dc0e0e1b0b25008e094a446c453"
+
+[[dependencies]]
+name = "forge-std"
+version = "1.9.7"
+url = "https://soldeer-revisions.s3.amazonaws.com/forge-std/1_9_7_28-04-2025_15:55:08_forge-std-1.9.zip"
+checksum = "8d9e0a885fa8ee6429a4d344aeb6799119f6a94c7c4fe6f188df79b0dce294ba"
+integrity = "9e60fdba82bc374df80db7f2951faff6467b9091873004a3d314cf0c084b3c7d"
+
+[[dependencies]]
+name = "smartcontractkit-chainlink"
+version = "2.22.0"
+url = "https://soldeer-revisions.s3.amazonaws.com/smartcontractkit-chainlink/2_22_0_31-03-2025_09:39:59_smartcontractkit-chainlink-2.22.zip"
+checksum = "f50c1482e3cea13a5ecf14ec545ce6248e177c322109c51724ecfed1bb1d4b6a"
+integrity = "7aa0224682cda7ec1647c22613377c2c6953192acc60ebb5d07676f192e13021"

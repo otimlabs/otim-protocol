@@ -1,0 +1,24 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ProtocolFeeLibrary",
+  "sourceName": "@uniswap/v4-core/src/libraries/ProtocolFeeLibrary.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "MAX_PROTOCOL_FEE",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523460175760489081601c823930815050f35b5f80fdfe60808060405260043610156011575f80fd5b5f3560e01c63b8ca3b83146023575f80fd5b5f366003190112603757806103e860209252f35b5f80fdfea164736f6c634300081a000a",
+  "deployedBytecode": "0x60808060405260043610156011575f80fd5b5f3560e01c63b8ca3b83146023575f80fd5b5f366003190112603757806103e860209252f35b5f80fdfea164736f6c634300081a000a",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

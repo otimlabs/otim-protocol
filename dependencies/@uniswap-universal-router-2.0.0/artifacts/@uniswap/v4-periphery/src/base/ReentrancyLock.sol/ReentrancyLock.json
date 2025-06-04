@@ -1,0 +1,16 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ReentrancyLock",
+  "sourceName": "@uniswap/v4-periphery/src/base/ReentrancyLock.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "ContractLocked",
+      "type": "error"
+    }
+  ],
+  "bytecode": "0x608080604052346013576010908160188239f35b5f80fdfe5f80fdfea164736f6c634300081a000a",
+  "deployedBytecode": "0x5f80fdfea164736f6c634300081a000a",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

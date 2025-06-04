@@ -1,0 +1,64 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "V3ToV4Migrator",
+  "sourceName": "contracts/modules/V3ToV4Migrator.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "action",
+          "type": "bytes4"
+        }
+      ],
+      "name": "InvalidAction",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "NotAuthorizedForToken",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OnlyMintAllowed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "V3_POSITION_MANAGER",
+      "outputs": [
+        {
+          "internalType": "contract INonfungiblePositionManager",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "V4_POSITION_MANAGER",
+      "outputs": [
+        {
+          "internalType": "contract IPositionManager",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

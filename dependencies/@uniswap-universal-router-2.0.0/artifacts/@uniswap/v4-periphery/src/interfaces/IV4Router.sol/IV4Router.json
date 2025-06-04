@@ -1,0 +1,56 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IV4Router",
+  "sourceName": "@uniswap/v4-periphery/src/interfaces/IV4Router.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "minAmountOutReceived",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountReceived",
+          "type": "uint256"
+        }
+      ],
+      "name": "V4TooLittleReceived",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "maxAmountInRequested",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountRequested",
+          "type": "uint256"
+        }
+      ],
+      "name": "V4TooMuchRequested",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "poolManager",
+      "outputs": [
+        {
+          "internalType": "contract IPoolManager",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

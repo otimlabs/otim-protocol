@@ -1,0 +1,53 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "UnorderedNonce",
+  "sourceName": "@uniswap/v4-periphery/src/base/UnorderedNonce.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "NonceAlreadyUsed",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "word",
+          "type": "uint256"
+        }
+      ],
+      "name": "nonces",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "bitmap",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "nonce",
+          "type": "uint256"
+        }
+      ],
+      "name": "revokeNonce",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523460135760cb908160188239f35b5f80fdfe608060405260043610156010575f80fd5b5f3560e01c806305c1ee201460745763502e1a1614602c575f80fd5b3460705760403660031901126070576004356001600160a01b038116908190036070575f525f60205260405f206024355f52602052602060405f2054604051908152f35b5f80fd5b6020366003190112607057600435600160ff82161b90335f525f60205260405f209060081c5f5260205260405f2081815418809155161560b057005b623f613760e71b5f5260045ffdfea164736f6c634300081a000a",
+  "deployedBytecode": "0x608060405260043610156010575f80fd5b5f3560e01c806305c1ee201460745763502e1a1614602c575f80fd5b3460705760403660031901126070576004356001600160a01b038116908190036070575f525f60205260405f206024355f52602052602060405f2054604051908152f35b5f80fd5b6020366003190112607057600435600160ff82161b90335f525f60205260405f209060081c5f5260205260405f2081815418809155161560b057005b623f613760e71b5f5260045ffdfea164736f6c634300081a000a",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

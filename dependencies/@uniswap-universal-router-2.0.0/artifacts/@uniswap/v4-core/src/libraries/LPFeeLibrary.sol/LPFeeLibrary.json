@@ -1,0 +1,74 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "LPFeeLibrary",
+  "sourceName": "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint24",
+          "name": "fee",
+          "type": "uint24"
+        }
+      ],
+      "name": "LPFeeTooLarge",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "DYNAMIC_FEE_FLAG",
+      "outputs": [
+        {
+          "internalType": "uint24",
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_LP_FEE",
+      "outputs": [
+        {
+          "internalType": "uint24",
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "OVERRIDE_FEE_FLAG",
+      "outputs": [
+        {
+          "internalType": "uint24",
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "REMOVE_OVERRIDE_MASK",
+      "outputs": [
+        {
+          "internalType": "uint24",
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523460175760ae9081601c823930815050f35b5f80fdfe60808060405260043610156011575f80fd5b5f3560e01c9081633b01d64d14608c575080633fc48eba1460755780636f95ebcf14605e5763f26ef49d146043575f80fd5b5f366003190112605a576020604051628000008152f35b5f80fd5b5f366003190112605a57602060405162bfffff8152f35b5f366003190112605a576020604051620f42408152f35b5f366003190112605a57806240000060209252f3fea164736f6c634300081a000a",
+  "deployedBytecode": "0x60808060405260043610156011575f80fd5b5f3560e01c9081633b01d64d14608c575080633fc48eba1460755780636f95ebcf14605e5763f26ef49d146043575f80fd5b5f366003190112605a576020604051628000008152f35b5f80fd5b5f366003190112605a57602060405162bfffff8152f35b5f366003190112605a576020604051620f42408152f35b5f366003190112605a57806240000060209252f3fea164736f6c634300081a000a",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

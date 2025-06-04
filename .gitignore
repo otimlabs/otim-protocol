@@ -1,0 +1,18 @@
+# Compiler files
+cache/
+out/
+
+# Ignores development broadcast logs
+broadcast/
+
+# Docs
+docs/
+
+# Dotenv file
+*.env
+
+# Deployment addresses json
+deployment_addresses.json
+deployed_core_contract_addresses.json
+deployed_fee_contract_addresses.json
+deployed_v0_action_addresses.json

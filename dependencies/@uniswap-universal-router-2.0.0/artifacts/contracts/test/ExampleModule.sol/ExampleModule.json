@@ -1,0 +1,43 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ExampleModule",
+  "sourceName": "contracts/test/ExampleModule.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "CauseRevert",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "message",
+          "type": "string"
+        }
+      ],
+      "name": "ExampleModuleEvent",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "causeRevert",
+      "outputs": [],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "logEvent",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523460135760ae908160188239f35b5f80fdfe608060405260043610156010575f80fd5b5f3560e01c806367192b631460845763a5fe087214602c575f80fd5b346080575f3660031901126080577ff173516ab337f2e7729ba9acd5771deab6be31f2ad8d5dd42dab5269e61701b960606040516020815260096020820152681d195cdd115d995b9d60ba1b6040820152a1005b5f80fd5b346080575f366003190112608057630e524bcd60e21b5f5260045ffdfea164736f6c634300081a000a",
+  "deployedBytecode": "0x608060405260043610156010575f80fd5b5f3560e01c806367192b631460845763a5fe087214602c575f80fd5b346080575f3660031901126080577ff173516ab337f2e7729ba9acd5771deab6be31f2ad8d5dd42dab5269e61701b960606040516020815260096020820152681d195cdd115d995b9d60ba1b6040820152a1005b5f80fd5b346080575f366003190112608057630e524bcd60e21b5f5260045ffdfea164736f6c634300081a000a",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

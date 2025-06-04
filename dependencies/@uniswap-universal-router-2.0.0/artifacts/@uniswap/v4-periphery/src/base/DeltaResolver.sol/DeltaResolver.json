@@ -1,0 +1,56 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "DeltaResolver",
+  "sourceName": "@uniswap/v4-periphery/src/base/DeltaResolver.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "Currency",
+          "name": "currency",
+          "type": "address"
+        }
+      ],
+      "name": "DeltaNotNegative",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "Currency",
+          "name": "currency",
+          "type": "address"
+        }
+      ],
+      "name": "DeltaNotPositive",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InsufficientBalance",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotPoolManager",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "poolManager",
+      "outputs": [
+        {
+          "internalType": "contract IPoolManager",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

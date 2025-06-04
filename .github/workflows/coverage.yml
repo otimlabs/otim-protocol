@@ -1,0 +1,93 @@
+name: Code Coverage
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  comment-forge-coverage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install foundry toolchain
+        uses: foundry-rs/foundry-toolchain@de808b1eea699e761c404bda44ba8f21aba30b2c # v1.3.1
+        with:
+          version: nightly
+          cache-key: ${{ github.job }}-${{ github.sha }}
+
+      - name: Run Forge build
+        id: build
+        run: |
+          forge --version
+          forge soldeer update
+          forge build --sizes
+
+      - name: Run Forge coverage
+        id: coverage
+        run: |
+          {
+          echo 'COVERAGE<<EOF'
+          echo '| File | % Lines | % Statements | % Branches | % Funcs |'
+          echo '|------|---------|--------------|------------|---------|'
+          forge coverage --no-match-contract Estimate --report summary | grep '^|' | grep -v 'test/' | grep -v '^|-' | grep -v 'File'
+          echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Verify coverage is updated
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const file = "coverage.txt"
+            if(!fs.existsSync(file)) {
+              console.log("Nothing to check");
+              return
+            }
+            const currentCoverage = fs.readFileSync(file, "utf8").trim();
+            const newCoverage = (`${{ steps.coverage.outputs.COVERAGE }}`).trim();
+            if (newCoverage != currentCoverage) {
+              core.setFailed(`Code coverage not updated. Run : forge coverage | grep '^|' | grep -v 'test/'  > coverage.txt`);
+            }
+
+      - name: Comment on PR
+        id: comment
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const {data: comments} = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number, 
+              })
+
+            const botComment = comments.find(comment => comment.user.id === 41898282)
+
+            const output = `${{ steps.coverage.outputs.COVERAGE }}`;
+            const commentBody = `Forge code coverage:\n${output}\n`;
+
+            if (botComment) {
+              github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              })
+            } else {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody
+              });
+            }
