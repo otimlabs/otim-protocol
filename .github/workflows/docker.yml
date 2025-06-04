@@ -39,7 +39,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure AWS Credentials (Dev)
-        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           role-to-assume: "${{ secrets.DEV_AWS_ECR_OPERATOR_ROLE_ARN }}"
           aws-region: ${{ env.AWS_REGION }}
@@ -50,7 +50,7 @@ jobs:
 
       - name: Configure AWS Credentials (Prod)
         if: github.ref == env.PROD_PUSH_REF
-        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           role-to-assume: "${{ secrets.PROD_AWS_ECR_OPERATOR_ROLE_ARN }}"
           aws-region: ${{ env.AWS_REGION }}
