@@ -188,7 +188,7 @@ jobs:
     if: needs.verify-artifacts.outputs.artifacts_match == 'false' && github.ref == 'refs/heads/main'
     steps:
       - name: Send Slack notification
-        uses: slackapi/slack-github-action@e28cf165c92ffef168d23c5c9000cffc8a25e117 # v1.24.0
+        uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
         with:
           channel-id: ci-logs
           slack-message: |
