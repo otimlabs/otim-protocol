@@ -4,7 +4,6 @@ pragma solidity ^0.8.26;
 import {Test, console} from "forge-std/src/Test.sol";
 import {Vm, VmSafe} from "forge-std/src/Vm.sol";
 
-import {ERC20MockWithDecimals} from "../mocks/ERC20MockWithDecimals.sol";
 import {MockV3Aggregator} from "@chainlink-contracts/src/v0.8/shared/mocks/MockV3Aggregator.sol";
 
 import {FeeTokenRegistry} from "../../src/infrastructure/FeeTokenRegistry.sol";

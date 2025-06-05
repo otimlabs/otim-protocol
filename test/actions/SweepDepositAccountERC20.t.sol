@@ -4,7 +4,7 @@ pragma solidity ^0.8.26;
 import {Test, console} from "forge-std/src/Test.sol";
 import {Vm, VmSafe} from "forge-std/src/Vm.sol";
 
-import {ERC20Mock} from "@openzeppelin-contracts/mocks/token/ERC20Mock.sol";
+import {ERC20Mock} from "../mocks/ERC20Mock.sol";
 
 import {InstructionLib} from "../../src/libraries/Instruction.sol";
 import {InstructionForkTestContext} from "../utils/InstructionForkTestContext.sol";

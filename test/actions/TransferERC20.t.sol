@@ -3,7 +3,7 @@ pragma solidity ^0.8.26;
 
 import {Vm, VmSafe} from "forge-std/src/Vm.sol";
 
-import {ERC20MockWithDecimals} from "../mocks/ERC20MockWithDecimals.sol";
+import {ERC20Mock} from "../mocks/ERC20Mock.sol";
 
 import {InstructionTestContext} from "../utils/InstructionTestContext.sol";
 
@@ -27,7 +27,7 @@ contract TransferERC20Test is InstructionTestContext {
     using SafeERC20 for IERC20;
     using InstructionLib for InstructionLib.Instruction;
 
-    ERC20MockWithDecimals public USDC = new ERC20MockWithDecimals(6);
+    ERC20Mock public USDC = new ERC20Mock();
 
     TransferERC20Action public transferERC20 = new TransferERC20Action(address(0), address(0), 0);
 

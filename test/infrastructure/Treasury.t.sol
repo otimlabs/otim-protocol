@@ -6,7 +6,7 @@ import {Vm, VmSafe} from "forge-std/src/Vm.sol";
 
 import {SafeERC20} from "@openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
 
-import {ERC20MockWithDecimals} from "../mocks/ERC20MockWithDecimals.sol";
+import {ERC20Mock} from "../mocks/ERC20Mock.sol";
 import {BadERC20Mock} from "../mocks/BadERC20.sol";
 
 import {RevertTarget} from "../mocks/RevertTarget.sol";
@@ -19,7 +19,7 @@ contract TreasuryTest is Test {
 
     VmSafe.Wallet public target = vm.createWallet("target");
 
-    ERC20MockWithDecimals public USDT = new ERC20MockWithDecimals(18);
+    ERC20Mock public USDT = new ERC20Mock();
 
     uint256 START_BALANCE = 1 ether;
     uint256 START_ERC20_BALANCE = 1_000_000_000;
