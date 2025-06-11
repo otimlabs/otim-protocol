@@ -77,6 +77,7 @@ contract DeactivateInstructionAction is IAction, IDeactivateInstructionAction, O
         // charge the fee
         chargeFee(startGas - gasleft(), arguments.fee);
 
+        // this action has no auto-deactivation cases
         return false;
     }
 }
