@@ -30,8 +30,8 @@ contract DeactivateInstructionAction is IAction, IDeactivateInstructionAction, O
         address instructionStorageAddress,
         address feeTokenRegistryAddress,
         address treasuryAddress,
-        uint256 gasConstant
-    ) OtimFee(feeTokenRegistryAddress, treasuryAddress, gasConstant) {
+        uint256 gasConstant_
+    ) OtimFee(feeTokenRegistryAddress, treasuryAddress, gasConstant_) {
         instructionStorage = IInstructionStorage(instructionStorageAddress);
     }
 
@@ -68,6 +68,7 @@ contract DeactivateInstructionAction is IAction, IDeactivateInstructionAction, O
         }
 
         // deactivate the instruction
+        // slither-disable-next-line reentrancy-events
         instructionStorage.deactivateStorage(arguments.instructionId);
 
         // emit that the instruction has been deactivated
