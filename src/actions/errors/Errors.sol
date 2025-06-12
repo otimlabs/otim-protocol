@@ -9,3 +9,5 @@ error BalanceOverThreshold();
 error BalanceUnderThreshold();
 
 error UniswapV3PoolDoesNotExist();
+
+error InstructionAlreadyDeactivated();
