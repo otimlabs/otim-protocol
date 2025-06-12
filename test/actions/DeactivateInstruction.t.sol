@@ -33,7 +33,7 @@ contract DeactivateInstruction is InstructionTestContext {
     /// @notice test Transfer target
     VmSafe.Wallet public target = vm.createWallet("target");
 
-    /// @notice default Action arguments
+    /// @notice default Transfer arguments
     address payable public DEFAULT_TARGET = payable(target.addr);
     uint256 public DEFAULT_VALUE = 100;
     uint256 public DEFAULT_GAS_LIMIT = 21_000;
@@ -47,6 +47,8 @@ contract DeactivateInstruction is InstructionTestContext {
     IOtimFee.Fee public DEFAULT_FEE;
 
     ITransferAction.Transfer public DEFAULT_TRANSFER_ARGS;
+
+    bytes32 public DEFAULT_INSTRUCTION_ID = bytes32(uint256(1));
 
     IDeactivateInstructionAction.DeactivateInstruction public DEFAULT_ACTION_ARGS;
 
@@ -74,6 +76,11 @@ contract DeactivateInstruction is InstructionTestContext {
             value: DEFAULT_VALUE,
             gasLimit: DEFAULT_GAS_LIMIT,
             schedule: DEFAULT_SCHEDULE,
+            fee: DEFAULT_FEE
+        });
+
+        DEFAULT_ACTION_ARGS = IDeactivateInstructionAction.DeactivateInstruction({
+            instructionId: DEFAULT_INSTRUCTION_ID,
             fee: DEFAULT_FEE
         });
 
@@ -118,14 +125,13 @@ contract DeactivateInstruction is InstructionTestContext {
         assertTrue(executionState.deactivated);
     }
 
-    /// @notice typical DeactivateInstruction flow
-    function test_deactivateInstruction_happyPath_beforeExecution() public {
+    /// @notice typical DeactivateInstruction flow before activation
+    function test_deactivateInstruction_happyPath_beforeActivation() public {
         vm.pauseGasMetering();
 
         // execute deactivate instruction
 
-        DEFAULT_ACTION_ARGS.instructionId = bytes32(uint256(1)); // dummy instructionId to deactivate
-        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, address(deactivate), abi.encode(DEFAULT_ACTION_ARGS));
+        buildInstruction();
 
         vm.expectEmit();
         emit IOtimDelegate.InstructionDeactivated(DEFAULT_ACTION_ARGS.instructionId);
@@ -193,10 +199,7 @@ contract DeactivateInstruction is InstructionTestContext {
     function test_deactivateInstruction_alreadyDeactivated() public {
         vm.pauseGasMetering();
 
-        // dummy instructionId to deactivate
-        DEFAULT_ACTION_ARGS.instructionId = bytes32(uint256(1));
-
-        buildInstruction(0, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
+        buildInstruction();
 
         vm.expectEmit();
         emit IOtimDelegate.InstructionDeactivated(DEFAULT_ACTION_ARGS.instructionId);
