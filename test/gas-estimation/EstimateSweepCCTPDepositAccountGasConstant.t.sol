@@ -88,9 +88,11 @@ contract EstimateSweepCCTPDepositAccountGasConstant is InstructionForkTestContex
 
         // disregard fuzz generated fee token
         arguments.fee.token = SEPOLIA_WETH9;
-        // assume block.basefee and transaction priority fee are non-zero and not ridiculously high
-        vm.assume(arguments.fee.maxBaseFeePerGas > 0 && arguments.fee.maxBaseFeePerGas < type(uint80).max);
-        vm.assume(arguments.fee.maxPriorityFeePerGas > 0 && arguments.fee.maxPriorityFeePerGas < type(uint80).max);
+        // assume maxBaseFeePerGas and maxPriorityFeePerGas are non-zero and not ridiculously high
+        vm.assume(arguments.fee.maxBaseFeePerGas > 0 && arguments.fee.maxBaseFeePerGas < type(uint64).max);
+        vm.assume(arguments.fee.maxPriorityFeePerGas > 0 && arguments.fee.maxPriorityFeePerGas < type(uint64).max);
+        // assume tx.gasprice is not ridiculously high
+        vm.assume(arguments.fee.maxBaseFeePerGas + arguments.fee.maxPriorityFeePerGas < type(uint64).max);
         // assume executionFee is non-zero (to enable fee calculation) and not ridiculously high
         vm.assume(arguments.fee.executionFee > 0 && arguments.fee.executionFee < 100 ether);
 
