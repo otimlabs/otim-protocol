@@ -1,0 +1,14 @@
+name: PR Workflow Notifications
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, review_requested, converted_to_draft, ready_for_review]
+  pull_request_target:
+    types: [closed]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  notify:
+    uses: otimlabs/actions/.github/workflows/pr-base.yml@main
+    secrets: inherit
