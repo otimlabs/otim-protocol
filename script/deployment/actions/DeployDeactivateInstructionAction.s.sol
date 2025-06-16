@@ -47,7 +47,7 @@ contract DeployDeactivateInstructionAction is Script {
         address instructionStorageAddress = vm.envAddress("EXPECTED_INSTRUCTION_STORAGE_ADDRESS");
         address feeTokenRegistryAddress = vm.envAddress("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS");
         address treasuryAddress = vm.envAddress("EXPECTED_TREASURY_ADDRESS");
-        uint256 gasConstant = vm.envUint("TRANSFER_ACTION_GAS_CONSTANT");
+        uint256 gasConstant = vm.envUint("DEACTIVATE_INSTRUCTION_ACTION_GAS_CONSTANT");
 
         // if this isn't a dry-run (aka we're using `--broadcast`), make sure to check the expected address
         if (vm.isContext(VmSafe.ForgeContext.ScriptBroadcast)) {
