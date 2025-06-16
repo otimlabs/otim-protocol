@@ -56,7 +56,7 @@ contract DeployDeactivateInstructionAction is Script {
 
         vm.startBroadcast();
 
-        // deterministically deploy DeactivateInstructionAction contracts via canonical Create2 deployer
+        // deterministically deploy DeactivateInstructionAction contract via canonical Create2 deployer
         DeactivateInstructionAction deactivateAction = new DeactivateInstructionAction{salt: salt}(
             instructionStorageAddress, feeTokenRegistryAddress, treasuryAddress, gasConstant
         );
