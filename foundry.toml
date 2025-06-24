@@ -19,8 +19,6 @@ remappings = [
     "forge-std/=dependencies/forge-std-1.9.7/",
 ]
 
-fs_permissions = [{ access = "read-write", path = "./deployment_addresses.json"},{ access = "read-write", path = "./deployed_fee_contract_addresses.json"},{ access = "read-write", path = "./deployed_v0_action_addresses.json"}]
-
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
 [dependencies]
