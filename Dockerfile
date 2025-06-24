@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY . .
 
+RUN forge soldeer update
 RUN forge build
 RUN forge test
 
