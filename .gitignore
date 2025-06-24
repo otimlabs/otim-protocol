@@ -2,6 +2,9 @@
 cache/
 out/
 
+# Dependencies
+dependencies/
+
 # Ignores development broadcast logs
 broadcast/
 
