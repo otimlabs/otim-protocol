@@ -1,4 +1,0 @@
-ChainID = '48900'
-
-[GasEstimator.BlockHistory]
-BlockHistorySize = 300
