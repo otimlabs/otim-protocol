@@ -1,7 +1,0 @@
-type TronKey {
-	id: ID!
-}
-
-type TronKeysPayload {
-	results: [TronKey!]!
-}
