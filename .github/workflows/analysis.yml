@@ -7,7 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@de808b1eea699e761c404bda44ba8f21aba30b2c # v1.3.1
+        with:
+          version: nightly
+          cache-key: ${{ github.job }}-${{ github.sha }}
+
+      - name: Install Dependencies with Soldeer
+        run: forge soldeer update
+
       - name: Run Slither Analysis
         uses: docker://trailofbits/eth-security-toolbox:latest
         with:
