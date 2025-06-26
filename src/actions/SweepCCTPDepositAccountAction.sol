@@ -101,7 +101,7 @@ contract SweepCCTPDepositAccountAction is
             );
         }
 
-        // sweep USDC from the SkipGoCCTPDepositAccount to the SkipGo CCTP relayer contract
+        // sweep USDC from the CCTPDepositAccount to the SkipGo CCTP relayer contract
         CCTPDepositAccount(depositAccountAddress).sweep(arguments.threshold);
 
         // charge the fee
