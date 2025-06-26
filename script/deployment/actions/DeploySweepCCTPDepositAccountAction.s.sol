@@ -28,7 +28,7 @@ contract DeploySweepCCTPDepositAccountAction is Script {
         address usdcAddress = vm.envAddress("USDC_ADDRESS");
         address cctpRelayerAddress = vm.envAddress("CCTP_RELAYER_ADDRESS");
         address tokenMinterAddress = vm.envAddress("TOKEN_MINTER_ADDRESS");
-        address skipGoFeeOracleAddress = vm.envAddress("SKIP_GO_FEE_ORACLE_ADDRESS");
+        address skipGoFeeOracleAddress = vm.envAddress("EXPECTED_SKIP_GO_FEE_ORACLE_ADDRESS");
 
         address feeTokenRegistryAddress = vm.envAddress("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS");
         address treasuryAddress = vm.envAddress("EXPECTED_TREASURY_ADDRESS");
