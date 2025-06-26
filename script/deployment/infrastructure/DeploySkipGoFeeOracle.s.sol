@@ -53,7 +53,7 @@ contract DeploySkipGoFeeOracle is Script {
 
         vm.startBroadcast();
 
-        // deterministically deploy Treasury contract via canonical Create2 deployer
+        // deterministically deploy SkipGoFeeOracle contract via canonical Create2 deployer
         SkipGoFeeOracle skipGoFeeOracle = new SkipGoFeeOracle{salt: salt}(owner);
 
         vm.stopBroadcast();
