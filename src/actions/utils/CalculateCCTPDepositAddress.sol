@@ -5,7 +5,6 @@ import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 
 import {CCTPDepositAccount} from "../transient-contracts/CCTPDepositAccount.sol";
 
-import {ICCTPRelayer} from "@skip-go-evm-contracts/CCTPRelayer/src/interfaces/ICCTPRelayer.sol";
 import {ICalculateCCTPDepositAddress} from "./interfaces/ICalculateCCTPDepositAddress.sol";
 
 /// @title CalculateCCTPDepositAddress
