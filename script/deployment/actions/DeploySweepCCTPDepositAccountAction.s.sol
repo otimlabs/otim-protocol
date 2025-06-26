@@ -36,7 +36,7 @@ contract DeploySweepCCTPDepositAccountAction is Script {
 
         vm.startBroadcast();
 
-        SweepCCTPDepositAccountAction sweepCCTPDepositAction = new SweepCCTPDepositAccountAction(
+        SweepCCTPDepositAccountAction sweepCCTPDepositAccountction = new SweepCCTPDepositAccountAction(
             usdcAddress,
             cctpRelayerAddress,
             tokenMinterAddress,
@@ -48,6 +48,6 @@ contract DeploySweepCCTPDepositAccountAction is Script {
 
         vm.stopBroadcast();
 
-        console2.log("SweepCCTPDepositAccountAction deployed at:", address(sweepCCTPDepositAction));
+        console2.log("SweepCCTPDepositAccountAction deployed at:", address(sweepCCTPDepositAccountction));
     }
 }
