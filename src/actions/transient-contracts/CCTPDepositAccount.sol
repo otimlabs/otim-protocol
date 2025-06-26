@@ -14,15 +14,6 @@ import {ISkipGoFeeOracle} from "../../actions/oracles/interfaces/ISkipGoFeeOracl
 contract CCTPDepositAccount {
     using SafeERC20 for IERC20;
 
-    /// @notice the owner of the CCTPDepositAccount
-    address payable internal immutable owner;
-    /// @notice the expected depositor for the CCTPDepositAccount
-    address payable internal immutable depositor;
-    /// @notice the CCTP domain ID for the destination chain
-    uint32 internal immutable destinationDomain;
-    /// @notice the CCTP mint recipient address in bytes32 format
-    bytes32 internal immutable destinationMintRecipient;
-
     /// @notice the USDC token contract
     IERC20 internal immutable usdc;
     /// @notice the SkipGo CCTP relayer contract
@@ -31,6 +22,15 @@ contract CCTPDepositAccount {
     ITokenController internal immutable tokenMinter;
     /// @notice the SkipGoFeeOracle contract
     ISkipGoFeeOracle internal immutable skipGoFeeOracle;
+
+    /// @notice the owner of the CCTPDepositAccount
+    address payable internal immutable owner;
+    /// @notice the expected depositor for the CCTPDepositAccount
+    address payable internal immutable depositor;
+    /// @notice the CCTP domain ID for the destination chain
+    uint32 internal immutable destinationDomain;
+    /// @notice the CCTP mint recipient address in bytes32 format
+    bytes32 internal immutable destinationMintRecipient;
 
     error BalanceUnderThreshold();
     error InsufficientBalanceForSkipGoFee();
