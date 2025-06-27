@@ -7,13 +7,13 @@
 //! description = "A tool to compare directory contents using Merkle trees"
 //!
 //! [dependencies]
-//! merkle_hash = "3.7"
+//! merkle_hash = "3.8"
 //! clap = { version = "4.0", features = ["derive", "env"] }
+//! camino = "1.0"
 //! ```
 
 use std::collections::HashMap;
 use std::error::Error;
-use std::path::Path;
 use std::process;
 use merkle_hash::{MerkleTree, Encodable};
 use clap::Parser;
@@ -23,9 +23,11 @@ use clap::Parser;
 #[command(about = "Compare directory contents using Merkle trees")]
 struct Cli {
     /// First directory to compare
+    #[arg(env = "DIR1")]
     dir1: String,
 
     /// Second directory to compare
+    #[arg(env = "DIR2")]
     dir2: String,
 
     /// Pattern to ignore during comparison
@@ -51,23 +53,28 @@ fn directories_match(dir1: &str, dir2: &str, ignore: Option<&str>) -> Result<boo
     let tree2 = MerkleTree::builder(dir2).build()?;
 
     let files1: HashMap<_, _> = tree1.iter()
-        .filter(|i| !should_ignore_file(dir1, i, ignore))
+        .filter(|i| !should_ignore_path(&i.path.relative, ignore))
         .map(|i| (i.path.relative.to_string(), i.hash.to_hex_string()))
         .collect();
 
     let files2: HashMap<_, _> = tree2.iter()
-        .filter(|i| !should_ignore_file(dir2, i, ignore))
+        .filter(|i| !should_ignore_path(&i.path.relative, ignore))
         .map(|i| (i.path.relative.to_string(), i.hash.to_hex_string()))
         .collect();
 
     Ok(files1 == files2)
 }
 
-fn should_ignore_file(base_dir: &str, item: &merkle_hash::tree::Item, ignore: Option<&str>) -> bool {
-    let path_str = item.path.relative.to_string();
-    path_str.is_empty() ||
-    ignore.map_or(false, |p| path_str.contains(p)) ||
-    !Path::new(base_dir).join(&path_str).is_file()
+fn should_ignore_path(relative_path: &camino::Utf8Path, ignore: Option<&str>) -> bool {
+    let path_str = relative_path.as_str();
+    
+    // Ignore empty paths
+    if path_str.is_empty() {
+        return true;
+    }
+    
+    // Apply ignore pattern if provided
+    ignore.map_or(false, |pattern| path_str.contains(pattern))
 }
 
 #[cfg(test)]
