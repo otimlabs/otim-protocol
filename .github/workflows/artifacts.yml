@@ -1,0 +1,112 @@
+name: Sync Contract Artifacts
+
+on:
+  workflow_call:
+    inputs:
+      protocol_ref:
+        description: Branch tag to checkout for otim-protocol
+        type: string
+        default: main
+      offchain_ref:
+        description: Branch tag to checkout for otim-offchain
+        type: string
+        default: main
+    secrets:
+      GH_APP_ID:
+        description: GitHub App ID for token generation
+        required: true
+      GH_APP_PRIVATE_KEY:
+        description: GitHub App private key for token generation
+        required: true
+    outputs:
+      artifacts_match:
+        description: Whether artifacts match between repositories
+        value: ${{ jobs.sync-artifacts.outputs.artifacts_match }}
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  sync-artifacts:
+    name: Sync Contract Artifacts
+    runs-on: ubuntu-latest
+    outputs:
+      artifacts_match: ${{ steps.compare-artifacts.outputs.artifacts_match }}
+    steps:
+      - name: Generate GitHub App Token
+        id: bot_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+        with:
+          app_id: ${{ secrets.GH_APP_ID }}
+          private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: Checkout protocol
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ inputs.protocol_ref || 'main' }}
+
+      - name: Checkout offchain
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: otimlabs/otim-offchain
+          token: ${{ steps.bot_token.outputs.token }}
+          path: offchain
+          ref: ${{ inputs.offchain_ref || 'main' }}
+
+      - name: Install foundry
+        uses: foundry-rs/foundry-toolchain@de808b1eea699e761c404bda44ba8f21aba30b2c # v1.3.1
+        with:
+          version: nightly
+          cache-key: ${{ github.job }}-${{ github.sha }}
+
+      - name: Build protocol
+        id: build-protocol
+        run: |
+          echo "protocol_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          forge soldeer update --config-location foundry
+          forge build ./src --sizes
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@fb51252c7ba57d633bc668f941da052e410add48 # v1.13.0
+        with:
+          working-directory: ./offchain
+
+      - name: Install rust-script
+        run: |
+          curl -LsSf https://github.com/fornwall/rust-script/releases/latest/download/rust-script-x86_64-unknown-linux-gnu.tar.gz | tar xzf -
+          sudo install rust-script /usr/local/bin/
+
+      - name: Compare and sync artifacts
+        id: compare-artifacts
+        run: |
+          if rust-script .github/scripts/directory-comparison.rs "./out" "./offchain/crates/contracts/artifacts" "build-info" >/dev/null 2>&1; then
+            echo "artifacts_match=true" >> $GITHUB_OUTPUT
+            echo "✅ Artifacts match"
+          else
+            echo "artifacts_match=false" >> $GITHUB_OUTPUT
+            echo "❌ Artifacts differ - syncing"
+
+            # Prepare offchain for artifact sync
+            cd ./offchain
+            rm -rf ./crates/contracts/artifacts
+            cp -r ../out ./crates/contracts/artifacts
+          fi
+
+      - name: Create artifact sync PR
+        if: steps.compare-artifacts.outputs.artifacts_match == 'false'
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        with:
+          token: ${{ steps.bot_token.outputs.token }}
+          path: ./offchain
+          commit-message: "sync: otim-protocol artifacts (${{ steps.build-protocol.outputs.protocol_sha }})"
+          title: "Sync: otim-protocol build artifacts"
+          body: |
+            Syncing build artifacts from otim-protocol.
+
+            - Protocol: `${{ steps.build-protocol.outputs.protocol_sha }}`
+            - Offchain: `${{ inputs.offchain_ref || 'main' }}`
+          branch: chore/sync-artifacts
+          branch-suffix: short-commit-hash
+          base: ${{ inputs.offchain_ref || 'main' }}
+          delete-branch: false

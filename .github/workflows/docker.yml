@@ -9,7 +9,17 @@ permissions:
   id-token: write
 
 jobs:
+  check-artifacts:
+    if: github.ref_name == 'main'
+    uses: ./.github/workflows/artifacts.yml
+    with:
+      protocol_ref: ${{ github.sha }}
+      offchain_ref: main
+    secrets: inherit
+
   build-and-publish:
+    needs: [check-artifacts]
+    if: always()
     runs-on: ubuntu-latest
 
     steps:
@@ -39,9 +49,8 @@ jobs:
           images: |
             ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=latest,enable=true
+            type=raw,value=latest,enable=${{ github.ref_name == 'main' && needs.check-artifacts.outputs.artifacts_match == 'true' }}
             type=ref,event=branch
-            type=ref,event=pr
             type=sha
 
       - name: Build and push Docker image
