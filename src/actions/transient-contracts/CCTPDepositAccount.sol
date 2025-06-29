@@ -10,7 +10,7 @@ import {ISkipGoFeeOracle} from "../../actions/oracles/interfaces/ISkipGoFeeOracl
 
 /// @title CCTPDepositAccount
 /// @author Otim Labs, Inc.
-/// @notice a transient contract that is deployed to sweep funds from a predetermined address to the SkipGo CCTP relayer contract
+/// @notice a transient contract that is deployed to sweep funds from a predetermined address to the Skip Go CCTP relayer contract
 contract CCTPDepositAccount {
     using SafeERC20 for IERC20;
 
@@ -75,7 +75,7 @@ contract CCTPDepositAccount {
         selfdestruct(depositor);
     }
 
-    /// @notice sweep USDC tokens from this deposit account to the SkipGo CCTP relayer contract
+    /// @notice sweep USDC tokens from this deposit account to the Skip Go CCTP relayer contract
     /// @param threshold - the minimum balance required to perform the sweep
     function sweep(uint256 threshold) external onlyOwner {
         // get the USDC token balance of this deposit account
@@ -86,10 +86,10 @@ contract CCTPDepositAccount {
             revert BalanceUnderThreshold();
         }
 
-        // get the SkipGo fee for bridging to the destination chain
+        // get the Skip Go fee for bridging to the destination chain
         uint256 feeAmount = skipGoFeeOracle.getFee(destinationDomain);
 
-        // the deposit account must have enough balance to cover the SkipGo fee
+        // the deposit account must have enough balance to cover the Skip Go fee
         if (balance <= feeAmount) {
             revert InsufficientBalanceForSkipGoFee();
         }

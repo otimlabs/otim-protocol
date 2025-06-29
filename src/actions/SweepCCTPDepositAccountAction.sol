@@ -19,7 +19,7 @@ import {InvalidArguments} from "./errors/Errors.sol";
 
 /// @title SweepCCTPDepositAccountAction
 /// @author Otim Labs, Inc.
-/// @notice an Action that sweeps USDC from a CCTPDepositAccount to the SkipGo CCTP relayer contract
+/// @notice an Action that sweeps USDC from a CCTPDepositAccount to the Skip Go CCTP relayer contract
 contract SweepCCTPDepositAccountAction is
     IAction,
     ISweepCCTPDepositAccountAction,
@@ -84,7 +84,7 @@ contract SweepCCTPDepositAccountAction is
 
         // try to deploy a new CCTPDepositAccount contract using Create2
         // if the contract already exists, it will revert, and we will just use the existing address
-        try new CCTPDepositAccount{salt: SALT_PREFIX}(
+        try new CCTPDepositAccount{salt: SALT}(
             usdcAddress,
             cctpRelayerAddress,
             tokenMinterAddress,
@@ -101,7 +101,7 @@ contract SweepCCTPDepositAccountAction is
             );
         }
 
-        // sweep USDC from the CCTPDepositAccount to the SkipGo CCTP relayer contract
+        // sweep USDC from the CCTPDepositAccount to the Skip Go CCTP relayer contract
         CCTPDepositAccount(depositAccountAddress).sweep(arguments.threshold);
 
         // charge the fee

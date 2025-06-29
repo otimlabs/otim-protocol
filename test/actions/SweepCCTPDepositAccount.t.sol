@@ -132,7 +132,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
             bytes32(uint256(0))
         );
 
-        // check that the SkipGo fee was paid correctly
+        // check that the Skip Go fee was paid correctly
         // don't check the nonce
         vm.expectEmit(false, true, false, false);
         emit ICCTPRelayer.PaymentForRelay(0, feeAmount);
@@ -178,7 +178,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
             bytes32(uint256(0))
         );
 
-        // check that the SkipGo fee was paid correctly
+        // check that the Skip Go fee was paid correctly
         // don't check the nonce
         vm.expectEmit(false, true, false, false);
         emit ICCTPRelayer.PaymentForRelay(0, feeAmount);
@@ -315,7 +315,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
         vm.pauseGasMetering();
     }
 
-    /// @notice test that the Instruction reverts when the deposit account balance is below the SkipGo fee amount
+    /// @notice test that the Instruction reverts when the deposit account balance is below the Skip Go fee amount
     function test_sweepCCTPDepositAccount_insufficientSkipGoFeeBalance() public {
         vm.pauseGasMetering();
 
@@ -326,7 +326,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
 
         uint256 feeAmount = skipGoFeeOracle.getFee(DEFAULT_ACTION_ARGS.destinationDomain);
 
-        // set the deposit account balance to below the SkipGo fee amount
+        // set the deposit account balance to below the Skip Go fee amount
         vm.startPrank(address(user));
         IERC20(SEPOLIA_USDC).transfer(DEFAULT_DEPOSIT_ACCOUNT, feeAmount - 1);
         vm.stopPrank();

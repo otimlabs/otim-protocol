@@ -12,11 +12,11 @@ import {ICalculateCCTPDepositAddress} from "./interfaces/ICalculateCCTPDepositAd
 /// @notice an abstract contract that calculates the address of a CCTPDepositAccount using Create2
 abstract contract CalculateCCTPDepositAddress is ICalculateCCTPDepositAddress {
     /// @notice the prefix used to calculate the salt for the deposit account address
-    bytes32 public constant SALT_PREFIX = keccak256("CCTPDepositAccount");
+    bytes32 public constant SALT = keccak256("CCTPDepositAccount");
 
     /// @notice the USDC token address
     address public immutable usdcAddress;
-    /// @notice the SkipGo CCTP relayer address
+    /// @notice the Skip Go CCTP relayer address
     address public immutable cctpRelayerAddress;
     /// @notice the CCTP TokenMinter address
     address public immutable tokenMinterAddress;
@@ -44,7 +44,7 @@ abstract contract CalculateCCTPDepositAddress is ICalculateCCTPDepositAddress {
     ) public view returns (address) {
         // slither-disable-next-line too-many-digits
         return Create2.computeAddress(
-            SALT_PREFIX,
+            SALT,
             keccak256(
                 abi.encodePacked(
                     type(CCTPDepositAccount).creationCode,

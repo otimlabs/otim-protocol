@@ -7,7 +7,7 @@ import {ISkipGoFeeOracle} from "./interfaces/ISkipGoFeeOracle.sol";
 
 /// @title SkipGoFeeOracle
 /// @author Otim Labs, Inc.
-/// @notice an oracle that stores SkipGo fees for transferring USDC to certain destination chains
+/// @notice an oracle that stores Skip Go fees for transferring USDC to certain destination chains
 contract SkipGoFeeOracle is ISkipGoFeeOracle, Ownable {
     /// @notice mapping to store fees for each destination domain
     mapping(uint32 => uint256) private fees;
