@@ -19,10 +19,10 @@ import {IOtimFee} from "../../src/actions/fee-models/interfaces/IOtimFee.sol";
 
 import {SkipGoFeeOracle} from "../../src/actions/oracles/SkipGoFeeOracle.sol";
 
-import {SweepCCTPDepositAccountAction} from "../../src/actions/SweepCCTPDepositAccountAction.sol";
-import {ISweepCCTPDepositAccountAction} from "../../src/actions/interfaces/ISweepCCTPDepositAccountAction.sol";
+import {SweepSkipCCTPDepositAccountAction} from "../../src/actions/SweepSkipCCTPDepositAccountAction.sol";
+import {ISweepSkipCCTPDepositAccountAction} from "../../src/actions/interfaces/ISweepSkipCCTPDepositAccountAction.sol";
 
-contract EstimateSweepCCTPDepositAccountGasConstant is InstructionForkTestContext {
+contract EstimateSweepSkipCCTPDepositAccountGasConstant is InstructionForkTestContext {
     using InstructionLib for InstructionLib.Instruction;
 
     SkipGoFeeOracle skipGoFeeOracle;
@@ -30,7 +30,7 @@ contract EstimateSweepCCTPDepositAccountGasConstant is InstructionForkTestContex
     Treasury treasury;
     FeeTokenRegistry feeTokenRegistry;
 
-    SweepCCTPDepositAccountAction sweepAction;
+    SweepSkipCCTPDepositAccountAction sweepAction;
 
     VmSafe.Wallet public depositor = vm.createWallet("depositor");
 
@@ -48,7 +48,7 @@ contract EstimateSweepCCTPDepositAccountGasConstant is InstructionForkTestContex
     bytes32 public constant DESTINATION_MINT_RECIPIENT =
         bytes32(0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef);
 
-    uint256 public constant SWEEP_CCTP_DEPOSIT_ACCOUNT_GAS_CONSTANT = 104_500;
+    uint256 public constant SWEEP_SKIP_CCTP_DEPOSIT_ACCOUNT_GAS_CONSTANT = 104_500;
 
     constructor() {
         string memory rpcUrl = vm.envOr("SEPOLIA_RPC_URL", string("https://ethereum-sepolia-rpc.publicnode.com"));
@@ -69,14 +69,14 @@ contract EstimateSweepCCTPDepositAccountGasConstant is InstructionForkTestContex
         skipGoFeeOracle.setFee(4, 2000);
 
         // deploy and whitelist action with new gas constant
-        sweepAction = new SweepCCTPDepositAccountAction(
+        sweepAction = new SweepSkipCCTPDepositAccountAction(
             SEPOLIA_USDC,
             SEPOLIA_CCTP_RELAYER,
             SEPOLIA_TOKEN_MINTER,
             address(skipGoFeeOracle),
             address(feeTokenRegistry),
             address(treasury),
-            SWEEP_CCTP_DEPOSIT_ACCOUNT_GAS_CONSTANT
+            SWEEP_SKIP_CCTP_DEPOSIT_ACCOUNT_GAS_CONSTANT
         );
 
         actionManager.addAction(address(sweepAction));
@@ -86,11 +86,11 @@ contract EstimateSweepCCTPDepositAccountGasConstant is InstructionForkTestContex
         );
     }
 
-    // check that the SWEEP_DEPOSIT_ACCOUNT_ERC20_GAS_CONSTANT doesn't result in an underpayment of the fee
-    function testFuzz_sweepCCTPDepositAccount_gasConstant(
+    // check that the SWEEP_SKIP_DEPOSIT_ACCOUNT_ERC20_GAS_CONSTANT doesn't result in an underpayment of the fee
+    function testFuzz_sweepSkipCCTPDepositAccount_gasConstant(
         uint256 salt,
         uint256 maxExecutions,
-        ISweepCCTPDepositAccountAction.SweepCCTPDepositAccount memory arguments
+        ISweepSkipCCTPDepositAccountAction.SweepSkipCCTPDepositAccount memory arguments
     ) public {
         vm.pauseGasMetering();
 

@@ -17,14 +17,14 @@ import {ITokenController} from "../../src/actions/external/ITokenController.sol"
 
 import {IOtimFee} from "../../src/actions/fee-models/interfaces/IOtimFee.sol";
 
-import {ISweepCCTPDepositAccountAction} from "../../src/actions/interfaces/ISweepCCTPDepositAccountAction.sol";
-import {SweepCCTPDepositAccountAction} from "../../src/actions/SweepCCTPDepositAccountAction.sol";
+import {ISweepSkipCCTPDepositAccountAction} from "../../src/actions/interfaces/ISweepSkipCCTPDepositAccountAction.sol";
+import {SweepSkipCCTPDepositAccountAction} from "../../src/actions/SweepSkipCCTPDepositAccountAction.sol";
 
-import {CCTPDepositAccount} from "../../src/actions/transient-contracts/CCTPDepositAccount.sol";
+import {SkipCCTPDepositAccount} from "../../src/actions/transient-contracts/SkipCCTPDepositAccount.sol";
 
 import "../../src/actions/errors/Errors.sol";
 
-contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
+contract SweepSkipCCTPDepositAccountTest is InstructionForkTestContext {
     using InstructionLib for InstructionLib.Instruction;
 
     address public constant SEPOLIA_USDC = address(0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238);
@@ -34,7 +34,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
     address public constant SEPOLIA_USDC_WHALE = address(0x1fD9611f009fcB8Bec0A4854FDcA0832DfdB04E3);
 
     SkipGoFeeOracle public skipGoFeeOracle;
-    SweepCCTPDepositAccountAction public sweepCCTPDepositAccountAction;
+    SweepSkipCCTPDepositAccountAction public sweepSkipCCTPDepositAccountAction;
 
     VmSafe.Wallet public depositor = vm.createWallet("depositor");
 
@@ -47,7 +47,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
 
     IOtimFee.Fee public DEFAULT_FEE;
 
-    ISweepCCTPDepositAccountAction.SweepCCTPDepositAccount public DEFAULT_ACTION_ARGS;
+    ISweepSkipCCTPDepositAccountAction.SweepSkipCCTPDepositAccount public DEFAULT_ACTION_ARGS;
 
     event DepositForBurn(
         uint64 indexed nonce,
@@ -73,7 +73,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
 
         skipGoFeeOracle.setFee(4, DEFAULT_SKIP_GO_FEE);
 
-        sweepCCTPDepositAccountAction = new SweepCCTPDepositAccountAction(
+        sweepSkipCCTPDepositAccountAction = new SweepSkipCCTPDepositAccountAction(
             SEPOLIA_USDC,
             SEPOLIA_CCTP_RELAYER,
             SEPOLIA_TOKEN_MINTER,
@@ -83,9 +83,9 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
             0
         );
 
-        actionManager.addAction(address(sweepCCTPDepositAccountAction));
+        actionManager.addAction(address(sweepSkipCCTPDepositAccountAction));
 
-        DEFAULT_ACTION_ARGS = ISweepCCTPDepositAccountAction.SweepCCTPDepositAccount({
+        DEFAULT_ACTION_ARGS = ISweepSkipCCTPDepositAccountAction.SweepSkipCCTPDepositAccount({
             depositor: DEFAULT_DEPOSITOR,
             destinationDomain: 4,
             destinationMintRecipient: bytes32(uint256(1)),
@@ -93,19 +93,19 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
             fee: DEFAULT_FEE
         });
 
-        DEFAULT_DEPOSIT_ACCOUNT = sweepCCTPDepositAccountAction.calculateDepositAddress(
+        DEFAULT_DEPOSIT_ACCOUNT = sweepSkipCCTPDepositAccountAction.calculateDepositAddress(
             address(user),
             DEFAULT_ACTION_ARGS.depositor,
             DEFAULT_ACTION_ARGS.destinationDomain,
             DEFAULT_ACTION_ARGS.destinationMintRecipient
         );
 
-        DEFAULT_ACTION = address(sweepCCTPDepositAccountAction);
+        DEFAULT_ACTION = address(sweepSkipCCTPDepositAccountAction);
         DEFAULT_ARGS = abi.encode(DEFAULT_ACTION_ARGS);
     }
 
     /// @notice test that sweeping USDC to the CCTP relayer works as expected
-    function test_sweepCCTPDepositAccount_happyPath() public {
+    function test_sweepSkipCCTPDepositAccount_happyPath() public {
         vm.pauseGasMetering();
 
         buildInstruction();
@@ -149,7 +149,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
     }
 
     /// @notice test that sweeping USDC to the CCTP relayer works as expected even when the deposit account has more USDC than the burn limit
-    function test_sweepCCTPDepositAccount_overBurnLimit() public {
+    function test_sweepSkipCCTPDepositAccount_overBurnLimit() public {
         vm.pauseGasMetering();
 
         buildInstruction();
@@ -195,7 +195,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
     }
 
     /// @notice test that sweeping USDC to the CCTP relayer works as expected when the deposit account also has ETH balance
-    function test_sweepCCTPDepositAccount_withEthBalance() public {
+    function test_sweepSkipCCTPDepositAccount_withEthBalance() public {
         vm.pauseGasMetering();
 
         buildInstruction();
@@ -227,14 +227,14 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
 
     /// @notice test that the Instruction succeeds even if the deposit account is perminently deployed and can't be self-destructed
     /// @dev this case will never happen if the Action is used as intended, but it is technically possible for the owner to permanently deploy the deposit account
-    function test_sweepCCTPDepositAccount_alreadyDeployed() public {
+    function test_sweepSkipCCTPDepositAccount_alreadyDeployed() public {
         vm.pauseGasMetering();
 
         buildInstruction();
 
         // permanently deploy the deposit account
         vm.prank(address(user));
-        CCTPDepositAccount cctpDepositAccount = new CCTPDepositAccount(
+        SkipCCTPDepositAccount skipCctpDepositAccount = new SkipCCTPDepositAccount(
             SEPOLIA_USDC,
             SEPOLIA_CCTP_RELAYER,
             SEPOLIA_TOKEN_MINTER,
@@ -243,7 +243,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
             DEFAULT_ACTION_ARGS.destinationDomain,
             DEFAULT_ACTION_ARGS.destinationMintRecipient
         );
-        vm.etch(DEFAULT_DEPOSIT_ACCOUNT, address(cctpDepositAccount).code);
+        vm.etch(DEFAULT_DEPOSIT_ACCOUNT, address(skipCctpDepositAccount).code);
 
         vm.startPrank(address(user));
         IERC20(SEPOLIA_USDC).transfer(DEFAULT_DEPOSIT_ACCOUNT, DEFAULT_THRESHOLD + 1);
@@ -263,7 +263,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
     }
 
     /// @notice test that the Instruction reverts when the depositor is set to the zero address
-    function test_sweepCCTPDepositAccount_depositorZero() public {
+    function test_sweepSkipCCTPDepositAccount_depositorZero() public {
         vm.pauseGasMetering();
 
         // set the depositor to the zero address
@@ -280,7 +280,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
     }
 
     /// @notice test that the Instruction reverts when the destinationMintRecipient is set to the zero address
-    function test_sweepCCTPDepositAccount_destinationMintRecipientZero() public {
+    function test_sweepSkipCCTPDepositAccount_destinationMintRecipientZero() public {
         vm.pauseGasMetering();
 
         // set the destinationMintRecipient to the zero address
@@ -297,7 +297,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
     }
 
     /// @notice test that the Instruction reverts when the deposit account balance is below the threshold
-    function test_sweepCCTPDepositAccount_balanceUnderThreshold() public {
+    function test_sweepSkipCCTPDepositAccount_balanceUnderThreshold() public {
         vm.pauseGasMetering();
 
         buildInstruction();
@@ -316,7 +316,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
     }
 
     /// @notice test that the Instruction reverts when the deposit account balance is below the Skip Go fee amount
-    function test_sweepCCTPDepositAccount_insufficientSkipGoFeeBalance() public {
+    function test_sweepSkipCCTPDepositAccount_insufficientSkipGoFeeBalance() public {
         vm.pauseGasMetering();
 
         // set threshold to zero to avoid the balance under threshold check
@@ -331,7 +331,7 @@ contract SweepCCTPDepositAccountTest is InstructionForkTestContext {
         IERC20(SEPOLIA_USDC).transfer(DEFAULT_DEPOSIT_ACCOUNT, feeAmount - 1);
         vm.stopPrank();
 
-        bytes memory result = abi.encodeWithSelector(CCTPDepositAccount.InsufficientBalanceForSkipGoFee.selector);
+        bytes memory result = abi.encodeWithSelector(SkipCCTPDepositAccount.InsufficientBalanceForSkipGoFee.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
         vm.resumeGasMetering();

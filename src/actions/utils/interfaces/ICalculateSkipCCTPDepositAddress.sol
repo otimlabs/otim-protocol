@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.26;
 
-/// @title ICalculateCCTPDepositAddress
+/// @title ICalculateSkipCCTPDepositAddress
 /// @author Otim Labs, Inc.
-/// @notice interface for the CalculateCCTPDepositAddress contract
-interface ICalculateCCTPDepositAddress {
-    /// @notice calculates the address of a CCTPDepositAccount using Create2
+/// @notice interface for the CalculateSkipCCTPDepositAddress contract
+interface ICalculateSkipCCTPDepositAddress {
+    /// @notice calculates the address of a SkipCCTPDepositAccount using Create2
     /// @param owner - the owner of the deposit account
     /// @param depositor - the depositor for the deposit account
     /// @param destinationDomain - the domain ID of the destination chain

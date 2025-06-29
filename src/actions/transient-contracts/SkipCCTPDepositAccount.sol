@@ -8,24 +8,24 @@ import {ICCTPRelayer} from "@skip-go-evm-contracts/CCTPRelayer/src/interfaces/IC
 import {ITokenController} from "../external/ITokenController.sol";
 import {ISkipGoFeeOracle} from "../../actions/oracles/interfaces/ISkipGoFeeOracle.sol";
 
-/// @title CCTPDepositAccount
+/// @title SkipCCTPDepositAccount
 /// @author Otim Labs, Inc.
 /// @notice a transient contract that is deployed to sweep funds from a predetermined address to the Skip Go CCTP relayer contract
-contract CCTPDepositAccount {
+contract SkipCCTPDepositAccount {
     using SafeERC20 for IERC20;
 
     /// @notice the USDC token contract
     IERC20 internal immutable usdc;
-    /// @notice the SkipGo CCTP relayer contract
+    /// @notice the Skip Go CCTP relayer contract
     ICCTPRelayer internal immutable cctpRelayer;
     /// @notice the CCTP TokenMinter contract
     ITokenController internal immutable tokenMinter;
     /// @notice the SkipGoFeeOracle contract
     ISkipGoFeeOracle internal immutable skipGoFeeOracle;
 
-    /// @notice the owner of the CCTPDepositAccount
+    /// @notice the owner of the SkipCCTPDepositAccount
     address payable internal immutable owner;
-    /// @notice the expected depositor for the CCTPDepositAccount
+    /// @notice the expected depositor for the SkipCCTPDepositAccount
     address payable internal immutable depositor;
     /// @notice the CCTP domain ID for the destination chain
     uint32 internal immutable destinationDomain;

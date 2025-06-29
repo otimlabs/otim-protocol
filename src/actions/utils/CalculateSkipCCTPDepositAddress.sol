@@ -3,16 +3,16 @@ pragma solidity ^0.8.26;
 
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 
-import {CCTPDepositAccount} from "../transient-contracts/CCTPDepositAccount.sol";
+import {SkipCCTPDepositAccount} from "../transient-contracts/SkipCCTPDepositAccount.sol";
 
-import {ICalculateCCTPDepositAddress} from "./interfaces/ICalculateCCTPDepositAddress.sol";
+import {ICalculateSkipCCTPDepositAddress} from "./interfaces/ICalculateSkipCCTPDepositAddress.sol";
 
-/// @title CalculateCCTPDepositAddress
+/// @title CalculateSkipCCTPDepositAddress
 /// @author Otim Labs, Inc.
-/// @notice an abstract contract that calculates the address of a CCTPDepositAccount using Create2
-abstract contract CalculateCCTPDepositAddress is ICalculateCCTPDepositAddress {
+/// @notice an abstract contract that calculates the address of a SkipCCTPDepositAccount using Create2
+abstract contract CalculateSkipCCTPDepositAddress is ICalculateSkipCCTPDepositAddress {
     /// @notice the prefix used to calculate the salt for the deposit account address
-    bytes32 public constant SALT = keccak256("CCTPDepositAccount");
+    bytes32 public constant SALT = keccak256("SkipCCTPDepositAccount");
 
     /// @notice the USDC token address
     address public immutable usdcAddress;
@@ -35,7 +35,7 @@ abstract contract CalculateCCTPDepositAddress is ICalculateCCTPDepositAddress {
         skipGoFeeOracleAddress = skipGoFeeOracleAddress_;
     }
 
-    /// @inheritdoc ICalculateCCTPDepositAddress
+    /// @inheritdoc ICalculateSkipCCTPDepositAddress
     function calculateDepositAddress(
         address owner,
         address depositor,
@@ -47,7 +47,7 @@ abstract contract CalculateCCTPDepositAddress is ICalculateCCTPDepositAddress {
             SALT,
             keccak256(
                 abi.encodePacked(
-                    type(CCTPDepositAccount).creationCode,
+                    type(SkipCCTPDepositAccount).creationCode,
                     abi.encode(
                         usdcAddress,
                         cctpRelayerAddress,
