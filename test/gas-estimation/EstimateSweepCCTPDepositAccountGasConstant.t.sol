@@ -48,7 +48,7 @@ contract EstimateSweepCCTPDepositAccountGasConstant is InstructionForkTestContex
     bytes32 public constant DESTINATION_MINT_RECIPIENT =
         bytes32(0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef);
 
-    uint256 public constant SWEEP_CCTP_DEPOSIT_ACCOUNT_GAS_CONSTANT = 104_000;
+    uint256 public constant SWEEP_CCTP_DEPOSIT_ACCOUNT_GAS_CONSTANT = 104_500;
 
     constructor() {
         string memory rpcUrl = vm.envOr("SEPOLIA_RPC_URL", string("https://ethereum-sepolia-rpc.publicnode.com"));
