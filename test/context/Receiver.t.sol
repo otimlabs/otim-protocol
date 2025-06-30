@@ -23,8 +23,6 @@ contract ReceiverTest is InstructionTestContext {
 
     /// @notice test EOA receives ether
     function test_receiveEther() public {
-        vm.pauseGasMetering();
-
         uint256 value_ = 100;
 
         vm.deal(address(user), 0);
@@ -33,7 +31,7 @@ contract ReceiverTest is InstructionTestContext {
         assertEq(address(user).balance, 0);
         assertEq(address(other).balance, value_);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         vm.prank(address(other));
         (bool success,) = address(user).call{value: value_}("");
         vm.pauseGasMetering();
@@ -44,15 +42,13 @@ contract ReceiverTest is InstructionTestContext {
 
     /// @notice test EOA receives ERC721 tokens with safeTransferFrom
     function test_receiveERC721() public {
-        vm.pauseGasMetering();
-
         uint256 id = 1;
 
         erc721.mint(address(other), id);
 
         assertEq(erc721.ownerOf(id), address(other));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         vm.prank(address(other));
         erc721.safeTransferFrom(address(other), address(user), id);
         vm.pauseGasMetering();
@@ -62,8 +58,6 @@ contract ReceiverTest is InstructionTestContext {
 
     /// @notice test EOA receives ERC1155 tokens with safeTransferFrom
     function test_receiveERC1155() public {
-        vm.pauseGasMetering();
-
         uint256 id = 1;
         uint256 amount = 1;
 
@@ -72,7 +66,7 @@ contract ReceiverTest is InstructionTestContext {
         assertEq(erc1155.balanceOf(address(other), id), amount);
         assertEq(erc1155.balanceOf(address(user), id), 0);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         vm.prank(address(other));
         erc1155.safeTransferFrom(address(other), address(user), id, amount, "");
         vm.pauseGasMetering();
@@ -83,8 +77,6 @@ contract ReceiverTest is InstructionTestContext {
 
     /// @notice test EOA receives a batch of ERC1155 tokens with safeBatchTransferFrom
     function test_receiveBatchERC1155() public {
-        vm.pauseGasMetering();
-
         uint256 id1 = 1;
         uint256 id2 = 2;
         uint256 id3 = 3;
@@ -115,7 +107,7 @@ contract ReceiverTest is InstructionTestContext {
         values[1] = value2;
         values[2] = value3;
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         vm.prank(address(other));
         erc1155.safeBatchTransferFrom(address(other), address(user), ids, values, "");
         vm.pauseGasMetering();

@@ -62,8 +62,6 @@ contract InstructionStorageTest is Test {
 
     /// @notice test access control for all functions
     function test_accessControl() public {
-        vm.pauseGasMetering();
-
         /// @notice revert if called directly from an EOA
         vm.startBroadcast(address(user));
 
@@ -96,8 +94,6 @@ contract InstructionStorageTest is Test {
 
     /// @notice test increment execution counter
     function test_incrementExecutionCounter_happyPath() public {
-        vm.pauseGasMetering();
-
         uint256 currentTime = block.timestamp;
         uint256 delay = 100;
 
@@ -107,9 +103,7 @@ contract InstructionStorageTest is Test {
         assertEq(executionState.lastExecuted, 0);
 
         for (uint256 i; i < maxExecutions - 1; i++) {
-            vm.resumeGasMetering();
             user.call_incrementExecutionCounter(instructionId);
-            vm.pauseGasMetering();
 
             executionState = target.getExecutionState(address(user), instructionId);
             assertFalse(executionState.deactivated);
@@ -118,7 +112,7 @@ contract InstructionStorageTest is Test {
             skip(delay);
         }
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.call_incrementExecutionCounter(instructionId);
         vm.pauseGasMetering();
 
@@ -132,8 +126,6 @@ contract InstructionStorageTest is Test {
 
     /// @notice test increment execution counter and deactivate
     function test_incrementAndDeactivate_happyPath() public {
-        vm.pauseGasMetering();
-
         uint256 currentTime = block.timestamp;
         uint256 delay = 100;
 
@@ -143,9 +135,7 @@ contract InstructionStorageTest is Test {
         assertEq(executionState.lastExecuted, 0);
 
         for (uint256 i; i < maxExecutions - 1; i++) {
-            vm.resumeGasMetering();
             user.call_incrementExecutionCounter(instructionId);
-            vm.pauseGasMetering();
 
             executionState = target.getExecutionState(address(user), instructionId);
             assertFalse(executionState.deactivated);
@@ -154,7 +144,7 @@ contract InstructionStorageTest is Test {
             skip(delay);
         }
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.call_incrementAndDeactivate(instructionId);
         vm.pauseGasMetering();
 
@@ -168,14 +158,10 @@ contract InstructionStorageTest is Test {
 
     /// @notice test deactivate storage
     function test_deactivate_happyPath() public {
-        vm.pauseGasMetering();
-
         uint256 currentTime = block.timestamp;
         uint256 delay = 100;
 
-        vm.resumeGasMetering();
         user.call_incrementExecutionCounter(instructionId);
-        vm.pauseGasMetering();
 
         executionState = target.getExecutionState(address(user), instructionId);
         assertFalse(executionState.deactivated);
@@ -184,7 +170,7 @@ contract InstructionStorageTest is Test {
 
         skip(delay);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.call_deactivate(instructionId);
         vm.pauseGasMetering();
 

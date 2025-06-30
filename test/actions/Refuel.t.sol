@@ -59,8 +59,6 @@ contract RefuelTest is InstructionTestContext {
 
     /// @notice typical Refuel flow
     function test_refuel_happyPath() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         assertEq(address(user).balance, USER_START_BALANCE);
@@ -69,7 +67,7 @@ contract RefuelTest is InstructionTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -79,8 +77,6 @@ contract RefuelTest is InstructionTestContext {
 
     /// @notice typical Refuel flow with threshold == 0
     function test_refuel_happyPath_thresholdZero() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set threshold to 0
         DEFAULT_ACTION_ARGS.threshold = 0;
 
@@ -93,7 +89,7 @@ contract RefuelTest is InstructionTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -103,8 +99,6 @@ contract RefuelTest is InstructionTestContext {
 
     /// @notice test validation reverts with target == address(0)
     function test_refuel_targetZero() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set target to address(0)
         DEFAULT_ACTION_ARGS.target = payable(address(0));
 
@@ -113,15 +107,13 @@ contract RefuelTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that validation fails with threshold above endBalance
     function test_refuel_thresholdAboveEndBalance() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set threshold to endBalance + 1
         DEFAULT_ACTION_ARGS.threshold = DEFAULT_END_BALANCE + 1;
 
@@ -130,15 +122,13 @@ contract RefuelTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that validation fails with threshold == endBalance
     function test_refuel_thresholdEqualsEndBalance() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set threshold to endBalance
         DEFAULT_ACTION_ARGS.threshold = DEFAULT_END_BALANCE;
 
@@ -147,15 +137,13 @@ contract RefuelTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts with ETH balance over threshold
     function test_refuel_balanceOverThreshold() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         vm.deal(target.addr, DEFAULT_THRESHOLD + 1);
@@ -163,15 +151,13 @@ contract RefuelTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(BalanceOverThreshold.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts with ETH insufficient balance
     function test_refuel_insufficientBalance() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         vm.deal(address(user), 0);
@@ -179,15 +165,13 @@ contract RefuelTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InsufficientBalance.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that the Instruction is automatically deactivated when the action fails from the target reverting
     function test_refuel_targetRevert() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set target to RevertTarget
         DEFAULT_ACTION_ARGS.target = payable(address(new RevertTarget()));
 
@@ -196,7 +180,7 @@ contract RefuelTest is InstructionTestContext {
         vm.expectEmit();
         emit IRefuelAction.RefuelActionFailed(DEFAULT_ACTION_ARGS.target);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -214,8 +198,6 @@ contract RefuelTest is InstructionTestContext {
 
     /// @notice test that the Instruction is automatically deactivated when the action fails from the target draining gas
     function test_refuel_targetDrainGas() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set target to DrainGasTarget
         DEFAULT_ACTION_ARGS.target = payable(address(new DrainGasTarget()));
 
@@ -224,7 +206,7 @@ contract RefuelTest is InstructionTestContext {
         vm.expectEmit();
         emit IRefuelAction.RefuelActionFailed(DEFAULT_ACTION_ARGS.target);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 

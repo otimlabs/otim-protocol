@@ -31,11 +31,9 @@ contract TreasuryTest is Test {
 
     /// @notice test that deposit works as expected
     function test_deposit_happyPath() public {
-        vm.pauseGasMetering();
-
         assertEq(address(treasury).balance, START_BALANCE);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         treasury.deposit{value: START_BALANCE}();
         vm.pauseGasMetering();
 
@@ -44,12 +42,10 @@ contract TreasuryTest is Test {
 
     /// @notice test that withdraw works as expected
     function test_withdraw_happyPath() public {
-        vm.pauseGasMetering();
-
         assertEq(address(treasury).balance, START_BALANCE);
         assertEq(target.addr.balance, 0);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         treasury.withdraw(target.addr, START_BALANCE);
         vm.pauseGasMetering();
 
@@ -59,51 +55,43 @@ contract TreasuryTest is Test {
 
     /// @notice test that withdraw fails with target = address(0)
     function test_withdraw_invalidTarget() public {
-        vm.pauseGasMetering();
-
         vm.expectRevert(abi.encodeWithSelector(ITreasury.InvalidTarget.selector));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         treasury.withdraw(address(0), START_BALANCE);
         vm.pauseGasMetering();
     }
 
     /// @notice test that withdraw fails with Treasury insufficient balance
     function test_withdraw_insufficientBalance() public {
-        vm.pauseGasMetering();
-
         address badRecipient = address(new RevertTarget());
 
         bytes memory result = "";
         vm.expectRevert(abi.encodeWithSelector(ITreasury.WithdrawalFailed.selector, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         treasury.withdraw(badRecipient, START_BALANCE);
         vm.pauseGasMetering();
     }
 
     /// @notice test that withdraw fails with reverting recipient
     function test_withdraw_transferFailed() public {
-        vm.pauseGasMetering();
-
         RevertTarget badRecipient = new RevertTarget();
 
         bytes memory result = "";
         vm.expectRevert(abi.encodeWithSelector(ITreasury.WithdrawalFailed.selector, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         treasury.withdraw(address(badRecipient), START_BALANCE);
         vm.pauseGasMetering();
     }
 
     /// @notice test that withdrawERC20 works as expected
     function test_withdrawERC20_happyPath() public {
-        vm.pauseGasMetering();
-
         assertEq(USDT.balanceOf(address(treasury)), START_ERC20_BALANCE);
         assertEq(USDT.balanceOf(target.addr), 0);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         treasury.withdrawERC20(address(USDT), target.addr, START_ERC20_BALANCE);
         vm.pauseGasMetering();
 
@@ -113,37 +101,31 @@ contract TreasuryTest is Test {
 
     /// @notice test that withdrawERC20 with target = address(0) fails
     function test_withdrawERC20_invalidTarget() public {
-        vm.pauseGasMetering();
-
         vm.expectRevert(abi.encodeWithSelector(ITreasury.InvalidTarget.selector));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         treasury.withdrawERC20(address(USDT), address(0), START_ERC20_BALANCE);
         vm.pauseGasMetering();
     }
 
     /// @notice test that withdrawERC20 with Treasury insufficient balance fails
     function test_withdrawERC20_insufficientBalance() public {
-        vm.pauseGasMetering();
-
         vm.expectRevert(abi.encodeWithSelector(ITreasury.InsufficientBalance.selector));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         treasury.withdrawERC20(address(USDT), target.addr, START_ERC20_BALANCE + 1);
         vm.pauseGasMetering();
     }
 
     /// @notice test that withdrawERC20 with non-SafeERC20 token fails
     function test_withdrawERC20_transferFailed() public {
-        vm.pauseGasMetering();
-
         BadERC20Mock badToken = new BadERC20Mock();
 
         badToken.mint(address(treasury), START_ERC20_BALANCE);
 
         vm.expectRevert(abi.encodeWithSelector(SafeERC20.SafeERC20FailedOperation.selector, badToken));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         treasury.withdrawERC20(address(badToken), target.addr, START_ERC20_BALANCE);
         vm.pauseGasMetering();
     }

@@ -28,7 +28,7 @@ contract ActionManagerTest is Test {
     function test_actionManager_constructor() public {
         vm.pauseGasMetering();
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         target = new ActionManager(owner.addr);
         vm.pauseGasMetering();
 
@@ -40,14 +40,12 @@ contract ActionManagerTest is Test {
 
     /// @notice test access control for all functions
     function test_actionManager_accessControl() public {
-        vm.pauseGasMetering();
-
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector, address(this), target.DEFAULT_ADMIN_ROLE()
             )
         );
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         target.addAction(action);
         vm.pauseGasMetering();
 
@@ -75,14 +73,12 @@ contract ActionManagerTest is Test {
 
     /// @notice add Action flow
     function test_addAction_happyPath() public {
-        vm.pauseGasMetering();
-
         vm.startPrank(owner.addr);
 
         vm.expectEmit();
         emit IActionManager.ActionAdded(action);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         target.addAction(action);
         vm.pauseGasMetering();
 
@@ -94,8 +90,6 @@ contract ActionManagerTest is Test {
 
     /// @notice can't update Action metadata, need to remove then add again
     function test_addAction_alreadyExists() public {
-        vm.pauseGasMetering();
-
         vm.startPrank(owner.addr);
 
         vm.expectEmit();
@@ -107,7 +101,7 @@ contract ActionManagerTest is Test {
         assertTrue(executable);
 
         vm.expectRevert(abi.encodeWithSelector(IActionManager.AlreadyAdded.selector));
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         target.addAction(action);
         vm.pauseGasMetering();
 
@@ -116,8 +110,6 @@ contract ActionManagerTest is Test {
 
     /// @notice remove Action flow
     function test_removeAction_happyPath() public {
-        vm.pauseGasMetering();
-
         vm.startPrank(owner.addr);
 
         target.addAction(action);
@@ -125,7 +117,7 @@ contract ActionManagerTest is Test {
         vm.expectEmit();
         emit IActionManager.ActionRemoved(action);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         target.removeAction(action);
         vm.pauseGasMetering();
 
@@ -137,8 +129,6 @@ contract ActionManagerTest is Test {
 
     /// @notice can't remove an already removed Action
     function test_removeAction_doesntExist() public {
-        vm.pauseGasMetering();
-
         vm.startPrank(owner.addr);
 
         target.addAction(action);
@@ -152,7 +142,7 @@ contract ActionManagerTest is Test {
         assertFalse(executable);
 
         vm.expectRevert(abi.encodeWithSelector(IActionManager.AlreadyRemoved.selector));
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         target.removeAction(action);
         vm.pauseGasMetering();
 
@@ -164,8 +154,6 @@ contract ActionManagerTest is Test {
 
     /// @notice lock all Actions flow
     function test_lockAllActions_happyPath() public {
-        vm.pauseGasMetering();
-
         vm.startPrank(owner.addr);
 
         target.addAction(action);
@@ -176,7 +164,7 @@ contract ActionManagerTest is Test {
         vm.expectEmit();
         emit IActionManager.ActionsGloballyLocked();
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         target.lockAllActions();
         vm.pauseGasMetering();
 
@@ -188,8 +176,6 @@ contract ActionManagerTest is Test {
 
     /// @notice lock all Actions flow
     function test_lockAllActions_happyPath_killSwitchOwner() public {
-        vm.pauseGasMetering();
-
         vm.prank(owner.addr);
         target.addAction(action);
 
@@ -205,7 +191,7 @@ contract ActionManagerTest is Test {
         vm.expectEmit();
         emit IActionManager.ActionsGloballyLocked();
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         target.lockAllActions();
         vm.pauseGasMetering();
 
@@ -220,8 +206,6 @@ contract ActionManagerTest is Test {
 
     /// @notice can't lock all Actions if already locked
     function test_lockAllActions_alreadyLocked() public {
-        vm.pauseGasMetering();
-
         vm.startPrank(owner.addr);
 
         target.addAction(action);
@@ -238,7 +222,7 @@ contract ActionManagerTest is Test {
         assertFalse(executable);
 
         vm.expectRevert(abi.encodeWithSelector(IActionManager.AlreadyLocked.selector));
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         target.lockAllActions();
         vm.pauseGasMetering();
 
@@ -250,8 +234,6 @@ contract ActionManagerTest is Test {
 
     /// @notice unlock all Actions flow
     function test_unlockAllActions_happyPath() public {
-        vm.pauseGasMetering();
-
         vm.startPrank(owner.addr);
 
         target.addAction(action);
@@ -267,7 +249,7 @@ contract ActionManagerTest is Test {
         vm.expectEmit();
         emit IActionManager.ActionsGloballyUnlocked();
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         target.unlockAllActions();
         vm.pauseGasMetering();
 
@@ -279,8 +261,6 @@ contract ActionManagerTest is Test {
 
     /// @notice can't unlock all Actions if already unlocked
     function test_unlockAllActions_alreadyUnlocked() public {
-        vm.pauseGasMetering();
-
         vm.startPrank(owner.addr);
 
         target.addAction(action);
@@ -289,7 +269,7 @@ contract ActionManagerTest is Test {
         assertTrue(executable);
 
         vm.expectRevert(abi.encodeWithSelector(IActionManager.AlreadyUnlocked.selector));
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         target.unlockAllActions();
         vm.pauseGasMetering();
 
@@ -301,14 +281,12 @@ contract ActionManagerTest is Test {
 
     /// @notice test isGloballyLocked
     function test_isGloballyLocked() public {
-        vm.pauseGasMetering();
-
         vm.startPrank(owner.addr);
 
         target.addAction(action);
         target.lockAllActions();
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         bool globallyLocked = target.isGloballyLocked();
         vm.pauseGasMetering();
         assertTrue(globallyLocked);

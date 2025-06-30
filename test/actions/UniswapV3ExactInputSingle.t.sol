@@ -57,7 +57,7 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
     constructor() {
         string memory rpcUrl = vm.envOr("SEPOLIA_RPC_URL", string("https://ethereum-sepolia-rpc.publicnode.com"));
 
-        vm.createSelectFork(rpcUrl);
+        vm.createSelectFork(rpcUrl, 8663879); // block number June 30, 2025
 
         UniswapV3ExactInputAction swapAction = new UniswapV3ExactInputAction(
             SEPOLIA_UNIVERSAL_ROUTER, SEPOLIA_V3_FACTORY, SEPOLIA_WETH9, address(0), address(0), 0
@@ -98,14 +98,12 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
 
     /// @notice test that swapping ETH to ERC20 works as expected
     function test_uniswapV3ExactInput_ethToToken() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -114,8 +112,6 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
 
     /// @notice test that swapping ERC20 to ERC20 works as expected
     function test_uniswapV3ExactInput_tokenToToken() public {
-        vm.pauseGasMetering();
-
         vm.prank(address(user));
         IWETH9(SEPOLIA_WETH9).deposit{value: DEFAULT_AMOUNT_IN}();
 
@@ -126,7 +122,7 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -135,8 +131,6 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
 
     /// @notice test that swapping ERC20 to ETH works as expected
     function test_uniswapV3ExactInput_tokenToEth() public {
-        vm.pauseGasMetering();
-
         vm.startPrank(SEPOLIA_USDC_WHALE);
         IERC20(SEPOLIA_USDC).transfer(address(user), IERC20(SEPOLIA_USDC).balanceOf(SEPOLIA_USDC_WHALE));
         vm.stopPrank();
@@ -152,7 +146,7 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -161,8 +155,6 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
 
     /// @notice test that the user can't swap the same token
     function test_uniswapV3ExactInput_sameToken() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.tokenIn = SEPOLIA_USDC;
         DEFAULT_ACTION_ARGS.tokenOut = SEPOLIA_USDC;
 
@@ -171,15 +163,13 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that the user can't set the recipient to address(0)
     function test_uniswapV3ExactInput_recipientZero() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.recipient = address(0);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -187,15 +177,13 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that the user can't set the swap amount to 0
     function test_uniswapV3ExactInput_amountInZero() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.amountIn = 0;
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -203,15 +191,13 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that ETH to ERC20 swapping reverts if the user has insufficient ETH
     function test_uniswapV3ExactInput_insufficientEthBalance() public {
-        vm.pauseGasMetering();
-
         vm.deal(address(user), 0);
 
         buildInstruction();
@@ -219,15 +205,13 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(InsufficientBalance.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that ERC20 to ERC20 swapping reverts if the user has insufficient token balance
     function test_uniswapV3ExactInput_insufficientTokenBalance() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.tokenIn = SEPOLIA_USDC;
         DEFAULT_ACTION_ARGS.tokenOut = SEPOLIA_WETH9;
 
@@ -236,15 +220,13 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(InsufficientBalance.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that the swap reverts if the user receives less than the minimum amount out
     function test_uniswapV3ExactInput_receivedTooLittle() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.floorAmountOut = type(uint256).max;
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -252,15 +234,13 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(V3TooLittleReceived.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that the swap reverts if the UniswapV3 pool doesn't exist
     function test_uniswapV3ExactInput_nonExistentPool() public {
-        vm.pauseGasMetering();
-
         // not a valid fee tier
         DEFAULT_ACTION_ARGS.feeTier = 501;
 
@@ -269,15 +249,13 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(UniswapV3PoolDoesNotExist.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that the swap reverts if the current UniswapV3 pool price has deviated too much from the mean price
     function test_uniswapV3ExactInput_priceDeviationTooHigh() public {
-        vm.pauseGasMetering();
-
         // set the lowest possible max price deviation
         DEFAULT_ACTION_ARGS.maxPriceDeviationBPS = 1;
 
@@ -286,7 +264,7 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(V3TooLittleReceived.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }

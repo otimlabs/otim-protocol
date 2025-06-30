@@ -50,34 +50,28 @@ contract GatewayTest is InstructionTestContext {
 
     /// @notice test that safeExecuteInstruction succeeds when user is delegated
     function test_safeExecuteInstruction_happyPath() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         gateway.safeExecuteInstruction(address(user), instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that safeExecuteInstruction (with no signature) succeeds when user is delegated
     function test_safeExecuteInstruction_happyPath_noSig() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         gateway.safeExecuteInstruction(address(user), instruction, instructionSig);
 
         skip(1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         gateway.safeExecuteInstruction(address(user), instruction);
         vm.pauseGasMetering();
     }
 
     /// @notice test that safeExecuteInstruction fails when user is not delegated
     function test_safeExecuteInstruction_targetNotDelegated() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         // delegate the user to a different address
@@ -85,15 +79,13 @@ contract GatewayTest is InstructionTestContext {
 
         vm.expectRevert(abi.encodeWithSelector(IGateway.TargetNotDelegated.selector));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         gateway.safeExecuteInstruction(address(user), instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that safeExecuteInstruction (no signature) fails when user is not delegated
     function test_safeExecuteInstruction_targetNotDelegated_noSig() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         gateway.safeExecuteInstruction(address(user), instruction, instructionSig);
@@ -105,26 +97,22 @@ contract GatewayTest is InstructionTestContext {
 
         vm.expectRevert(abi.encodeWithSelector(IGateway.TargetNotDelegated.selector));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         gateway.safeExecuteInstruction(address(user), instruction);
         vm.pauseGasMetering();
     }
 
     /// @notice test that safeDeactivateInstruction succeeds when user is delegated
     function test_safeDeactivateInstruction_happyPath() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         gateway.safeDeactivateInstruction(address(user), deactivation, deactivationSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that safeDeactivateInstruction fails when user is not delegated
     function test_safeDeactivateInstruction_targetNotDelegated() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         // delegate the user to a different address
@@ -132,7 +120,7 @@ contract GatewayTest is InstructionTestContext {
 
         vm.expectRevert(abi.encodeWithSelector(IGateway.TargetNotDelegated.selector));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         gateway.safeDeactivateInstruction(address(user), deactivation, deactivationSig);
         vm.pauseGasMetering();
     }

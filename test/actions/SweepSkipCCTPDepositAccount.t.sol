@@ -106,8 +106,6 @@ contract SweepSkipCCTPDepositAccountTest is InstructionForkTestContext {
 
     /// @notice test that sweeping USDC to the CCTP relayer works as expected
     function test_sweepSkipCCTPDepositAccount_happyPath() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         uint256 feeAmount = skipGoFeeOracle.getFee(DEFAULT_ACTION_ARGS.destinationDomain);
@@ -140,7 +138,7 @@ contract SweepSkipCCTPDepositAccountTest is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -150,8 +148,6 @@ contract SweepSkipCCTPDepositAccountTest is InstructionForkTestContext {
 
     /// @notice test that sweeping USDC to the CCTP relayer works as expected even when the deposit account has more USDC than the burn limit
     function test_sweepSkipCCTPDepositAccount_overBurnLimit() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         uint256 maxBurnPerMessage = ITokenController(SEPOLIA_TOKEN_MINTER).burnLimitsPerMessage(SEPOLIA_USDC);
@@ -186,7 +182,7 @@ contract SweepSkipCCTPDepositAccountTest is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -196,8 +192,6 @@ contract SweepSkipCCTPDepositAccountTest is InstructionForkTestContext {
 
     /// @notice test that sweeping USDC to the CCTP relayer works as expected when the deposit account also has ETH balance
     function test_sweepSkipCCTPDepositAccount_withEthBalance() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         vm.startPrank(address(user));
@@ -213,7 +207,7 @@ contract SweepSkipCCTPDepositAccountTest is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -228,8 +222,6 @@ contract SweepSkipCCTPDepositAccountTest is InstructionForkTestContext {
     /// @notice test that the Instruction succeeds even if the deposit account is perminently deployed and can't be self-destructed
     /// @dev this case will never happen if the Action is used as intended, but it is technically possible for the owner to permanently deploy the deposit account
     function test_sweepSkipCCTPDepositAccount_alreadyDeployed() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         // permanently deploy the deposit account
@@ -254,7 +246,7 @@ contract SweepSkipCCTPDepositAccountTest is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -264,8 +256,6 @@ contract SweepSkipCCTPDepositAccountTest is InstructionForkTestContext {
 
     /// @notice test that the Instruction reverts when the depositor is set to the zero address
     function test_sweepSkipCCTPDepositAccount_depositorZero() public {
-        vm.pauseGasMetering();
-
         // set the depositor to the zero address
         DEFAULT_ACTION_ARGS.depositor = address(0);
 
@@ -274,15 +264,13 @@ contract SweepSkipCCTPDepositAccountTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that the Instruction reverts when the destinationMintRecipient is set to the zero address
     function test_sweepSkipCCTPDepositAccount_destinationMintRecipientZero() public {
-        vm.pauseGasMetering();
-
         // set the destinationMintRecipient to the zero address
         DEFAULT_ACTION_ARGS.destinationMintRecipient = bytes32(0);
 
@@ -291,15 +279,13 @@ contract SweepSkipCCTPDepositAccountTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that the Instruction reverts when the deposit account balance is below the threshold
     function test_sweepSkipCCTPDepositAccount_balanceUnderThreshold() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         // set the deposit account balance to below the threshold
@@ -310,15 +296,13 @@ contract SweepSkipCCTPDepositAccountTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(BalanceUnderThreshold.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that the Instruction reverts when the deposit account balance is below the Skip Go fee amount
     function test_sweepSkipCCTPDepositAccount_insufficientSkipGoFeeBalance() public {
-        vm.pauseGasMetering();
-
         // set threshold to zero to avoid the balance under threshold check
         DEFAULT_ACTION_ARGS.threshold = 0;
 
@@ -334,7 +318,7 @@ contract SweepSkipCCTPDepositAccountTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(SkipCCTPDepositAccount.InsufficientBalanceForSkipGoFee.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
