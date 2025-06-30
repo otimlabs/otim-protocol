@@ -77,6 +77,8 @@ contract ReceiverTest is InstructionTestContext {
 
     /// @notice test EOA receives a batch of ERC1155 tokens with safeBatchTransferFrom
     function test_receiveBatchERC1155() public {
+        vm.pauseGasMetering();
+
         uint256 id1 = 1;
         uint256 id2 = 2;
         uint256 id3 = 3;
@@ -107,10 +109,8 @@ contract ReceiverTest is InstructionTestContext {
         values[1] = value2;
         values[2] = value3;
 
-        vm.resetGasMetering();
         vm.prank(address(other));
         erc1155.safeBatchTransferFrom(address(other), address(user), ids, values, "");
-        vm.pauseGasMetering();
 
         assertEq(erc1155.balanceOf(address(other), id1), 0);
         assertEq(erc1155.balanceOf(address(other), id2), 0);
