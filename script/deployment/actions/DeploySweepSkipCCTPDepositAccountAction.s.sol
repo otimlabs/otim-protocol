@@ -32,7 +32,7 @@ contract DeploySweepSkipCCTPDepositAccountAction is Script {
 
         address feeTokenRegistryAddress = vm.envAddress("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS");
         address treasuryAddress = vm.envAddress("EXPECTED_TREASURY_ADDRESS");
-        uint256 gasConstant = vm.envUint("SWEEP_DEPOSIT_ACCOUNT_ACTION_GAS_CONSTANT");
+        uint256 gasConstant = vm.envUint("SWEEP_SKIP_CCTP_DEPOSIT_ACCOUNT_ACTION_GAS_CONSTANT");
 
         vm.startBroadcast();
 
