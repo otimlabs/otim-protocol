@@ -78,8 +78,6 @@ contract SweepDepositAccountERC20Test is InstructionForkTestContext {
 
     /// @notice test typical sweep ERC20 flow
     function test_sweepDepositAccountERC20_happyPath() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         mockERC20.mint(DEFAULT_DEPOSIT_ACCOUNT, DEFAULT_THRESHOLD + 1);
@@ -90,7 +88,7 @@ contract SweepDepositAccountERC20Test is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -100,8 +98,6 @@ contract SweepDepositAccountERC20Test is InstructionForkTestContext {
 
     /// @notice test typical sweep ERC20 flow with recipient != user
     function test_sweepDepositAccountERC20_otherRecipient() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.recipient = recipient.addr;
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -115,7 +111,7 @@ contract SweepDepositAccountERC20Test is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -126,8 +122,6 @@ contract SweepDepositAccountERC20Test is InstructionForkTestContext {
 
     /// @notice test typical sweep ERC20 flow when deposit account also has an ETH balance
     function test_sweepDepositAccountERC20_withEthBalance() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         mockERC20.mint(DEFAULT_DEPOSIT_ACCOUNT, DEFAULT_THRESHOLD + 1);
@@ -140,7 +134,7 @@ contract SweepDepositAccountERC20Test is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -151,8 +145,6 @@ contract SweepDepositAccountERC20Test is InstructionForkTestContext {
 
     /// @notice test Action reverts when depositor is the zero address
     function test_sweepDepositAccountERC20_depositorZero() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.depositor = address(0);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -160,15 +152,13 @@ contract SweepDepositAccountERC20Test is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test Action reverts when recipient is the zero address
     function test_sweepDepositAccountERC20_recipientZero() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.recipient = address(0);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -176,15 +166,13 @@ contract SweepDepositAccountERC20Test is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test Action reverts when the deposit account has a balance below the threshold
     function test_sweepDepositAccountERC20_balanceUnderThreshold() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         mockERC20.mint(DEFAULT_DEPOSIT_ACCOUNT, DEFAULT_THRESHOLD - 1);
@@ -192,15 +180,13 @@ contract SweepDepositAccountERC20Test is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(BalanceUnderThreshold.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test Action still works if the deposit account is somehow already deployed
     function test_sweepDepositAccountERC20_alreadyDeployed() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         vm.prank(address(user));
@@ -216,7 +202,7 @@ contract SweepDepositAccountERC20Test is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 

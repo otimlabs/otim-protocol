@@ -86,8 +86,6 @@ contract OtimFeeTest is InstructionTestContext {
 
     /// @notice test that no fee is charged when fee.value = 0
     function test_chargeFee_noFee() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set fee.executionFee to 0
         DEFAULT_ACTION_ARGS.fee.executionFee = 0;
 
@@ -96,7 +94,7 @@ contract OtimFeeTest is InstructionTestContext {
         assertEq(address(user).balance, USER_START_BALANCE);
         assertEq(address(treasury).balance, 0);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -109,14 +107,12 @@ contract OtimFeeTest is InstructionTestContext {
 
     /// @notice test that fee routing with ETH works as expected
     function test_chargeFee_ether() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         assertEq(address(user).balance, USER_START_BALANCE);
         assertEq(address(treasury).balance, 0);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -129,8 +125,6 @@ contract OtimFeeTest is InstructionTestContext {
 
     /// @notice test that fee routing with ERC20 token works as expected
     function test_chargeFee_erc20() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set fee.token to USDC
         DEFAULT_ACTION_ARGS.fee.token = address(USDC);
 
@@ -141,7 +135,7 @@ contract OtimFeeTest is InstructionTestContext {
         assertEq(USDC.balanceOf(address(user)), USER_START_BALANCE);
         assertEq(USDC.balanceOf(address(treasury)), 0);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -157,8 +151,6 @@ contract OtimFeeTest is InstructionTestContext {
 
     /// @notice test that block.basefee can be anything when fee.maxBaseFeePerGas = 0
     function test_chargeFee_ether_maxBaseFeePerGasZero(uint256 baseFeePerGas) public {
-        vm.pauseGasMetering();
-
         // assume block.basefee is less than 1 ether
         vm.assume(baseFeePerGas < 1 ether);
 
@@ -177,7 +169,7 @@ contract OtimFeeTest is InstructionTestContext {
         assertEq(address(user).balance, USER_START_BALANCE);
         assertEq(address(treasury).balance, 0);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -190,8 +182,6 @@ contract OtimFeeTest is InstructionTestContext {
 
     /// @notice test that execution reverts with block.basefee > fee.maxBaseFeePerGas
     function test_chargeFee_baseFeePerGasTooHigh() public {
-        vm.pauseGasMetering();
-
         vm.fee(DEFAULT_MAX_BASE_PER_GAS + 1);
 
         buildInstruction();
@@ -199,15 +189,13 @@ contract OtimFeeTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(IOtimFee.BaseFeePerGasTooHigh.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts with priorityFee > fee.maxPriorityFeePerGas
     function test_chargeFee_priorityFeePerGasTooHigh() public {
-        vm.pauseGasMetering();
-
         vm.fee(DEFAULT_MAX_BASE_PER_GAS);
         vm.txGasPrice(DEFAULT_MAX_BASE_PER_GAS + DEFAULT_MAX_PRIORITY_PER_GAS + 1);
 
@@ -216,15 +204,13 @@ contract OtimFeeTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(IOtimFee.PriorityFeePerGasTooHigh.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts with insufficient ETH fee balance
     function test_chargeFee_insufficientFeeBalance_ether() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         // only deal the transfer value + executionFee (not enough to cover gas payment)
@@ -233,15 +219,13 @@ contract OtimFeeTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(IOtimFee.InsufficientFeeBalance.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts with insufficient ERC20 fee balance
     function test_chargeFee_insufficientFeeBalance_erc20() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set fee.token to USDC
         DEFAULT_ACTION_ARGS.fee.token = address(USDC);
 
@@ -255,15 +239,13 @@ contract OtimFeeTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(IOtimFee.InsufficientFeeBalance.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts if the fee token is not registered
     function test_chargeFee_tokenNotRegistered() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set fee.token to address(1)
         DEFAULT_ACTION_ARGS.fee.token = address(1);
 
@@ -272,7 +254,7 @@ contract OtimFeeTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(IFeeTokenRegistry.FeeTokenNotRegistered.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }

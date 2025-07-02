@@ -91,11 +91,10 @@ contract EstimateDeactivateInstructionGasConstant is InstructionForkTestContext 
         buildInstruction(salt, 1, address(deactivateAction), abi.encode(arguments));
 
         // execute and measure gas used
-        vm.resetGasMetering();
+
         uint256 gasUsed = gasleft();
         gateway.safeExecuteInstruction(address(user), instruction, instructionSig);
         gasUsed -= gasleft();
-        vm.pauseGasMetering();
 
         uint256 feeCollected = IERC20(SEPOLIA_WETH9).balanceOf(address(treasury));
         uint256 executionCost = gasUsed * tx.gasprice;

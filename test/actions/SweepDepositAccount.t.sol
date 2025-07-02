@@ -72,8 +72,6 @@ contract SweepDepositAccountTest is InstructionForkTestContext {
 
     /// @notice test typical sweep flow
     function test_sweepDepositAccount_happyPath() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         vm.deal(DEFAULT_DEPOSIT_ACCOUNT, DEFAULT_THRESHOLD + 1);
@@ -84,7 +82,7 @@ contract SweepDepositAccountTest is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -94,8 +92,6 @@ contract SweepDepositAccountTest is InstructionForkTestContext {
 
     /// @notice test typical sweep flow with recipient != user
     function test_sweepDepositAccount_otherRecipient() public {
-        vm.pauseGasMetering();
-
         // set a recipient other than the user/owner
         DEFAULT_ACTION_ARGS.recipient = payable(recipient.addr);
 
@@ -110,7 +106,7 @@ contract SweepDepositAccountTest is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -120,8 +116,6 @@ contract SweepDepositAccountTest is InstructionForkTestContext {
 
     /// @notice test Action reverts if the depositor is the zero address
     function test_sweepDepositAccount_depositorZero() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.depositor = address(0);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -129,15 +123,13 @@ contract SweepDepositAccountTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test Action reverts if the recipient is the zero address
     function test_sweepDepositAccount_recipientZero() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.recipient = payable(0);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -145,15 +137,13 @@ contract SweepDepositAccountTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test Action reverts if the deposit account balance is below the threshold
     function test_sweepDepositAccount_balanceUnderThreshold() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         vm.deal(DEFAULT_DEPOSIT_ACCOUNT, DEFAULT_THRESHOLD - 1);
@@ -161,15 +151,13 @@ contract SweepDepositAccountTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(BalanceUnderThreshold.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test Action still succeeds if the deposit account is somehow already deployed
     function test_sweepDepositAccount_alreadyDeployed() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         vm.prank(address(user));
@@ -185,7 +173,7 @@ contract SweepDepositAccountTest is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -195,8 +183,6 @@ contract SweepDepositAccountTest is InstructionForkTestContext {
 
     /// @notice test Action succeeds even with a malicious recipient
     function test_sweepDepositAccount_revertRecipient() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.recipient = payable(address(new RevertTarget()));
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -209,7 +195,7 @@ contract SweepDepositAccountTest is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -219,8 +205,6 @@ contract SweepDepositAccountTest is InstructionForkTestContext {
 
     /// @notice test Action succeeds even with a malicious recipient
     function test_sweepDepositAccount_drainGasRecipient() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.recipient = payable(address(new DrainGasTarget()));
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -233,7 +217,7 @@ contract SweepDepositAccountTest is InstructionForkTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 

@@ -83,8 +83,6 @@ contract TransferERC20Test is InstructionTestContext {
 
     /// @notice typical Transfer flow with ERC20 token
     function test_transferERC20_happyPath() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         USDC.mint(address(user), USER_START_BALANCE);
@@ -94,7 +92,7 @@ contract TransferERC20Test is InstructionTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -104,8 +102,6 @@ contract TransferERC20Test is InstructionTestContext {
 
     /// @notice test that validation fails with token == address(0)
     function test_transferERC20_tokenZero() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set token to address(0)
         DEFAULT_ACTION_ARGS.token = address(0);
 
@@ -114,15 +110,13 @@ contract TransferERC20Test is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that validation fails with target == address(0)
     function test_transferERC20_targetZero() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set target to address(0)
         DEFAULT_ACTION_ARGS.target = address(0);
 
@@ -131,15 +125,13 @@ contract TransferERC20Test is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that validation fails with zero value
     function test_transferERC20_valueZero() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set value to 0
         DEFAULT_ACTION_ARGS.value = 0;
 
@@ -148,15 +140,13 @@ contract TransferERC20Test is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts with user insufficient balance
     function test_transferERC20_insufficientBalance() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         USDC.mint(target.addr, TARGET_START_BALANCE);
@@ -164,15 +154,13 @@ contract TransferERC20Test is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InsufficientBalance.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that a failed token transfer reverts
     function test_transferERC20_tokenTransferRevert() public {
-        vm.pauseGasMetering();
-
         BadERC20Mock badMockToken = new BadERC20Mock();
 
         // keep defaults but set token to badMockToken
@@ -185,7 +173,7 @@ contract TransferERC20Test is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(SafeERC20.SafeERC20FailedOperation.selector, address(badMockToken));
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }

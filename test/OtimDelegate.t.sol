@@ -72,11 +72,9 @@ contract OtimDelegateTest is InstructionTestContext {
 
     /// @notice test that isValidSignature returns the correct selector for a valid signature
     function test_isValidSignature_happyPath() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         bytes4 selector = user.isValidSignature(
             instructionHash, abi.encodePacked(instructionSig.r, instructionSig.s, instructionSig.v)
         );
@@ -87,11 +85,9 @@ contract OtimDelegateTest is InstructionTestContext {
 
     /// @notice test that isValidSignature returns bytes4(0) for an invalid signature
     function test_isValidSignature_invalid() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         bytes4 selector = user.isValidSignature(
             deactivationHash, abi.encodePacked(instructionSig.r, instructionSig.s, instructionSig.v)
         );
@@ -102,8 +98,6 @@ contract OtimDelegateTest is InstructionTestContext {
 
     /// @notice typical Instruciton execution flow
     function test_executeInstruction_happyPath() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         executionState = instructionStorage.getExecutionState(address(user), instructionId);
@@ -117,7 +111,7 @@ contract OtimDelegateTest is InstructionTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -135,9 +129,7 @@ contract OtimDelegateTest is InstructionTestContext {
             vm.expectEmit();
             emit IOtimDelegate.InstructionExecuted(instructionId, i + 1);
 
-            vm.resumeGasMetering();
             user.executeInstruction(instruction, instructionSig);
-            vm.pauseGasMetering();
 
             executionState = instructionStorage.getExecutionState(address(user), instructionId);
             assertFalse(executionState.deactivated);
@@ -153,9 +145,7 @@ contract OtimDelegateTest is InstructionTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, instruction.maxExecutions);
 
-        vm.resumeGasMetering();
         user.executeInstruction(instruction, instructionSig);
-        vm.pauseGasMetering();
 
         executionState = instructionStorage.getExecutionState(address(user), instructionId);
         assertTrue(executionState.deactivated);
@@ -172,7 +162,7 @@ contract OtimDelegateTest is InstructionTestContext {
         uint256 iterations = 100;
 
         for (uint256 i = 0; i < iterations; i++) {
-            vm.resumeGasMetering();
+            vm.resetGasMetering();
             user.executeInstruction(instruction, instructionSig);
             vm.pauseGasMetering();
 
@@ -187,8 +177,6 @@ contract OtimDelegateTest is InstructionTestContext {
 
     /// @notice can't replay an Instruction execution on a different chain
     function test_executeInstruction_wrongChainId() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         vm.chainId(474747);
@@ -203,15 +191,13 @@ contract OtimDelegateTest is InstructionTestContext {
 
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.InvalidSignature.selector, instructionId));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice can't execute a deactivated Instruction
     function test_executeInstruction_instructionAlreadyDeactivated() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         user.executeInstruction(instruction, instructionSig);
@@ -219,45 +205,39 @@ contract OtimDelegateTest is InstructionTestContext {
 
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.InstructionAlreadyDeactivated.selector, instructionId));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice can't execute an Instruction with a non-existent Action
     function test_executeInstruction_actionDoesNotExist() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         actionManager.removeAction(DEFAULT_ACTION);
 
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionNotExecutable.selector, instructionId));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice can't activate or execute Instructions when ActionManager is locked
     function test_executeInstruction_actionLocked() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         actionManager.lockAllActions();
 
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionNotExecutable.selector, instructionId));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice can't execute an Instruction with invalid signature
     function test_executeInstruction_invalidSignature() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         InstructionLib.Instruction memory badInstruction =
@@ -269,45 +249,39 @@ contract OtimDelegateTest is InstructionTestContext {
 
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.InvalidSignature.selector, instructionId));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, badInstructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice can't execute an Instruction twice in the same block (interval=0)
     function test_executeInstruction_sameBlock() public {
-        vm.pauseGasMetering();
-
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, DEFAULT_ARGS);
 
         user.executeInstruction(instruction, instructionSig);
 
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ExecutionSameBlock.selector, instructionId));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice can't execute an Instruction if Action reverts
     function test_executeInstruction_actionRevert() public {
-        vm.pauseGasMetering();
-
         HelloWorldAction.HelloWorld memory bad_args = HelloWorldAction.HelloWorld("Hello World!", 48);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(bad_args));
 
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, bytes("")));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test the Instruction gets deactivated after maxExecutions is reached
     function test_executeInstruction_maxExecutionsReached() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         for (uint256 i; i < instruction.maxExecutions; i++) {
@@ -317,15 +291,13 @@ contract OtimDelegateTest is InstructionTestContext {
 
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.InstructionAlreadyDeactivated.selector, instructionId));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that you can activate the same exact Instruction multiple times as long as you bump the salt
     function test_executeInstruction_bumpSalt() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         user.executeInstruction(instruction, instructionSig);
@@ -340,15 +312,13 @@ contract OtimDelegateTest is InstructionTestContext {
 
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice typical Instruction deactivation flow
     function test_deactivateInstruction_happyPath() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         uint256 delay = 1000;
@@ -365,7 +335,7 @@ contract OtimDelegateTest is InstructionTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionDeactivated(instructionId);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.deactivateInstruction(deactivation, deactivationSig);
         vm.pauseGasMetering();
 
@@ -377,8 +347,6 @@ contract OtimDelegateTest is InstructionTestContext {
 
     /// @notice can't deactivate an Instruction with invalid signature
     function test_deactivateInstruction_invalidSignature() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         user.executeInstruction(instruction, instructionSig);
@@ -396,15 +364,13 @@ contract OtimDelegateTest is InstructionTestContext {
 
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.InvalidSignature.selector, instructionId));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.deactivateInstruction(deactivation, badSignature);
         vm.pauseGasMetering();
     }
 
     /// @notice can't replay Instruction deactivation on a different chain
     function test_deactivateInstruction_wrongChainId() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         vm.chainId(474747);
@@ -415,15 +381,13 @@ contract OtimDelegateTest is InstructionTestContext {
 
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.InvalidSignature.selector, instructionId));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.deactivateInstruction(deactivation, deactivationSig);
         vm.pauseGasMetering();
     }
 
     /// @notice can't deactivate an already-deactivated Instruction
     function test_deactivateInstruction_alreadyDeactivated() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         uint256 delay = 1000;
@@ -444,7 +408,7 @@ contract OtimDelegateTest is InstructionTestContext {
 
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.InstructionAlreadyDeactivated.selector, instructionId));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.deactivateInstruction(deactivation, deactivationSig);
         vm.pauseGasMetering();
     }

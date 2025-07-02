@@ -74,8 +74,6 @@ contract TransferTest is InstructionTestContext {
 
     /// @notice typical Transfer flow
     function test_transfer_happyPath() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         assertEq(address(user).balance, USER_START_BALANCE);
@@ -83,7 +81,7 @@ contract TransferTest is InstructionTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -93,8 +91,6 @@ contract TransferTest is InstructionTestContext {
 
     /// @notice test that validation fails with target == address(0)
     function test_transfer_targetZero() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set target to address(0)
         DEFAULT_ACTION_ARGS.target = payable(address(0));
 
@@ -103,15 +99,13 @@ contract TransferTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that validation fails with zero value
     function test_transfer_valueZero() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set value to 0
         DEFAULT_ACTION_ARGS.value = 0;
 
@@ -120,15 +114,13 @@ contract TransferTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts with user insufficient balance
     function test_transfer_insufficientBalance() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         vm.deal(address(user), 0);
@@ -136,15 +128,13 @@ contract TransferTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InsufficientBalance.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that the Instruction is automatically deactivated when the action fails from the target reverting
     function test_transfer_targetRevert() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set target to badTarget
         DEFAULT_ACTION_ARGS.target = payable(new RevertTarget());
 
@@ -153,7 +143,7 @@ contract TransferTest is InstructionTestContext {
         vm.expectEmit();
         emit ITransferAction.TransferActionFailed(DEFAULT_ACTION_ARGS.target);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -171,8 +161,6 @@ contract TransferTest is InstructionTestContext {
 
     /// @notice test that the Instruction is automatically deactivated when the action fails from the target draining gas
     function test_transfer_targetDrainGas() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set target to DrainGasTarget
         DEFAULT_ACTION_ARGS.target = payable(new DrainGasTarget());
 
@@ -181,7 +169,7 @@ contract TransferTest is InstructionTestContext {
         vm.expectEmit();
         emit ITransferAction.TransferActionFailed(DEFAULT_ACTION_ARGS.target);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 

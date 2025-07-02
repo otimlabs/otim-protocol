@@ -69,8 +69,6 @@ contract DeactivateInstruction is InstructionTestContext {
 
     /// @notice typical DeactivateInstruction flow
     function test_deactivateInstruction_happyPath() public {
-        vm.pauseGasMetering();
-
         // execute transfer instruction
 
         buildInstruction(DEFAULT_SALT, 0, address(transfer), abi.encode(DEFAULT_TRANSFER_ARGS));
@@ -90,7 +88,7 @@ contract DeactivateInstruction is InstructionTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -103,8 +101,6 @@ contract DeactivateInstruction is InstructionTestContext {
 
     /// @notice typical DeactivateInstruction flow before activation
     function test_deactivateInstruction_happyPath_beforeActivation() public {
-        vm.pauseGasMetering();
-
         // execute deactivate instruction
 
         buildInstruction();
@@ -115,7 +111,7 @@ contract DeactivateInstruction is InstructionTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -129,36 +125,30 @@ contract DeactivateInstruction is InstructionTestContext {
 
     /// @notice test that execution fails with maxExecutions > 1
     function test_deactivateInstruction_maxExecutionsTooHigh() public {
-        vm.pauseGasMetering();
-
         buildInstruction(DEFAULT_SALT, 2, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution fails with maxExecutions = 0
     function test_deactivateInstruction_maxExecutionsZero() public {
-        vm.pauseGasMetering();
-
         buildInstruction(DEFAULT_SALT, 0, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution fails with instructionId = bytes32(0)
     function test_deactivateInstruction_instructionIdZero() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.instructionId = bytes32(0);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -166,15 +156,13 @@ contract DeactivateInstruction is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution fails if the instruction is already deactivated
     function test_deactivateInstruction_alreadyDeactivated() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         vm.expectEmit();
@@ -192,7 +180,7 @@ contract DeactivateInstruction is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InstructionAlreadyDeactivated.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }

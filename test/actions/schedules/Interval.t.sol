@@ -70,8 +70,6 @@ contract IntervalTest is InstructionTestContext {
 
     /// @notice test that execution fails before startAt timestamp
     function test_checkStart_tooEarly() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         vm.warp(DEFAULT_START_AT - 1);
@@ -79,15 +77,13 @@ contract IntervalTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(IInterval.ExecutionTooEarly.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution fails after startBy timestamp
     function test_checkStart_tooLate() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         vm.warp(DEFAULT_START_BY + 1);
@@ -95,15 +91,13 @@ contract IntervalTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(IInterval.ExecutionTooLate.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution fails before interval
     function test_checkInterval_tooEarly() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         user.executeInstruction(instruction, instructionSig);
@@ -113,15 +107,13 @@ contract IntervalTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(IInterval.ExecutionTooEarly.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution fails after timeout
     function test_checkInterval_tooLate() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         user.executeInstruction(instruction, instructionSig);
@@ -131,15 +123,13 @@ contract IntervalTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(IInterval.ExecutionTooLate.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that Instruction startBy is not enforced when startBy = 0
     function test_checkStart_startByZero(uint64 timestamp) public {
-        vm.pauseGasMetering();
-
         vm.assume(timestamp > DEFAULT_START_AT && timestamp < type(uint64).max - DEFAULT_INTERVAL - 1);
         vm.warp(timestamp);
 
@@ -148,7 +138,7 @@ contract IntervalTest is InstructionTestContext {
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -170,8 +160,6 @@ contract IntervalTest is InstructionTestContext {
 
     /// @notice test that Instruction timeout is not enforced when timeout = 0
     function test_checkStart_timeoutZero(uint64 skipSeconds) public {
-        vm.pauseGasMetering();
-
         vm.assume(skipSeconds > 0 && skipSeconds < type(uint64).max - DEFAULT_INTERVAL);
 
         // keep defaults but set timeout to 0
@@ -179,7 +167,7 @@ contract IntervalTest is InstructionTestContext {
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 

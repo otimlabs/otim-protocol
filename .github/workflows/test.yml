@@ -31,7 +31,4 @@ jobs:
           forge build --sizes
 
       - name: Check gas snapshot
-        run: forge snapshot --check --tolerance 1
-
-      - name: Run tests
-        run: forge test -vvv
+        run: forge snapshot --check --tolerance 1 -vvv

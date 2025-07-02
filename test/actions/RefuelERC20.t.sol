@@ -62,8 +62,6 @@ contract RefuelERC20Test is InstructionTestContext {
 
     /// @notice typical RefuelERC20 flow
     function test_refuelERC20_happyPath() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         USDC.mint(address(user), USER_START_BALANCE);
@@ -75,7 +73,7 @@ contract RefuelERC20Test is InstructionTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -85,8 +83,6 @@ contract RefuelERC20Test is InstructionTestContext {
 
     /// @notice typical RefuelERC20 flow with threshold == 0
     function test_refuelERC20_happyPath_thresholdZero() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set threshold to 0
         DEFAULT_ACTION_ARGS.threshold = 0;
 
@@ -100,7 +96,7 @@ contract RefuelERC20Test is InstructionTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -110,8 +106,6 @@ contract RefuelERC20Test is InstructionTestContext {
 
     /// @notice test validation reverts with token == address(0)
     function test_refuelERC20_tokenZero() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set token to address(0)
         DEFAULT_ACTION_ARGS.token = address(0);
 
@@ -120,15 +114,13 @@ contract RefuelERC20Test is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test validation reverts with target == address(0)
     function test_refuelERC20_targetZero() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set target to address(0)
         DEFAULT_ACTION_ARGS.target = address(0);
 
@@ -137,15 +129,13 @@ contract RefuelERC20Test is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that validation fails with threshold above endBalance
     function test_refuelERC20_thresholdAboveEndBalance() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set threshold to above endBalance
         DEFAULT_ACTION_ARGS.threshold = DEFAULT_END_BALANCE + 1;
 
@@ -154,15 +144,13 @@ contract RefuelERC20Test is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that validation fails with threshold == endBalance
     function test_refuelERC20_thresholdEqualsEndBalance() public {
-        vm.pauseGasMetering();
-
         // keep defaults but set threshold to endBalance
         DEFAULT_ACTION_ARGS.threshold = DEFAULT_END_BALANCE;
 
@@ -171,15 +159,13 @@ contract RefuelERC20Test is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts with target ERC20 token balance over threshold
     function test_refuelERC20_balanceOverThreshold() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         USDC.mint(address(user), USER_START_BALANCE);
@@ -188,15 +174,13 @@ contract RefuelERC20Test is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(BalanceOverThreshold.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts with ERC20 token insufficient balance
     function test_refuelERC20_insufficientBalance() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         USDC.mint(target.addr, TARGET_START_BALANCE);
@@ -204,15 +188,13 @@ contract RefuelERC20Test is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InsufficientBalance.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that fee routing reverts with invalid fee token
     function test_refuelERC20_tokenTransferRevert() public {
-        vm.pauseGasMetering();
-
         BadERC20Mock badMockToken = new BadERC20Mock();
 
         // keep defaults but set token to badMockToken
@@ -225,7 +207,7 @@ contract RefuelERC20Test is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(SafeERC20.SafeERC20FailedOperation.selector, address(badMockToken));
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
