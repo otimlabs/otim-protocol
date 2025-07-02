@@ -1,6 +1,9 @@
 name: Sync Contract Artifacts
 
 on:
+  push:
+    branches:
+      - ahmad/readd_offchain_artifact_match_sync
   workflow_call:
     inputs:
       protocol_ref:
@@ -80,7 +83,8 @@ jobs:
       - name: Compare and sync artifacts
         id: compare-artifacts
         run: |
-          if rust-script .github/scripts/directory-comparison.rs "./out" "./offchain/crates/contracts/artifacts" "build-info" >/dev/null 2>&1; then
+          export IGNORE_PATTERN="build-info"
+          if rust-script .github/scripts/directory-comparison.rs "./out" "./offchain/crates/contracts/artifacts" >/dev/null 2>&1; then
             echo "artifacts_match=true" >> $GITHUB_OUTPUT
             echo "✅ Artifacts match"
           else
