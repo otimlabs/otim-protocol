@@ -4,8 +4,8 @@ pragma solidity ^0.8.26;
 import {Script, console2} from "forge-std/src/Script.sol";
 import {VmSafe} from "forge-std/src/Vm.sol";
 
-import {IDeactivateInstructionAction} from "../../src/actions/interfaces/IDeactivateInstructionAction.sol";
-import {DeactivateInstructionAction} from "../../src/actions/DeactivateInstructionAction.sol";
+import {IDeactivateInstructionAction} from "../../../src/actions/interfaces/IDeactivateInstructionAction.sol";
+import {DeactivateInstructionAction} from "../../../src/actions/DeactivateInstructionAction.sol";
 
 contract DecodeDeactivateInstruction is Script {
     // command to decode DeactivateInstruction arguments (will be prompted for encoded arguments):

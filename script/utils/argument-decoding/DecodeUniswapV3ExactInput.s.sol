@@ -4,8 +4,8 @@ pragma solidity ^0.8.26;
 import {Script, console2} from "forge-std/src/Script.sol";
 import {VmSafe} from "forge-std/src/Vm.sol";
 
-import {IUniswapV3ExactInputAction} from "../../src/actions/interfaces/IUniswapV3ExactInputAction.sol";
-import {UniswapV3ExactInputAction} from "../../src/actions/UniswapV3ExactInputAction.sol";
+import {IUniswapV3ExactInputAction} from "../../../src/actions/interfaces/IUniswapV3ExactInputAction.sol";
+import {UniswapV3ExactInputAction} from "../../../src/actions/UniswapV3ExactInputAction.sol";
 
 contract DecodeUniswapV3ExactInput is Script {
     // command to decode UniswapV3ExactInput arguments (will be prompted for encoded arguments):

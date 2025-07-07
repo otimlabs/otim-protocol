@@ -4,8 +4,8 @@ pragma solidity ^0.8.26;
 import {Script, console2} from "forge-std/src/Script.sol";
 import {VmSafe} from "forge-std/src/Vm.sol";
 
-import {ISweepDepositAccountERC20Action} from "../../src/actions/interfaces/ISweepDepositAccountERC20Action.sol";
-import {SweepDepositAccountERC20Action} from "../../src/actions/SweepDepositAccountERC20Action.sol";
+import {ISweepDepositAccountERC20Action} from "../../../src/actions/interfaces/ISweepDepositAccountERC20Action.sol";
+import {SweepDepositAccountERC20Action} from "../../../src/actions/SweepDepositAccountERC20Action.sol";
 
 contract DecodeSweepDepositAccountERC20 is Script {
     // command to decode SweepDepositAccountERC20 arguments (will be prompted for encoded arguments):

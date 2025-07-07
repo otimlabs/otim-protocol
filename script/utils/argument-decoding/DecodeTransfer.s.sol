@@ -4,23 +4,23 @@ pragma solidity ^0.8.26;
 import {Script, console2} from "forge-std/src/Script.sol";
 import {VmSafe} from "forge-std/src/Vm.sol";
 
-import {ITransferERC20Action} from "../../src/actions/interfaces/ITransferERC20Action.sol";
-import {TransferERC20Action} from "../../src/actions/TransferERC20Action.sol";
+import {ITransferAction} from "../../../src/actions/interfaces/ITransferAction.sol";
+import {TransferAction} from "../../../src/actions/TransferAction.sol";
 
-contract DecodeTransferERC20 is Script {
-    // command to decode TransferERC20 arguments (will be prompted for encoded arguments):
+contract DecodeTransfer is Script {
+    // command to decode Transfer arguments (will be prompted for encoded arguments):
     //
-    // forge script DecodeTransferERC20
+    // forge script DecodeTransfer
 
     function run() public {
-        bytes memory encoded = vm.parseBytes(vm.prompt("Enter encoded TransferERC20 arguments"));
+        bytes memory encoded = vm.parseBytes(vm.prompt("Enter encoded Transfer arguments"));
 
-        ITransferERC20Action.TransferERC20 memory decoded = abi.decode(encoded, (ITransferERC20Action.TransferERC20));
+        ITransferAction.Transfer memory decoded = abi.decode(encoded, (ITransferAction.Transfer));
 
-        console2.log("TransferERC20 Arguments:");
-        console2.log("\t token:", decoded.token);
+        console2.log("Transfer Arguments:");
         console2.log("\t target:", decoded.target);
         console2.log("\t value:", decoded.value);
+        console2.log("\t gasLimit:", decoded.gasLimit);
         console2.log("");
         console2.log("Schedule Arguments:");
         console2.log("\t schedule.startAt:", decoded.schedule.startAt);

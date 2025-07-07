@@ -4,24 +4,24 @@ pragma solidity ^0.8.26;
 import {Script, console2} from "forge-std/src/Script.sol";
 import {VmSafe} from "forge-std/src/Vm.sol";
 
-import {IRefuelAction} from "../../src/actions/interfaces/IRefuelAction.sol";
-import {RefuelAction} from "../../src/actions/RefuelAction.sol";
+import {IRefuelERC20Action} from "../../../src/actions/interfaces/IRefuelERC20Action.sol";
+import {RefuelERC20Action} from "../../../src/actions/RefuelERC20Action.sol";
 
-contract DecodeRefuel is Script {
-    // command to decode Refuel arguments (will be prompted for encoded arguments):
+contract DecodeRefuelERC20 is Script {
+    // command to decode RefuelERC20 arguments (will be prompted for encoded arguments):
     //
-    // forge script DecodeRefuel
+    // forge script DecodeRefuelERC20
 
     function run() public {
-        bytes memory encoded = vm.parseBytes(vm.prompt("Enter encoded Refuel arguments"));
+        bytes memory encoded = vm.parseBytes(vm.prompt("Enter encoded RefuelERC20 arguments"));
 
-        IRefuelAction.Refuel memory decoded = abi.decode(encoded, (IRefuelAction.Refuel));
+        IRefuelERC20Action.RefuelERC20 memory decoded = abi.decode(encoded, (IRefuelERC20Action.RefuelERC20));
 
-        console2.log("Refuel Arguments:");
+        console2.log("RefuelERC20 Arguments:");
+        console2.log("\t token:", decoded.token);
         console2.log("\t target:", decoded.target);
         console2.log("\t threshold:", decoded.threshold);
         console2.log("\t endBalance:", decoded.endBalance);
-        console2.log("\t gasLimit:", decoded.gasLimit);
         console2.log("");
         console2.log("Fee Arguments:");
         console2.log("\t fee.token:", decoded.fee.token);
