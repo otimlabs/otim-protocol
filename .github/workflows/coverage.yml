@@ -38,7 +38,7 @@ jobs:
           echo 'COVERAGE<<EOF'
           echo '| File | % Lines | % Statements | % Branches | % Funcs |'
           echo '|------|---------|--------------|------------|---------|'
-          forge coverage --no-match-contract Estimate --report summary | grep '^|' | grep -v 'test/' | grep -v '^|-' | grep -v 'File'
+          forge coverage --no-match-contract Estimate --no-match-coverage script --report summary | grep '^|' | grep -v 'test/' | grep -v '^|-' | grep -v 'File'
           echo EOF
           } >> "$GITHUB_OUTPUT"
 
