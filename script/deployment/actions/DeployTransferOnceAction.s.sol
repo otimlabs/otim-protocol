@@ -67,7 +67,7 @@ contract DeployTransferOnceAction is Script {
     function checkExpectedAddress(address feeTokenRegistry, address treasuryAddress, uint256 gasConstant) public view {
         /// @dev before deploying for the first time, generate this expected address by running this script in dry-run mode (see above).
         /// once it has been deployed for the first time, that deployed address should be used as the expected address from then on.
-        address expectedAddress = vm.envAddress("EXPECTED_TRANSFER_ACTION_ADDRESS");
+        address expectedAddress = vm.envAddress("EXPECTED_TRANSFER_ONCE_ACTION_ADDRESS");
 
         // calculate the expected address using the current init code
         address calculatedAddress = vm.computeCreate2Address(

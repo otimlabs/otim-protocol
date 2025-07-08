@@ -27,7 +27,7 @@ interface ITransferOnceAction is IOtimFee {
         Fee fee;
     }
 
-    /// @notice emitted when the Transfer fails
+    /// @notice emitted when the TransferOnce fails
     event TransferOnceActionFailed(address indexed target);
 
     /// @notice calculates the EIP-712 hash of the Transfer struct

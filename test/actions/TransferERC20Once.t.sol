@@ -81,6 +81,30 @@ contract TransferERC20OnceTest is InstructionTestContext {
         assertEq(USDC.balanceOf(target.addr), DEFAULT_VALUE);
     }
 
+    /// @notice test that execution fails with maxExecutions > 1
+    function test_transferERC20Once_maxExecutionsTooHigh() public {
+        buildInstruction(DEFAULT_SALT, 2, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
+
+        bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
+        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
+
+        vm.resetGasMetering();
+        user.executeInstruction(instruction, instructionSig);
+        vm.pauseGasMetering();
+    }
+
+    /// @notice test that execution fails with maxExecutions = 0
+    function test_transferERC20Once_maxExecutionsZero() public {
+        buildInstruction(DEFAULT_SALT, 0, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
+
+        bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
+        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
+
+        vm.resetGasMetering();
+        user.executeInstruction(instruction, instructionSig);
+        vm.pauseGasMetering();
+    }
+
     /// @notice test that validation fails with token == address(0)
     function test_transferERC20Once_tokenZero() public {
         // keep defaults but set token to address(0)

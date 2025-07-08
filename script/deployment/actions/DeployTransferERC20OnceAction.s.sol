@@ -46,7 +46,7 @@ contract DeployTransferERC20OnceAction is Script {
     function run() public {
         address feeTokenRegistryAddress = vm.envAddress("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS");
         address treasuryAddress = vm.envAddress("EXPECTED_TREASURY_ADDRESS");
-        uint256 gasConstant = vm.envUint("TRANSFER_ERC20_ACTION_GAS_CONSTANT");
+        uint256 gasConstant = vm.envUint("TRANSFER_ERC20_ONCE_ACTION_GAS_CONSTANT");
 
         // if this isn't a dry-run (aka we're using `--broadcast`), make sure to check the expected address
         if (vm.isContext(VmSafe.ForgeContext.ScriptBroadcast)) {
@@ -55,7 +55,7 @@ contract DeployTransferERC20OnceAction is Script {
 
         vm.startBroadcast();
 
-        // deterministically deploy TransferERC20Action via canonical Create2 deployer
+        // deterministically deploy TransferERC20OnceAction via canonical Create2 deployer
         TransferERC20OnceAction transferAction =
             new TransferERC20OnceAction{salt: salt}(feeTokenRegistryAddress, treasuryAddress, gasConstant);
 
@@ -67,7 +67,7 @@ contract DeployTransferERC20OnceAction is Script {
     function checkExpectedAddress(address feeTokenRegistry, address treasuryAddress, uint256 gasConstant) public view {
         /// @dev before deploying for the first time, generate this expected address by running this script in dry-run mode (see above).
         /// once it has been deployed for the first time, that deployed address should be used as the expected address from then on.
-        address expectedAddress = vm.envAddress("EXPECTED_TRANSFER_ERC20_ACTION_ADDRESS");
+        address expectedAddress = vm.envAddress("EXPECTED_TRANSFER_ERC20_ONCE_ACTION_ADDRESS");
 
         // calculate the expected address using the current init code
         address calculatedAddress = vm.computeCreate2Address(
