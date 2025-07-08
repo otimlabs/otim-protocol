@@ -67,8 +67,6 @@ contract EstimateSweepDepositAccountERC20GasConstant is InstructionForkTestConte
         uint256 maxExecutions,
         ISweepDepositAccountERC20Action.SweepDepositAccountERC20 memory arguments
     ) public {
-        vm.pauseGasMetering();
-
         // disregard fuzz generated target
         arguments.token = SEPOLIA_WETH9;
         arguments.depositor = depositor.addr;
@@ -113,5 +111,7 @@ contract EstimateSweepDepositAccountERC20GasConstant is InstructionForkTestConte
 
         // revert if fee collected is less than transaction cost + executor tip
         assertGe(feeCollected, executionCost + arguments.fee.executionFee);
+
+        vm.resetGasMetering();
     }
 }

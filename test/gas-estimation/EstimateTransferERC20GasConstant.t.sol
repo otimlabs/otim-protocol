@@ -62,8 +62,6 @@ contract EstimateTransferERC20GasConstant is InstructionForkTestContext {
         uint256 maxExecutions,
         ITransferERC20Action.TransferERC20 memory arguments
     ) public {
-        vm.pauseGasMetering();
-
         // disregard fuzz generated values for token and target
         arguments.token = SEPOLIA_WETH9;
         arguments.target = payable(target.addr);
@@ -107,5 +105,7 @@ contract EstimateTransferERC20GasConstant is InstructionForkTestContext {
 
         // revert if fee collected is less than transaction cost + executor tip
         assertGe(feeCollected, executionCost + arguments.fee.executionFee);
+
+        vm.resetGasMetering();
     }
 }

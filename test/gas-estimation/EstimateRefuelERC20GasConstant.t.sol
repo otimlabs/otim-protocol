@@ -61,8 +61,6 @@ contract EstimateRefuelERC20GasConstant is InstructionForkTestContext {
         uint256 maxExecutions,
         IRefuelERC20Action.RefuelERC20 memory arguments
     ) public {
-        vm.pauseGasMetering();
-
         // disregard fuzz generated token
         arguments.token = SEPOLIA_WETH9;
         // disregard fuzz generated target
@@ -104,5 +102,7 @@ contract EstimateRefuelERC20GasConstant is InstructionForkTestContext {
 
         // revert if fee collected is less than transaction cost + executor tip
         assertGe(feeCollected, executionCost + arguments.fee.executionFee);
+
+        vm.resetGasMetering();
     }
 }

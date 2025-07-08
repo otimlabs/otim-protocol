@@ -92,8 +92,6 @@ contract EstimateSweepSkipCCTPDepositAccountGasConstant is InstructionForkTestCo
         uint256 maxExecutions,
         ISweepSkipCCTPDepositAccountAction.SweepSkipCCTPDepositAccount memory arguments
     ) public {
-        vm.pauseGasMetering();
-
         arguments.depositor = depositor.addr;
         arguments.destinationDomain = DESTINATION_DOMAIN;
         arguments.destinationMintRecipient = DESTINATION_MINT_RECIPIENT;
@@ -139,5 +137,7 @@ contract EstimateSweepSkipCCTPDepositAccountGasConstant is InstructionForkTestCo
 
         // revert if fee collected is less than transaction cost + executor tip
         assertGe(feeCollected, executionCost + arguments.fee.executionFee);
+
+        vm.resetGasMetering();
     }
 }

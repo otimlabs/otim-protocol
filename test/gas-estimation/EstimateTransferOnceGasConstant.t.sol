@@ -17,22 +17,22 @@ import {Treasury} from "../../src/infrastructure/Treasury.sol";
 
 import {IOtimFee} from "../../src/actions/fee-models/interfaces/IOtimFee.sol";
 
-import {DeactivateInstructionAction} from "../../src/actions/DeactivateInstructionAction.sol";
-import {IDeactivateInstructionAction} from "../../src/actions/interfaces/IDeactivateInstructionAction.sol";
+import {TransferOnceAction} from "../../src/actions/TransferOnceAction.sol";
+import {ITransferOnceAction} from "../../src/actions/interfaces/ITransferOnceAction.sol";
 
-contract EstimateDeactivateInstructionGasConstant is InstructionForkTestContext {
+contract EstimateTransferOnceGasConstant is InstructionForkTestContext {
     using InstructionLib for InstructionLib.Instruction;
 
     Treasury treasury;
     FeeTokenRegistry feeTokenRegistry;
 
-    DeactivateInstructionAction deactivateAction;
+    TransferOnceAction transferAction;
 
     VmSafe.Wallet public target = vm.createWallet("target");
 
     address public constant SEPOLIA_WETH9 = address(0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14);
 
-    uint256 public constant DEACTIVATE_INSTRUCTION_GAS_CONSTANT = 103_000;
+    uint256 public constant TRANSFER_ONCE_GAS_CONSTANT = 104_000;
 
     constructor() {
         string memory rpcUrl = vm.envOr("SEPOLIA_RPC_URL", string("https://ethereum-sepolia-rpc.publicnode.com"));
@@ -49,22 +49,22 @@ contract EstimateDeactivateInstructionGasConstant is InstructionForkTestContext 
         feeTokenRegistry.addFeeToken(SEPOLIA_WETH9, address(priceFeed), type(uint40).max);
 
         // deploy and whitelist action with new gas constant
-        deactivateAction = new DeactivateInstructionAction(
-            address(instructionStorage),
-            address(feeTokenRegistry),
-            address(treasury),
-            DEACTIVATE_INSTRUCTION_GAS_CONSTANT
-        );
+        transferAction =
+            new TransferOnceAction(address(feeTokenRegistry), address(treasury), TRANSFER_ONCE_GAS_CONSTANT);
 
-        actionManager.addAction(address(deactivateAction));
+        actionManager.addAction(address(transferAction));
     }
 
-    // check that the DEACTIVATE_INSTRUCTION_GAS_CONSTANT doesn't result in an underpayment of the fee
-    function testFuzz_deactivateInstruction_gasConstant(
-        uint256 salt,
-        IDeactivateInstructionAction.DeactivateInstruction memory arguments
-    ) public {
-        vm.assume(arguments.instructionId != bytes32(0));
+    // check that the TRANSFER_ONCE_GAS_CONSTANT doesn't result in an underpayment of the fee
+    function testFuzz_transferOnce_gasConstant(uint256 salt, ITransferOnceAction.TransferOnce memory arguments)
+        public
+    {
+        // disregard fuzz generated target
+        arguments.target = payable(target.addr);
+        // fuzz test must pass argument validation
+        vm.assume(arguments.value > 0 && arguments.value < 100 ether);
+        // not possible to consume more gas than the block gas limit
+        vm.assume(arguments.gasLimit < 30_000_000);
 
         // disregard fuzz generated fee token
         arguments.fee.token = SEPOLIA_WETH9;
@@ -85,11 +85,13 @@ contract EstimateDeactivateInstructionGasConstant is InstructionForkTestContext 
         vm.prank(address(user));
         IWETH9(SEPOLIA_WETH9).deposit{value: address(user).balance}();
 
-        // build Instruction with fuzz values (maxExecutions is set to 1)
-        buildInstruction(salt, 1, address(deactivateAction), abi.encode(arguments));
+        // deal enough ETH to transfer based on fuzzed values
+        vm.deal(address(user), arguments.value);
+
+        // build Instruction with fuzz values
+        buildInstruction(salt, 1, address(transferAction), abi.encode(arguments));
 
         // execute and measure gas used
-
         uint256 gasUsed = gasleft();
         gateway.safeExecuteInstruction(address(user), instruction, instructionSig);
         gasUsed -= gasleft();

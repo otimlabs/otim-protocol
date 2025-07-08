@@ -58,8 +58,6 @@ contract EstimateRefuelGasConstant is InstructionForkTestContext {
     function testFuzz_refuel_gasConstant(uint256 salt, uint256 maxExecutions, IRefuelAction.Refuel memory arguments)
         public
     {
-        vm.pauseGasMetering();
-
         // disregard fuzz generated target
         arguments.target = payable(target.addr);
         // fuzz test must pass argument validation
@@ -104,5 +102,7 @@ contract EstimateRefuelGasConstant is InstructionForkTestContext {
 
         // revert if fee collected is less than transaction cost + executor tip
         assertGe(feeCollected, executionCost + arguments.fee.executionFee);
+
+        vm.resetGasMetering();
     }
 }
