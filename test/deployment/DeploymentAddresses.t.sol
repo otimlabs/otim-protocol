@@ -16,8 +16,6 @@ import {RefuelAction} from "../../src/actions/RefuelAction.sol";
 import {RefuelERC20Action} from "../../src/actions/RefuelERC20Action.sol";
 import {SweepDepositAccountAction} from "../../src/actions/SweepDepositAccountAction.sol";
 import {SweepDepositAccountERC20Action} from "../../src/actions/SweepDepositAccountERC20Action.sol";
-import {SweepSkipCCTPDepositAccountAction} from "../../src/actions/SweepSkipCCTPDepositAccountAction.sol";
-import {UniswapV3ExactInputAction} from "../../src/actions/UniswapV3ExactInputAction.sol";
 import {DeactivateInstructionAction} from "../../src/actions/DeactivateInstructionAction.sol";
 
 contract DeploymentAddressesTest is Test {
