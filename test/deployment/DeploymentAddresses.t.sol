@@ -1,0 +1,108 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+pragma solidity ^0.8.26;
+
+import {Vm, VmSafe} from "forge-std/src/Vm.sol";
+
+import {Test} from "forge-std/src/Test.sol";
+
+import {OtimDelegate} from "../../src/OtimDelegate.sol";
+
+import {FeeTokenRegistry} from "../../src/infrastructure/FeeTokenRegistry.sol";
+import {Treasury} from "../../src/infrastructure/Treasury.sol";
+
+import {TransferAction} from "../../src/actions/TransferAction.sol";
+import {TransferERC20Action} from "../../src/actions/TransferERC20Action.sol";
+import {RefuelAction} from "../../src/actions/RefuelAction.sol";
+import {RefuelERC20Action} from "../../src/actions/RefuelERC20Action.sol";
+import {SweepDepositAccountAction} from "../../src/actions/SweepDepositAccountAction.sol";
+import {SweepDepositAccountERC20Action} from "../../src/actions/SweepDepositAccountERC20Action.sol";
+import {SweepSkipCCTPDepositAccountAction} from "../../src/actions/SweepSkipCCTPDepositAccountAction.sol";
+import {UniswapV3ExactInputAction} from "../../src/actions/UniswapV3ExactInputAction.sol";
+import {DeactivateInstructionAction} from "../../src/actions/DeactivateInstructionAction.sol";
+
+contract DeploymentAddressesTest is Test {
+    // expected core addresses
+    address constant EXPECTED_OTIM_DELEGATE_ADDRESS = 0x1292349F9D9179286b831AF9a7F1F7d3E24ACd17;
+
+    // expected infrastructure addresses
+    address constant EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS = 0xaB0d5Af339e4D3E986E5b1b0F936e700c211540b;
+    address constant EXPECTED_TREASURY_ADDRESS = 0x347e715405cDD0B272FC9f681f30A99DFe5702DE;
+
+    // expected action addresses
+    address constant EXPECTED_TRANSFER_ACTION_ADDRESS = 0x8c6935D1000dFF1f19de14636B0e67B3cD9921dC;
+    address constant EXPECTED_TRANSFER_ERC20_ACTION_ADDRESS = 0x0860117A7A5930C7970f4a4E0CDC7D37b70E4F46;
+    address constant EXPECTED_REFUEL_ACTION_ADDRESS = 0xd85576b4B9f9552292A0B7eBCa5f8B8f48a6637f;
+    address constant EXPECTED_REFUEL_ERC20_ACTION_ADDRESS = 0xCFA692c1f99008de0B4AA2c8ed49afD8971ddad9;
+    address constant EXPECTED_SWEEP_DEPOSIT_ACCOUNT_ACTION_ADDRESS = 0x9b3E99B674A9789497B03f95597aD1463e103A7F;
+    address constant EXPECTED_SWEEP_DEPOSIT_ACCOUNT_ERC20_ACTION_ADDRESS = 0x7C7f3cd7Fb8b76A1c603A4D0F714C8D6475A186b;
+    address constant EXPECTED_SWEEP_SKIP_CCTP_DEPOSIT_ACCOUNT_ACTION_ADDRESS =
+        0x3e0e3172bAA045B427869b9db3bcc6016E37478f;
+    address constant EXPECTED_UNISWAP_V3_EXACT_INPUT_ACTION_ADDRESS = 0xD1e7Ef6fd641ff48678B1A8f6c815a24e5D14cB4;
+    address constant EXPECTED_DEACTIVATE_INSTRUCTION_ACTION_ADDRESS = 0xd6EDb2C598603E77424145E58fb5F4D49092C46B;
+
+    ////////////////////
+    // Core addresses //
+    ////////////////////
+
+    /// @dev this implicitly tests that Gateway, InstructionStorage, and ActionManager addresses are correct
+    function test_otimDelegate_deployedAddress() public {
+        address deployed = address(new OtimDelegate{salt: bytes32(0)}(address(0)));
+        assertEq(deployed, EXPECTED_OTIM_DELEGATE_ADDRESS);
+    }
+
+    //////////////////////////////
+    // Infrastructure addresses //
+    //////////////////////////////
+
+    function test_feeTokenRegistry_deployedAddress() public {
+        address deployed = address(new FeeTokenRegistry{salt: bytes32(0)}(address(1))); // Ownable constructor requires non-zero address
+        assertEq(deployed, EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS);
+    }
+
+    function test_treasury_deployedAddress() public {
+        address deployed = address(new Treasury{salt: bytes32(0)}(address(1))); // Ownable constructor requires non-zero address
+        assertEq(deployed, EXPECTED_TREASURY_ADDRESS);
+    }
+
+    //////////////////////
+    // Action addresses //
+    //////////////////////
+
+    /// @dev SweepSkipCCTPDepositAccountAction and UniswapV3ExactInputAction are not deployed with Create2 so we don't need to test them
+
+    function test_refuelAction_deployedAddress() public {
+        address deployed = address(new RefuelAction{salt: bytes32(0)}(address(0), address(0), 0));
+        assertEq(deployed, EXPECTED_REFUEL_ACTION_ADDRESS);
+    }
+
+    function test_refuelERC20Action_deployedAddress() public {
+        address deployed = address(new RefuelERC20Action{salt: bytes32(0)}(address(0), address(0), 0));
+        assertEq(deployed, EXPECTED_REFUEL_ERC20_ACTION_ADDRESS);
+    }
+
+    function test_transferAction_deployedAddress() public {
+        address deployed = address(new TransferAction{salt: bytes32(0)}(address(0), address(0), 0));
+        assertEq(deployed, EXPECTED_TRANSFER_ACTION_ADDRESS);
+    }
+
+    function test_transferERC20Action_deployedAddress() public {
+        address deployed = address(new TransferERC20Action{salt: bytes32(0)}(address(0), address(0), 0));
+        assertEq(deployed, EXPECTED_TRANSFER_ERC20_ACTION_ADDRESS);
+    }
+
+    function test_sweepDepositAccountAction_deployedAddress() public {
+        address deployed = address(new SweepDepositAccountAction{salt: bytes32(0)}(address(0), address(0), 0));
+        assertEq(deployed, EXPECTED_SWEEP_DEPOSIT_ACCOUNT_ACTION_ADDRESS);
+    }
+
+    function test_sweepDepositAccountERC20Action_deployedAddress() public {
+        address deployed = address(new SweepDepositAccountERC20Action{salt: bytes32(0)}(address(0), address(0), 0));
+        assertEq(deployed, EXPECTED_SWEEP_DEPOSIT_ACCOUNT_ERC20_ACTION_ADDRESS);
+    }
+
+    function test_deactivateInstructionAction_deployedAddress() public {
+        address deployed =
+            address(new DeactivateInstructionAction{salt: bytes32(0)}(address(0), address(0), address(0), 0));
+        assertEq(deployed, EXPECTED_DEACTIVATE_INSTRUCTION_ACTION_ADDRESS);
+    }
+}
