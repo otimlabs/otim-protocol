@@ -33,12 +33,16 @@ struct Cli {
     /// Pattern to ignore during comparison
     #[arg(long, env = "IGNORE_PATTERN")]
     ignore: Option<String>,
+
+    /// Show detailed differences when directories don't match
+    #[arg(long, env = "SHOW_DIFF")]
+    show_diff: bool,
 }
 
 fn main() {
     let cli = Cli::parse();
 
-    match directories_match(&cli.dir1, &cli.dir2, cli.ignore.as_deref()) {
+    match directories_match(&cli.dir1, &cli.dir2, cli.ignore.as_deref(), cli.show_diff) {
         Ok(true) => process::exit(0),
         Ok(false) => process::exit(1),
         Err(e) => {
@@ -48,7 +52,7 @@ fn main() {
     }
 }
 
-fn directories_match(dir1: &str, dir2: &str, ignore: Option<&str>) -> Result<bool, Box<dyn Error>> {
+fn directories_match(dir1: &str, dir2: &str, ignore: Option<&str>, show_diff: bool) -> Result<bool, Box<dyn Error>> {
     let tree1 = MerkleTree::builder(dir1).build()?;
     let tree2 = MerkleTree::builder(dir2).build()?;
 
@@ -62,20 +66,57 @@ fn directories_match(dir1: &str, dir2: &str, ignore: Option<&str>) -> Result<boo
         .map(|i| (i.path.relative.to_string(), i.hash.to_hex_string()))
         .collect();
 
-    Ok(files1 == files2)
+    let matches = files1 == files2;
+    if !matches && show_diff {
+        print_differences(&files1, &files2, dir1, dir2);
+    }
+
+    Ok(matches)
 }
+
+// -- Helper functions --
 
 fn should_ignore_path(relative_path: &camino::Utf8Path, ignore: Option<&str>) -> bool {
     let path_str = relative_path.as_str();
-    
     // Ignore empty paths
     if path_str.is_empty() {
         return true;
     }
-    
+
     // Apply ignore pattern if provided
     ignore.map_or(false, |pattern| path_str.contains(pattern))
 }
+
+fn print_differences(files1: &HashMap<String, String>, files2: &HashMap<String, String>, _dir1: &str, dir2: &str) {
+    let mut diff_count = 0;
+
+    // Find different and missing files
+    for (path, hash1) in files1 {
+        match files2.get(path) {
+            Some(hash2) if hash1 != hash2 => {
+                println!("📝 {}: content differs", path);
+                diff_count += 1;
+            }
+            None => {
+                println!("❌ {}: missing in {}", path, dir2);
+                diff_count += 1;
+            }
+            _ => {}
+        }
+    }
+
+    // Find extra files
+    for path in files2.keys() {
+        if !files1.contains_key(path) {
+            println!("➕ {}: extra in {}", path, dir2);
+            diff_count += 1;
+        }
+    }
+
+    println!("\n❌ Found {} differences", diff_count);
+}
+
+// -- Tests --
 
 #[cfg(test)]
 mod tests {
@@ -104,7 +145,7 @@ mod tests {
         write_file(&dir1, "file.txt", "content");
         write_file(&dir2, "file.txt", "content");
 
-        assert!(directories_match(dir1.to_str().unwrap(), dir2.to_str().unwrap(), None).unwrap());
+        assert!(directories_match(dir1.to_str().unwrap(), dir2.to_str().unwrap(), None, false).unwrap());
 
         fs::remove_dir_all(&dir1).ok();
         fs::remove_dir_all(&dir2).ok();
@@ -122,7 +163,7 @@ mod tests {
         write_file(&dir1, "file.txt", "content A");
         write_file(&dir2, "file.txt", "content B");
 
-        assert!(!directories_match(dir1.to_str().unwrap(), dir2.to_str().unwrap(), None).unwrap());
+        assert!(!directories_match(dir1.to_str().unwrap(), dir2.to_str().unwrap(), None, false).unwrap());
 
         fs::remove_dir_all(&dir1).ok();
         fs::remove_dir_all(&dir2).ok();
@@ -142,7 +183,7 @@ mod tests {
         write_file(&dir1, "build-info/ignore.txt", "diff1");
         write_file(&dir2, "build-info/ignore.txt", "diff2");
 
-        assert!(directories_match(dir1.to_str().unwrap(), dir2.to_str().unwrap(), Some("build-info")).unwrap());
+        assert!(directories_match(dir1.to_str().unwrap(), dir2.to_str().unwrap(), Some("build-info"), false).unwrap());
 
         fs::remove_dir_all(&dir1).ok();
         fs::remove_dir_all(&dir2).ok();
