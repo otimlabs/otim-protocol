@@ -1,9 +1,6 @@
 name: Sync Contract Artifacts
 
 on:
-  push:
-    branches:
-      - ahmad/readd_offchain_artifact_match_sync
   workflow_call:
     inputs:
       protocol_ref:
