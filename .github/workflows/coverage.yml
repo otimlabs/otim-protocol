@@ -39,7 +39,7 @@ jobs:
           echo '| File | % Lines | % Statements | % Branches | % Funcs |'
           echo '|------|---------|--------------|------------|---------|'
           forge coverage --no-match-contract Estimate --no-match-coverage script --report summary | grep '^|' | grep -v 'test/' | grep -v '^|-' | grep -v 'File'
-          echo EOF
+          echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
       - name: Verify coverage is updated
