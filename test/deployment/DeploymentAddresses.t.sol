@@ -70,16 +70,6 @@ contract DeploymentAddressesTest is Test {
 
     /// @dev SweepSkipCCTPDepositAccountAction and UniswapV3ExactInputAction are not deployed with Create2 so we don't need to test them
 
-    function test_refuelAction_deployedAddress() public {
-        address deployed = address(new RefuelAction{salt: bytes32(0)}(address(0), address(0), 0));
-        assertEq(deployed, EXPECTED_REFUEL_ACTION_ADDRESS);
-    }
-
-    function test_refuelERC20Action_deployedAddress() public {
-        address deployed = address(new RefuelERC20Action{salt: bytes32(0)}(address(0), address(0), 0));
-        assertEq(deployed, EXPECTED_REFUEL_ERC20_ACTION_ADDRESS);
-    }
-
     function test_transferAction_deployedAddress() public {
         address deployed = address(new TransferAction{salt: bytes32(0)}(address(0), address(0), 0));
         assertEq(deployed, EXPECTED_TRANSFER_ACTION_ADDRESS);
@@ -88,6 +78,16 @@ contract DeploymentAddressesTest is Test {
     function test_transferERC20Action_deployedAddress() public {
         address deployed = address(new TransferERC20Action{salt: bytes32(0)}(address(0), address(0), 0));
         assertEq(deployed, EXPECTED_TRANSFER_ERC20_ACTION_ADDRESS);
+    }
+
+    function test_refuelAction_deployedAddress() public {
+        address deployed = address(new RefuelAction{salt: bytes32(0)}(address(0), address(0), 0));
+        assertEq(deployed, EXPECTED_REFUEL_ACTION_ADDRESS);
+    }
+
+    function test_refuelERC20Action_deployedAddress() public {
+        address deployed = address(new RefuelERC20Action{salt: bytes32(0)}(address(0), address(0), 0));
+        assertEq(deployed, EXPECTED_REFUEL_ERC20_ACTION_ADDRESS);
     }
 
     function test_sweepDepositAccountAction_deployedAddress() public {
