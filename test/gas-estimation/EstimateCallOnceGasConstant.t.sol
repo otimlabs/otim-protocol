@@ -17,22 +17,22 @@ import {Treasury} from "../../src/infrastructure/Treasury.sol";
 
 import {IOtimFee} from "../../src/actions/fee-models/interfaces/IOtimFee.sol";
 
-import {DeactivateInstructionAction} from "../../src/actions/DeactivateInstructionAction.sol";
-import {IDeactivateInstructionAction} from "../../src/actions/interfaces/IDeactivateInstructionAction.sol";
+import {CallOnceAction} from "../../src/actions/CallOnceAction.sol";
+import {ICallOnceAction} from "../../src/actions/interfaces/ICallOnceAction.sol";
 
-contract EstimateDeactivateInstructionGasConstant is InstructionForkTestContext {
+contract EstimateCallOnceGasConstant is InstructionForkTestContext {
     using InstructionLib for InstructionLib.Instruction;
 
     Treasury treasury;
     FeeTokenRegistry feeTokenRegistry;
 
-    DeactivateInstructionAction deactivateAction;
+    CallOnceAction callOnceAction;
 
     VmSafe.Wallet public target = vm.createWallet("target");
 
     address public constant SEPOLIA_WETH9 = address(0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14);
 
-    uint256 public constant DEACTIVATE_INSTRUCTION_GAS_CONSTANT = 103_000;
+    uint256 public constant CALL_ONCE_GAS_CONSTANT = 106_500;
 
     constructor() {
         string memory rpcUrl = vm.envOr("SEPOLIA_RPC_URL", string("https://sepolia.drpc.org"));
@@ -49,22 +49,26 @@ contract EstimateDeactivateInstructionGasConstant is InstructionForkTestContext 
         feeTokenRegistry.addFeeToken(SEPOLIA_WETH9, address(priceFeed), type(uint40).max);
 
         // deploy and whitelist action with new gas constant
-        deactivateAction = new DeactivateInstructionAction(
-            address(instructionStorage),
-            address(feeTokenRegistry),
-            address(treasury),
-            DEACTIVATE_INSTRUCTION_GAS_CONSTANT
+        callOnceAction = new CallOnceAction(
+            address(instructionStorage), address(feeTokenRegistry), address(treasury), CALL_ONCE_GAS_CONSTANT
         );
 
-        actionManager.addAction(address(deactivateAction));
+        actionManager.addAction(address(callOnceAction));
     }
 
-    // check that the DEACTIVATE_INSTRUCTION_GAS_CONSTANT doesn't result in an underpayment of the fee
-    function testFuzz_deactivateInstruction_gasConstant(
-        uint256 salt,
-        IDeactivateInstructionAction.DeactivateInstruction memory arguments
-    ) public {
-        vm.assume(arguments.instructionId != bytes32(0));
+    // check that the CALL_ONCE_GAS_CONSTANT doesn't result in an underpayment of the fee
+    function testFuzz_callOnce_gasConstant(uint256 salt, ICallOnceAction.CallOnce memory arguments) public {
+        // always allow failure so the fuzzer can't force a failure
+        arguments.allowFailure = true;
+
+        // assume target is valid
+        vm.assume(arguments.target != address(0) && arguments.target != address(instructionStorage));
+
+        // assume value is not ridiculously high
+        vm.assume(arguments.value < 100 ether);
+
+        // assume gasLimit is not ridiculously high
+        vm.assume(arguments.gasLimit < 30_000_000);
 
         // disregard fuzz generated fee token
         arguments.fee.token = SEPOLIA_WETH9;
@@ -85,11 +89,12 @@ contract EstimateDeactivateInstructionGasConstant is InstructionForkTestContext 
         vm.prank(address(user));
         IWETH9(SEPOLIA_WETH9).deposit{value: address(user).balance}();
 
+        vm.deal(address(user), arguments.value);
+
         // build Instruction with fuzz values (maxExecutions is set to 1)
-        buildInstruction(salt, 1, address(deactivateAction), abi.encode(arguments));
+        buildInstruction(salt, 1, address(callOnceAction), abi.encode(arguments));
 
         // execute and measure gas used
-
         uint256 gasUsed = gasleft();
         gateway.safeExecuteInstruction(address(user), instruction, instructionSig);
         gasUsed -= gasleft();

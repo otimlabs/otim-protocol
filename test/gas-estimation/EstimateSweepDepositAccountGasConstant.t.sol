@@ -38,7 +38,7 @@ contract EstimateSweepDepositAccountGasConstant is InstructionForkTestContext {
     uint256 public constant SWEEP_DEPOSIT_ACCOUNT_GAS_CONSTANT = 104_000;
 
     constructor() {
-        string memory rpcUrl = vm.envOr("SEPOLIA_RPC_URL", string("https://ethereum-sepolia-rpc.publicnode.com"));
+        string memory rpcUrl = vm.envOr("SEPOLIA_RPC_URL", string("https://sepolia.drpc.org"));
 
         vm.createSelectFork(rpcUrl);
 

@@ -36,7 +36,7 @@ contract EstimateTransferGasConstant is InstructionForkTestContext {
     uint256 public constant TRANSFER_GAS_CONSTANT = 105_500;
 
     constructor() {
-        string memory rpcUrl = vm.envOr("SEPOLIA_RPC_URL", string("https://ethereum-sepolia-rpc.publicnode.com"));
+        string memory rpcUrl = vm.envOr("SEPOLIA_RPC_URL", string("https://sepolia.drpc.org"));
 
         vm.createSelectFork(rpcUrl);
 
