@@ -64,8 +64,6 @@ contract CallOnceTest is InstructionTestContext {
 
     /// @notice test typical CallOnceAction flow
     function test_callOnce_happyPath() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         assertEq(address(user).balance, USER_START_BALANCE);
@@ -76,7 +74,7 @@ contract CallOnceTest is InstructionTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
@@ -110,8 +108,6 @@ contract CallOnceTest is InstructionTestContext {
 
     /// @notice test that execution fails with target == address(0)
     function test_callOnce_targetZero() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.target = address(0);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -119,15 +115,13 @@ contract CallOnceTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution fails with target == instructionStorage
     function test_callOnce_targetInstructionStorage() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.target = address(instructionStorage);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -135,15 +129,13 @@ contract CallOnceTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution succeeds with allowFailure == true for a target that reverts
     function test_callOnce_happyPath_allowFailure() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.target = address(new RevertTarget());
         DEFAULT_ACTION_ARGS.allowFailure = true;
 
@@ -155,15 +147,13 @@ contract CallOnceTest is InstructionTestContext {
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts with user insufficient balance
     function test_callOnce_insufficientBalance() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.value = USER_START_BALANCE + 1;
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -171,15 +161,13 @@ contract CallOnceTest is InstructionTestContext {
         bytes memory result = abi.encodeWithSelector(InsufficientBalance.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts when trying to call a non-existent function
     function test_callOnce_noSuchSelector() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.selector = bytes4(0x12345678);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -189,15 +177,13 @@ contract CallOnceTest is InstructionTestContext {
         );
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts when the external call reverts and allowFailure == false
     function test_callOnce_targetRevert() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.target = address(new RevertTarget());
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -207,15 +193,13 @@ contract CallOnceTest is InstructionTestContext {
         );
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts when a non-payable function is called with value and allowFailure == false
     function test_callOnce_targetNonPayable() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.selector = target.helloWorldNonPayable.selector;
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -225,15 +209,13 @@ contract CallOnceTest is InstructionTestContext {
         );
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts when the target consumes all gas and allowFailure == false
     function test_callOnce_targetOutOfGas() public {
-        vm.pauseGasMetering();
-
         DEFAULT_ACTION_ARGS.target = address(new DrainGasTarget());
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -243,15 +225,13 @@ contract CallOnceTest is InstructionTestContext {
         );
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that return data is truncated when a return bomb is attempted
     function test_callOnce_returnBomb() public {
-        vm.pauseGasMetering();
-
         uint256 returnBombSize = 70_000;
         ReturnBombTarget returnBombTarget = new ReturnBombTarget(returnBombSize);
 
@@ -277,15 +257,13 @@ contract CallOnceTest is InstructionTestContext {
         );
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that return data is not copied when returnSizeLimit is 0
     function test_callOnce_noReturnData() public {
-        vm.pauseGasMetering();
-
         uint256 returnBombSize = 70_000;
         ReturnBombTarget returnBombTarget = new ReturnBombTarget(returnBombSize);
 
@@ -302,15 +280,13 @@ contract CallOnceTest is InstructionTestContext {
         );
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts when the user attempts reentrancy and allowFailure == false
     function test_callOnce_nonReentrant() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         InstructionLib.Instruction memory alreadyActivatedInstruction = instruction;
@@ -333,15 +309,13 @@ contract CallOnceTest is InstructionTestContext {
         );
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
 
     /// @notice test that execution reverts when the user attempts reentrancy via Gateway and allowFailure == false
     function test_callOnce_nonReentrantGateway() public {
-        vm.pauseGasMetering();
-
         buildInstruction();
 
         InstructionLib.Instruction memory alreadyActivatedInstruction = instruction;
@@ -365,7 +339,7 @@ contract CallOnceTest is InstructionTestContext {
         );
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resumeGasMetering();
+        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
     }
