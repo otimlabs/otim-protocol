@@ -94,11 +94,11 @@ fn print_differences(files1: &HashMap<String, String>, files2: &HashMap<String, 
     for (path, hash1) in files1 {
         match files2.get(path) {
             Some(hash2) if hash1 != hash2 => {
-                println!("📝 {}: content differs", path);
+                println!("{}: content differs", path);
                 diff_count += 1;
             }
             None => {
-                println!("❌ {}: missing in {}", path, dir2);
+                println!("{}: missing in {}", path, dir2);
                 diff_count += 1;
             }
             _ => {}
@@ -108,7 +108,7 @@ fn print_differences(files1: &HashMap<String, String>, files2: &HashMap<String, 
     // Find extra files
     for path in files2.keys() {
         if !files1.contains_key(path) {
-            println!("➕ {}: extra in {}", path, dir2);
+            println!("{}: extra in {}", path, dir2);
             diff_count += 1;
         }
     }
