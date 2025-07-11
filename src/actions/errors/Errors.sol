@@ -11,3 +11,5 @@ error BalanceUnderThreshold();
 error UniswapV3PoolDoesNotExist();
 
 error InstructionAlreadyDeactivated();
+
+error InsufficientBalanceForSkipGoFee();
