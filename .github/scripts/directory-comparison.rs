@@ -58,11 +58,13 @@ fn directories_match(dir1: &str, dir2: &str, ignore: Option<&str>, show_diff: bo
 
     let files1: HashMap<_, _> = tree1.iter()
         .filter(|i| !should_ignore_path(&i.path.relative, ignore))
+        .filter(|i| std::path::Path::new(dir1).join(&i.path.relative).is_file())
         .map(|i| (i.path.relative.to_string(), i.hash.to_hex_string()))
         .collect();
 
     let files2: HashMap<_, _> = tree2.iter()
         .filter(|i| !should_ignore_path(&i.path.relative, ignore))
+        .filter(|i| std::path::Path::new(dir2).join(&i.path.relative).is_file())
         .map(|i| (i.path.relative.to_string(), i.hash.to_hex_string()))
         .collect();
 

@@ -64,13 +64,8 @@ jobs:
         id: build-protocol
         run: |
           echo "protocol_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          forge soldeer update --config-location foundry
-          forge build ./src --sizes
-
-      - name: Setup Rust
-        uses: actions-rust-lang/setup-rust-toolchain@fb51252c7ba57d633bc668f941da052e410add48 # v1.13.0
-        with:
-          working-directory: ./offchain
+          forge soldeer update
+          forge build --sizes
 
       - name: Install rust-script
         run: |
@@ -102,7 +97,7 @@ jobs:
           commit-message: "sync: otim-protocol artifacts (${{ steps.build-protocol.outputs.protocol_sha }})"
           title: "Sync: otim-protocol build artifacts"
           body: |
-            Syncing build artifacts from otim-protocol.
+            Syncing build artifacts from otim-protocol ([artifact comparison](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}))
 
             - Protocol: `${{ steps.build-protocol.outputs.protocol_sha }}`
             - Offchain: `${{ inputs.offchain_ref || 'main' }}`
