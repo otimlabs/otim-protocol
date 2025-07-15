@@ -13,3 +13,5 @@ error UniswapV3PoolDoesNotExist();
 error InstructionAlreadyDeactivated();
 
 error CallOnceFailed(address target, bytes4 selector, bytes result);
+
+error SubcallFailed(uint16 index, address target, bytes4 selector, bytes result);
