@@ -61,8 +61,6 @@ contract EstimateTransferGasConstant is InstructionForkTestContext {
         uint256 maxExecutions,
         ITransferAction.Transfer memory arguments
     ) public {
-        vm.pauseGasMetering();
-
         // disregard fuzz generated target
         arguments.target = payable(target.addr);
         // fuzz test must pass argument validation
@@ -110,5 +108,7 @@ contract EstimateTransferGasConstant is InstructionForkTestContext {
 
         // revert if fee collected is less than transaction cost + executor tip
         assertGe(feeCollected, executionCost + arguments.fee.executionFee);
+
+        vm.resetGasMetering();
     }
 }

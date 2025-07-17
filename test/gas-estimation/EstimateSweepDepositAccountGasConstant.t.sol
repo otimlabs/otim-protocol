@@ -67,8 +67,6 @@ contract EstimateSweepDepositAccountGasConstant is InstructionForkTestContext {
         uint256 maxExecutions,
         ISweepDepositAccountAction.SweepDepositAccount memory arguments
     ) public {
-        vm.pauseGasMetering();
-
         // disregard fuzz generated target
         arguments.depositor = depositor.addr;
         arguments.recipient = payable(recipient.addr);
@@ -110,5 +108,7 @@ contract EstimateSweepDepositAccountGasConstant is InstructionForkTestContext {
 
         // revert if fee collected is less than transaction cost + executor tip
         assertGe(feeCollected, executionCost + arguments.fee.executionFee);
+
+        vm.resetGasMetering();
     }
 }

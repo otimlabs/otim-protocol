@@ -72,8 +72,6 @@ contract EstimateUniswapV3ExactInputConstant is InstructionForkTestContext {
         uint256 maxExecutions,
         IUniswapV3ExactInputAction.UniswapV3ExactInput memory arguments
     ) public {
-        vm.pauseGasMetering();
-
         // fuzz test must pass argument validation
         vm.assume(arguments.recipient != address(0));
 
@@ -133,5 +131,7 @@ contract EstimateUniswapV3ExactInputConstant is InstructionForkTestContext {
 
         // revert if fee collected is less than transaction cost + executor tip
         assertGe(feeCollected, executionCost + arguments.fee.executionFee);
+
+        vm.resetGasMetering();
     }
 }
