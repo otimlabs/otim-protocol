@@ -63,7 +63,10 @@ contract DeploySweepAction is Script {
         console2.log("SweepAction deployed at:", address(sweepAction));
     }
 
-    function checkExpectedAddress(address feeTokenRegistry, address treasuryAddress, uint256 gasConstant) public view {
+    function checkExpectedAddress(address feeTokenRegistryAddress, address treasuryAddress, uint256 gasConstant)
+        public
+        view
+    {
         /// @dev before deploying for the first time, generate this expected address by running this script in dry-run mode (see above).
         /// once it has been deployed for the first time, that deployed address should be used as the expected address from then on.
         address expectedAddress = vm.envAddress("EXPECTED_SWEEP_ACTION_ADDRESS");
@@ -73,7 +76,7 @@ contract DeploySweepAction is Script {
             salt,
             keccak256(
                 abi.encodePacked(
-                    type(SweepAction).creationCode, abi.encode(feeTokenRegistry, treasuryAddress, gasConstant)
+                    type(SweepAction).creationCode, abi.encode(feeTokenRegistryAddress, treasuryAddress, gasConstant)
                 )
             )
         );
