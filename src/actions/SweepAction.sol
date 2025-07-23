@@ -13,7 +13,7 @@ import {InvalidArguments, BalanceUnderThreshold} from "./errors/Errors.sol";
 
 /// @title SweepAction
 /// @author Otim Labs, Inc.
-/// @notice an Action that sweeps all native currency from this account to a target address when the balance is higher than a threshold
+/// @notice an Action that sweeps native currency from the user's account to a target when the balance is higher than a threshold
 contract SweepAction is IAction, ISweepAction, OtimFee {
     using InstructionLib for InstructionLib.Instruction;
 
@@ -60,7 +60,7 @@ contract SweepAction is IAction, ISweepAction, OtimFee {
             }
         }
 
-        // get the current balance of this contract
+        // get the user's balance
         uint256 balance = address(this).balance;
 
         // if the balance is under the threshold, revert
@@ -71,7 +71,7 @@ contract SweepAction is IAction, ISweepAction, OtimFee {
         // calculate the amount to sweep
         uint256 sweepAmount = balance - arguments.endBalance;
 
-        // transfer the value to the target address, with a gas limit, and without returning any data
+        // transfer the sweepAmount to the target address, with a gas limit, and without returning any data
         bool success = AssemblyUtils.safeTransferNoReturn(arguments.target, sweepAmount, arguments.gasLimit);
 
         // if the transfer fails, charge the user for the gas used, emit an event, and automatically deactivate the instruction
