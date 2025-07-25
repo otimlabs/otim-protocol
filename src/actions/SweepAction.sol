@@ -13,7 +13,7 @@ import {InvalidArguments, BalanceUnderThreshold} from "./errors/Errors.sol";
 
 /// @title SweepAction
 /// @author Otim Labs, Inc.
-/// @notice an Action that sweeps native currency from the user's account to a target when the balance is higher than a threshold
+/// @notice an Action that sweeps native currency from the user's account to a target when the balance is greater than or equal to a threshold
 contract SweepAction is IAction, ISweepAction, OtimFee {
     using InstructionLib for InstructionLib.Instruction;
 
@@ -54,17 +54,19 @@ contract SweepAction is IAction, ISweepAction, OtimFee {
 
         // if first execution, validate the input
         if (executionState.executionCount == 0) {
-            // validate the arguments
+            /// @dev we allow endBalance == threshold particularly to support the use-case of sweeping the account's entire balance
             if (arguments.target == address(0) || arguments.endBalance > arguments.threshold) {
                 revert InvalidArguments();
             }
         }
 
-        // get the user's balance
+        // get the account's balance
         uint256 balance = address(this).balance;
 
-        // if the balance is under the threshold, revert
-        if (balance <= arguments.threshold) {
+        // if the balance is under the threshold or equal to the endBalance, revert.
+        // the endBalance check is to prevent the instruction from executing
+        // when threshold == endBalance == balance because in this case we would have sweepAmount == 0
+        if (balance < arguments.threshold || balance == arguments.endBalance) {
             revert BalanceUnderThreshold();
         }
 
@@ -74,7 +76,7 @@ contract SweepAction is IAction, ISweepAction, OtimFee {
         // transfer the sweepAmount to the target address, with a gas limit, and without returning any data
         bool success = AssemblyUtils.safeTransferNoReturn(arguments.target, sweepAmount, arguments.gasLimit);
 
-        // if the transfer fails, charge the user for the gas used, emit an event, and automatically deactivate the instruction
+        // if the sweep fails, charge the user for the gas used, emit an event, and automatically deactivate the instruction
         // we do this instead of reverting to protect the Executor from gas griefing attacks
         if (!success) {
             // if the fee is not sponsored, set the execution fee to 1 to only charge the user for gas used

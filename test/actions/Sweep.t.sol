@@ -30,7 +30,7 @@ contract SweepTest is InstructionTestContext {
     address payable public DEFAULT_TARGET = payable(target.addr);
     uint256 public DEFAULT_THRESHOLD = 5 gwei;
     uint256 public DEFAULT_END_BALANCE = 2 gwei;
-    uint256 public DEFAULT_GAS_LIMIT = 21_000;
+    uint256 public DEFAULT_GAS_LIMIT = 0;
 
     IOtimFee.Fee public DEFAULT_FEE;
 
@@ -72,8 +72,28 @@ contract SweepTest is InstructionTestContext {
 
     /// @notice test that execution succeeds with threshold == endBalance
     function test_sweep_happyPath_thresholdEqualsEndBalance() public {
-        // keep defaults but set threshold to endBalance
+        // keep defaults but set threshold == endBalance
         DEFAULT_ACTION_ARGS.threshold = DEFAULT_END_BALANCE;
+
+        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
+
+        assertEq(address(user).balance, USER_START_BALANCE);
+        assertEq(target.addr.balance, 0);
+
+        vm.expectEmit();
+        emit IOtimDelegate.InstructionExecuted(instructionId, 1);
+
+        vm.resetGasMetering();
+        user.executeInstruction(instruction, instructionSig);
+        vm.pauseGasMetering();
+
+        assertEq(address(user).balance, DEFAULT_END_BALANCE);
+        assertEq(target.addr.balance, USER_START_BALANCE - DEFAULT_END_BALANCE);
+    }
+
+    /// @notice test that execution succeeds when balance is exactly equal to the threshold
+    function test_sweep_happyPath_balanceEqualsThreshold() public {
+        DEFAULT_ACTION_ARGS.threshold = USER_START_BALANCE;
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
@@ -135,9 +155,29 @@ contract SweepTest is InstructionTestContext {
         vm.pauseGasMetering();
     }
 
-    /// @notice test that execution reverts with ETH balance under threshold
-    function test_sweep_balanceEqualsThreshold() public {
-        DEFAULT_ACTION_ARGS.threshold = USER_START_BALANCE;
+    /// @notice test that execution reverts with ETH balance == endBalance
+    /// @dev this is so the Instruction doesn't execute unnecessarily when the threshsold == endBalance
+    function test_sweep_balanceEqualsEndBalance() public {
+        vm.deal(address(user), DEFAULT_END_BALANCE);
+
+        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
+
+        bytes memory result = abi.encodeWithSelector(BalanceUnderThreshold.selector);
+        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
+
+        vm.resetGasMetering();
+        user.executeInstruction(instruction, instructionSig);
+        vm.pauseGasMetering();
+    }
+
+    /// @notice test that execution reverts with ETH balance equal to zero even if the threshold is zero
+    /// @dev this is so the Instruction doesn't execute unnecessarily when the threshsold is zero
+    /// @dev this is a special case of the above test case
+    function test_sweep_balanceZero() public {
+        DEFAULT_ACTION_ARGS.threshold = 0;
+        DEFAULT_ACTION_ARGS.endBalance = 0;
+
+        vm.deal(address(user), 0);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
