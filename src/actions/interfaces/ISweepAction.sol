@@ -17,8 +17,8 @@ bytes32 constant ARGUMENTS_TYPEHASH = keccak256(
 interface ISweepAction is IOtimFee {
     /// @notice arguments for the SweepAction contract
     /// @param target - the target address to sweep to
-    /// @param threshold - the user's balance threshold to trigger the sweep
-    /// @param endBalance - the user's balance after the sweep
+    /// @param threshold - the account's balance threshold to trigger the sweep
+    /// @param endBalance - the account's balance after the sweep
     /// @param gasLimit - the maximum amount of gas the sweep external call can consume
     /// @param fee - the fee Otim will charge for the sweep
     struct Sweep {
