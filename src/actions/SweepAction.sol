@@ -66,6 +66,7 @@ contract SweepAction is IAction, ISweepAction, OtimFee {
         // if the balance is under the threshold or equal to the endBalance, revert.
         // the endBalance check is to prevent the instruction from executing
         // when threshold == endBalance == balance because in this case we would have sweepAmount == 0
+        // slither-disable-next-line incorrect-equality
         if (balance < arguments.threshold || balance == arguments.endBalance) {
             revert BalanceUnderThreshold();
         }
