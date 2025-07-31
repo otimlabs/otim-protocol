@@ -52,7 +52,7 @@ contract SweepTest is InstructionTestContext {
         DEFAULT_ARGS = abi.encode(DEFAULT_ACTION_ARGS);
     }
 
-    /// @notice typical Sweep flow
+    /// @notice test Sweep happy path
     function test_sweep_happyPath() public {
         buildInstruction();
 
@@ -70,7 +70,7 @@ contract SweepTest is InstructionTestContext {
         assertEq(target.addr.balance, USER_START_BALANCE - DEFAULT_END_BALANCE);
     }
 
-    /// @notice test that execution succeeds with threshold == endBalance
+    /// @notice test that execution succeeds with threshold == endBalance and balance > threshold
     function test_sweep_happyPath_thresholdEqualsEndBalance() public {
         // keep defaults but set threshold == endBalance
         DEFAULT_ACTION_ARGS.threshold = DEFAULT_END_BALANCE;
@@ -91,7 +91,7 @@ contract SweepTest is InstructionTestContext {
         assertEq(target.addr.balance, USER_START_BALANCE - DEFAULT_END_BALANCE);
     }
 
-    /// @notice test that execution succeeds when balance is exactly equal to the threshold
+    /// @notice test that execution succeeds when balance is exactly equal to the threshold and endBalance < threshold
     function test_sweep_happyPath_balanceEqualsThreshold() public {
         DEFAULT_ACTION_ARGS.threshold = USER_START_BALANCE;
 
@@ -126,7 +126,7 @@ contract SweepTest is InstructionTestContext {
         vm.pauseGasMetering();
     }
 
-    /// @notice test that execution fails with endBalance above threshold
+    /// @notice test that execution fails with endBalance > threshold
     function test_sweep_endBalanceAboveThreshold() public {
         // keep defaults but set endBalance above threshold
         DEFAULT_ACTION_ARGS.endBalance = DEFAULT_THRESHOLD + 1;
@@ -141,7 +141,7 @@ contract SweepTest is InstructionTestContext {
         vm.pauseGasMetering();
     }
 
-    /// @notice test that execution reverts with ETH balance under threshold
+    /// @notice test that execution reverts with balance < threshold
     function test_sweep_balanceUnderThreshold() public {
         DEFAULT_ACTION_ARGS.threshold = USER_START_BALANCE + 1;
 
@@ -155,7 +155,7 @@ contract SweepTest is InstructionTestContext {
         vm.pauseGasMetering();
     }
 
-    /// @notice test that execution reverts with ETH balance == endBalance
+    /// @notice test that execution reverts with endBalance == threshold and balance == threshold
     /// @dev this is so the Instruction doesn't execute unnecessarily when the threshsold == endBalance
     function test_sweep_balanceEqualsEndBalance() public {
         DEFAULT_ACTION_ARGS.threshold = DEFAULT_END_BALANCE;
@@ -172,7 +172,7 @@ contract SweepTest is InstructionTestContext {
         vm.pauseGasMetering();
     }
 
-    /// @notice test that execution reverts with ETH balance equal to zero even if the threshold is zero
+    /// @notice test that execution reverts with endBalance == threshold == 0 and balance == 0
     /// @dev this is so the Instruction doesn't execute unnecessarily when the threshsold is zero
     /// @dev this is a special case of the above test case
     function test_sweep_balanceZero() public {
