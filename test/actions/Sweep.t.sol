@@ -158,6 +158,8 @@ contract SweepTest is InstructionTestContext {
     /// @notice test that execution reverts with ETH balance == endBalance
     /// @dev this is so the Instruction doesn't execute unnecessarily when the threshsold == endBalance
     function test_sweep_balanceEqualsEndBalance() public {
+        DEFAULT_ACTION_ARGS.threshold = DEFAULT_END_BALANCE;
+
         vm.deal(address(user), DEFAULT_END_BALANCE);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
