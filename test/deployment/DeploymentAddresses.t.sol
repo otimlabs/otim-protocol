@@ -18,6 +18,7 @@ import {DeactivateInstructionAction} from "../../src/actions/DeactivateInstructi
 import {TransferOnceAction} from "../../src/actions/TransferOnceAction.sol";
 import {TransferERC20OnceAction} from "../../src/actions/TransferERC20OnceAction.sol";
 import {SweepAction} from "../../src/actions/SweepAction.sol";
+import {SweepERC20Action} from "../../src/actions/SweepERC20Action.sol";
 
 contract DeploymentAddressesTest is Test {
     // expected core addresses
@@ -37,6 +38,7 @@ contract DeploymentAddressesTest is Test {
     address constant EXPECTED_TRANSFER_ONCE_ACTION_ADDRESS = 0x24364bc3C227515BD2f263b63b1C381F86Cc11dB;
     address constant EXPECTED_TRANSFER_ONCE_ERC20_ACTION_ADDRESS = 0x007c835EF7A99878Ca2cB75F9c59bF996527EE3a;
     address constant EXPECTED_SWEEP_ACTION_ADDRESS = 0xCb526Dd98445D70D1718914e76Ec023e22808Bf0;
+    address constant EXPECTED_SWEEP_ERC20_ACTION_ADDRESS = 0x85dCC0E70aD4288b4540D1A5f3Ba49b7934c2E88;
 
     ////////////////////
     // Core addresses //
@@ -107,5 +109,10 @@ contract DeploymentAddressesTest is Test {
     function test_sweepAction_deployedAddress() public {
         address deployed = address(new SweepAction{salt: bytes32(0)}(address(0), address(0), 0));
         assertEq(deployed, EXPECTED_SWEEP_ACTION_ADDRESS);
+    }
+
+    function test_sweepERC20Action_deployedAddress() public {
+        address deployed = address(new SweepERC20Action{salt: bytes32(0)}(address(0), address(0), 0));
+        assertEq(deployed, EXPECTED_SWEEP_ERC20_ACTION_ADDRESS);
     }
 }
