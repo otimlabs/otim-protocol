@@ -6,12 +6,6 @@ checksum = "fa2bc3db351137c4d5eb32b738a814a541b78e87fbcbfeca825e189c4c787153"
 integrity = "d69addf252dfe0688dcd893a7821cbee2421f8ce53d95ca0845a59530043cfd1"
 
 [[dependencies]]
-name = "@skip-go-evm-contracts"
-version = "0.0.0"
-git = "https://github.com/skip-mev/skip-go-evm-contracts.git"
-rev = "e9c8efb943a1828f5da74b3d8374f77dde27a7b3"
-
-[[dependencies]]
 name = "@uniswap-universal-router"
 version = "2.0.0"
 url = "https://soldeer-revisions.s3.amazonaws.com/@uniswap-universal-router/2_0_0_12-02-2025_17:38:08_universal-router.zip"
