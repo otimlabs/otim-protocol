@@ -1,9 +1,9 @@
 [[dependencies]]
 name = "@openzeppelin-contracts"
-version = "5.3.0"
-url = "https://soldeer-revisions.s3.amazonaws.com/@openzeppelin-contracts/5_3_0_10-04-2025_10:51:50_contracts.zip"
-checksum = "fa2bc3db351137c4d5eb32b738a814a541b78e87fbcbfeca825e189c4c787153"
-integrity = "d69addf252dfe0688dcd893a7821cbee2421f8ce53d95ca0845a59530043cfd1"
+version = "5.4.0"
+url = "https://soldeer-revisions.s3.amazonaws.com/@openzeppelin-contracts/5_4_0_19-07-2025_08:59:41_contracts.zip"
+checksum = "3dd38f17610dba4602bd008ee2cb551e51e97d7b4ce04e1ffdf853da832942fa"
+integrity = "4eb0ef219d10ab5a5708adaae1132dc0a93ab6a193378486e842d606c989ff3e"
 
 [[dependencies]]
 name = "@uniswap-universal-router"
@@ -28,14 +28,14 @@ integrity = "e101a06117b3274cd21a3032fa9a55446e842dc0e0e1b0b25008e094a446c453"
 
 [[dependencies]]
 name = "forge-std"
-version = "1.9.7"
-url = "https://soldeer-revisions.s3.amazonaws.com/forge-std/1_9_7_28-04-2025_15:55:08_forge-std-1.9.zip"
-checksum = "8d9e0a885fa8ee6429a4d344aeb6799119f6a94c7c4fe6f188df79b0dce294ba"
-integrity = "9e60fdba82bc374df80db7f2951faff6467b9091873004a3d314cf0c084b3c7d"
+version = "1.10.0"
+url = "https://soldeer-revisions.s3.amazonaws.com/forge-std/1_10_0_02-08-2025_06:50:35_forge-std-1.10.zip"
+checksum = "8cc59e92a7762c170c15f2102c4f3718106dfc78239978fe87c64f316740cc09"
+integrity = "3fd441e2499c5cf04ef9b4126f52150a50dcef9cac1645ff7a955345e947cd04"
 
 [[dependencies]]
 name = "smartcontractkit-chainlink"
-version = "2.22.0"
-url = "https://soldeer-revisions.s3.amazonaws.com/smartcontractkit-chainlink/2_22_0_31-03-2025_09:39:59_smartcontractkit-chainlink-2.22.zip"
-checksum = "f50c1482e3cea13a5ecf14ec545ce6248e177c322109c51724ecfed1bb1d4b6a"
-integrity = "7aa0224682cda7ec1647c22613377c2c6953192acc60ebb5d07676f192e13021"
+version = "2.25.0"
+url = "https://soldeer-revisions.s3.amazonaws.com/smartcontractkit-chainlink/2_25_0_11-07-2025_08:43:57_smartcontractkit-chainlink-2.25.zip"
+checksum = "3a4ce5420ef92df6a72fb429e2d29a62d30a533c287ac7fafd3ddae635e2151d"
+integrity = "112f9de491421a68eb0e17980b3d86eb02f615cedb553e68240cac36868c3ab8"
