@@ -13,7 +13,6 @@ remappings = [
     "@chainlink-contracts/=dependencies/smartcontractkit-chainlink-2.22.0/contracts",
     "@openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.3.0/",
     "@openzeppelin/contracts/=dependencies/@openzeppelin-contracts-5.3.0/",
-    "@skip-go-evm-contracts/=dependencies/@skip-go-evm-contracts-0.0.0/",
     "@uniswap-universal-router/=dependencies/@uniswap-universal-router-2.0.0/",
     "@uniswap-v3-core/=dependencies/@uniswap-v3-core-1.0.2-solc-0.8-simulate/",
     "@uniswap-v3-periphery/=dependencies/@uniswap-v3-periphery-1.4.4/",
@@ -29,7 +28,6 @@ remappings = [
 smartcontractkit-chainlink = "2.22.0"
 "@uniswap-v3-core" = "1.0.2-solc-0.8-simulate"
 "@uniswap-v3-periphery" = "1.4.4"
-"@skip-go-evm-contracts" = { version = "0.0.0", git = "https://github.com/skip-mev/skip-go-evm-contracts.git", rev = "e9c8efb943a1828f5da74b3d8374f77dde27a7b3" }
 
 [soldeer]
 remappings_generated = true

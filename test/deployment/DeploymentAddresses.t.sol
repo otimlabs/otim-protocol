@@ -14,8 +14,6 @@ import {TransferAction} from "../../src/actions/TransferAction.sol";
 import {TransferERC20Action} from "../../src/actions/TransferERC20Action.sol";
 import {RefuelAction} from "../../src/actions/RefuelAction.sol";
 import {RefuelERC20Action} from "../../src/actions/RefuelERC20Action.sol";
-import {SweepDepositAccountAction} from "../../src/actions/SweepDepositAccountAction.sol";
-import {SweepDepositAccountERC20Action} from "../../src/actions/SweepDepositAccountERC20Action.sol";
 import {DeactivateInstructionAction} from "../../src/actions/DeactivateInstructionAction.sol";
 import {TransferOnceAction} from "../../src/actions/TransferOnceAction.sol";
 import {TransferERC20OnceAction} from "../../src/actions/TransferERC20OnceAction.sol";
@@ -34,10 +32,6 @@ contract DeploymentAddressesTest is Test {
     address constant EXPECTED_TRANSFER_ERC20_ACTION_ADDRESS = 0x0860117A7A5930C7970f4a4E0CDC7D37b70E4F46;
     address constant EXPECTED_REFUEL_ACTION_ADDRESS = 0xd85576b4B9f9552292A0B7eBCa5f8B8f48a6637f;
     address constant EXPECTED_REFUEL_ERC20_ACTION_ADDRESS = 0xCFA692c1f99008de0B4AA2c8ed49afD8971ddad9;
-    address constant EXPECTED_SWEEP_DEPOSIT_ACCOUNT_ACTION_ADDRESS = 0x9b3E99B674A9789497B03f95597aD1463e103A7F;
-    address constant EXPECTED_SWEEP_DEPOSIT_ACCOUNT_ERC20_ACTION_ADDRESS = 0x7C7f3cd7Fb8b76A1c603A4D0F714C8D6475A186b;
-    address constant EXPECTED_SWEEP_SKIP_CCTP_DEPOSIT_ACCOUNT_ACTION_ADDRESS =
-        0x3e0e3172bAA045B427869b9db3bcc6016E37478f;
     address constant EXPECTED_UNISWAP_V3_EXACT_INPUT_ACTION_ADDRESS = 0xD1e7Ef6fd641ff48678B1A8f6c815a24e5D14cB4;
     address constant EXPECTED_DEACTIVATE_INSTRUCTION_ACTION_ADDRESS = 0xd6EDb2C598603E77424145E58fb5F4D49092C46B;
     address constant EXPECTED_TRANSFER_ONCE_ACTION_ADDRESS = 0x24364bc3C227515BD2f263b63b1C381F86Cc11dB;
@@ -92,16 +86,6 @@ contract DeploymentAddressesTest is Test {
     function test_refuelERC20Action_deployedAddress() public {
         address deployed = address(new RefuelERC20Action{salt: bytes32(0)}(address(0), address(0), 0));
         assertEq(deployed, EXPECTED_REFUEL_ERC20_ACTION_ADDRESS);
-    }
-
-    function test_sweepDepositAccountAction_deployedAddress() public {
-        address deployed = address(new SweepDepositAccountAction{salt: bytes32(0)}(address(0), address(0), 0));
-        assertEq(deployed, EXPECTED_SWEEP_DEPOSIT_ACCOUNT_ACTION_ADDRESS);
-    }
-
-    function test_sweepDepositAccountERC20Action_deployedAddress() public {
-        address deployed = address(new SweepDepositAccountERC20Action{salt: bytes32(0)}(address(0), address(0), 0));
-        assertEq(deployed, EXPECTED_SWEEP_DEPOSIT_ACCOUNT_ERC20_ACTION_ADDRESS);
     }
 
     function test_deactivateInstructionAction_deployedAddress() public {
