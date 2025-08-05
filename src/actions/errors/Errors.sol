@@ -11,3 +11,5 @@ error BalanceUnderThreshold();
 error UniswapV3PoolDoesNotExist();
 
 error InstructionAlreadyDeactivated();
+
+error CallOnceFailed(address target, bytes4 selector, bytes result);
