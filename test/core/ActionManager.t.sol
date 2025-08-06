@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.26;
 
-import {Test, console} from "forge-std/src/Test.sol";
-import {Vm, VmSafe} from "forge-std/src/Vm.sol";
+import {Test} from "forge-std/src/Test.sol";
+import {VmSafe} from "forge-std/src/Vm.sol";
 
 import {IAccessControl} from "@openzeppelin-contracts/access/IAccessControl.sol";
 

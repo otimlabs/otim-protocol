@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.26;
 
-import {Ownable} from "@openzeppelin-contracts/access/Ownable.sol";
-import {Test, console} from "forge-std/src/Test.sol";
+import {Test} from "forge-std/src/Test.sol";
 import {Vm, VmSafe} from "forge-std/src/Vm.sol";
 
 import {InstructionStorage} from "../../src/core/InstructionStorage.sol";

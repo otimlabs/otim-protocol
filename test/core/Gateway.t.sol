@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.26;
 
-// forge test suite
-import {Vm, VmSafe} from "forge-std/src/Vm.sol";
-
 // test helper contract
 import {InstructionTestContext} from "../utils/InstructionTestContext.sol";
 

@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.26;
 
-import {Vm, VmSafe} from "forge-std/src/Vm.sol";
-
 import {InstructionTestContext} from "../utils/InstructionTestContext.sol";
 
 import {InstructionLib} from "../../src/libraries/Instruction.sol";
-import {OtimDelegate} from "../../src/OtimDelegate.sol";
 import {IAction} from "../../src/actions/interfaces/IAction.sol";
 
 import {TransferAction} from "../../src/actions/TransferAction.sol";

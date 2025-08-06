@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.26;
 
-import {Script, console2} from "forge-std/src/Script.sol";
+import {Script} from "forge-std/src/Script.sol";
 
 import {ActionManager} from "../../../src/core/ActionManager.sol";
 
