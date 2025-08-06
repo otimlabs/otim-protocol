@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.26;
 
-import {Test, console} from "forge-std/src/Test.sol";
-import {Vm, VmSafe} from "forge-std/src/Vm.sol";
+import {Test} from "forge-std/src/Test.sol";
 
 import {MockV3Aggregator} from "@chainlink-contracts/src/v0.8/shared/mocks/MockV3Aggregator.sol";
-
-import {FeeTokenRegistry} from "../../src/infrastructure/FeeTokenRegistry.sol";
-import {IFeeTokenRegistry} from "../../src/infrastructure/interfaces/IFeeTokenRegistry.sol";
 
 import {InvertedPriceFeed} from "../../src/mocks/InvertedPriceFeed.sol";
 

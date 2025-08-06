@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.26;
 
-import {Vm, VmSafe} from "forge-std/src/Vm.sol";
-
 import {ReentrancyGuardTransient} from "@openzeppelin-contracts/utils/ReentrancyGuardTransient.sol";
 
 import {InstructionLib} from "../../src/libraries/Instruction.sol";
@@ -15,7 +13,6 @@ import {ReturnBombTarget} from "../mocks/ReturnBombTarget.sol";
 import {DrainGasTarget} from "../mocks/DrainGasTarget.sol";
 
 import {IOtimDelegate} from "../../src/IOtimDelegate.sol";
-import {IGateway} from "../../src/core/interfaces/IGateway.sol";
 
 import {IOtimFee} from "../../src/actions/fee-models/interfaces/IOtimFee.sol";
 

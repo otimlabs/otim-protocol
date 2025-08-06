@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.26;
 
-import {Vm, VmSafe} from "forge-std/src/Vm.sol";
+import {VmSafe} from "forge-std/src/Vm.sol";
 
 import {ERC20MockWithDecimals} from "../../mocks/ERC20MockWithDecimals.sol";
 import {MockV3Aggregator} from "@chainlink-contracts/src/v0.8/shared/mocks/MockV3Aggregator.sol";

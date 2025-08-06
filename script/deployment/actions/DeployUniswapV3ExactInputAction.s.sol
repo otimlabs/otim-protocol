@@ -2,7 +2,6 @@
 pragma solidity ^0.8.26;
 
 import {Script, console2} from "forge-std/src/Script.sol";
-import {VmSafe} from "forge-std/src/Vm.sol";
 
 import {UniswapV3ExactInputAction} from "../../../src/actions/UniswapV3ExactInputAction.sol";
 

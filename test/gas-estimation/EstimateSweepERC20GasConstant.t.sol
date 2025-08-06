@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.26;
 
-import {Test, console} from "forge-std/src/Test.sol";
-import {Vm, VmSafe} from "forge-std/src/Vm.sol";
+import {VmSafe} from "forge-std/src/Vm.sol";
 
 import {IERC20} from "@openzeppelin-contracts/token/ERC20/IERC20.sol";
 import {MockV3Aggregator} from "@chainlink-contracts/src/v0.8/shared/mocks/MockV3Aggregator.sol";
@@ -14,8 +13,6 @@ import {InstructionForkTestContext} from "../utils/InstructionForkTestContext.so
 
 import {FeeTokenRegistry} from "../../src/infrastructure/FeeTokenRegistry.sol";
 import {Treasury} from "../../src/infrastructure/Treasury.sol";
-
-import {IOtimFee} from "../../src/actions/fee-models/interfaces/IOtimFee.sol";
 
 import {SweepERC20Action} from "../../src/actions/SweepERC20Action.sol";
 import {ISweepERC20Action} from "../../src/actions/interfaces/ISweepERC20Action.sol";
