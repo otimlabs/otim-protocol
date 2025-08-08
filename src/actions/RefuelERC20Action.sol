@@ -29,15 +29,15 @@ contract RefuelERC20Action is IAction, IRefuelERC20Action, OtimFee {
     }
 
     /// @inheritdoc IRefuelERC20Action
-    function hash(RefuelERC20 memory refuelERC20) public pure returns (bytes32) {
+    function hash(RefuelERC20 memory arguments) public pure returns (bytes32) {
         return keccak256(
             abi.encode(
                 ARGUMENTS_TYPEHASH,
-                refuelERC20.token,
-                refuelERC20.target,
-                refuelERC20.threshold,
-                refuelERC20.endBalance,
-                hash(refuelERC20.fee)
+                arguments.token,
+                arguments.target,
+                arguments.threshold,
+                arguments.endBalance,
+                hash(arguments.fee)
             )
         );
     }
@@ -52,31 +52,31 @@ contract RefuelERC20Action is IAction, IRefuelERC20Action, OtimFee {
         uint256 startGas = gasleft();
 
         // decode the arguments from the instruction
-        RefuelERC20 memory refuelERC20 = abi.decode(instruction.arguments, (RefuelERC20));
+        RefuelERC20 memory arguments = abi.decode(instruction.arguments, (RefuelERC20));
 
         // if first execution, validate the input
         if (executionState.executionCount == 0) {
             // validate the arguments
             if (
-                refuelERC20.token == address(0) || refuelERC20.target == address(0)
-                    || refuelERC20.threshold >= refuelERC20.endBalance
+                arguments.token == address(0) || arguments.target == address(0)
+                    || arguments.threshold >= arguments.endBalance
             ) {
                 revert InvalidArguments();
             }
         }
 
-        IERC20 refuelToken = IERC20(refuelERC20.token);
+        IERC20 refuelToken = IERC20(arguments.token);
 
         // get the target's ERC20 balance
-        uint256 balance = refuelToken.balanceOf(refuelERC20.target);
+        uint256 balance = refuelToken.balanceOf(arguments.target);
 
         // if the balance is above the threshold, revert
-        if (balance > refuelERC20.threshold) {
+        if (balance > arguments.threshold) {
             revert BalanceOverThreshold();
         }
 
         // calculate the amount to refuel
-        uint256 refuelAmount = refuelERC20.endBalance - balance;
+        uint256 refuelAmount = arguments.endBalance - balance;
 
         // check if the account has enough balance to refuel
         if (refuelToken.balanceOf(address(this)) < refuelAmount) {
@@ -84,10 +84,10 @@ contract RefuelERC20Action is IAction, IRefuelERC20Action, OtimFee {
         }
 
         // transfer the refuel amount to the target
-        refuelToken.safeTransfer(refuelERC20.target, refuelAmount);
+        refuelToken.safeTransfer(arguments.target, refuelAmount);
 
         // charge the fee
-        chargeFee(startGas - gasleft(), refuelERC20.fee);
+        chargeFee(startGas - gasleft(), arguments.fee);
 
         // this action has no auto-deactivation cases
         return false;

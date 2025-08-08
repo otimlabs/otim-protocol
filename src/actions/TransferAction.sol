@@ -28,15 +28,15 @@ contract TransferAction is IAction, ITransferAction, Interval, OtimFee {
     }
 
     /// @inheritdoc ITransferAction
-    function hash(Transfer memory transfer) public pure returns (bytes32) {
+    function hash(Transfer memory arguments) public pure returns (bytes32) {
         return keccak256(
             abi.encode(
                 ARGUMENTS_TYPEHASH,
-                transfer.target,
-                transfer.value,
-                transfer.gasLimit,
-                hash(transfer.schedule),
-                hash(transfer.fee)
+                arguments.target,
+                arguments.value,
+                arguments.gasLimit,
+                hash(arguments.schedule),
+                hash(arguments.fee)
             )
         );
     }
@@ -51,44 +51,44 @@ contract TransferAction is IAction, ITransferAction, Interval, OtimFee {
         uint256 startGas = gasleft();
 
         // decode the arguments from the instruction
-        Transfer memory transfer = abi.decode(instruction.arguments, (Transfer));
+        Transfer memory arguments = abi.decode(instruction.arguments, (Transfer));
 
         // if first execution, validate the input
         if (executionState.executionCount == 0) {
             // validate the arguments
-            if (transfer.target == address(0) || transfer.value == 0) {
+            if (arguments.target == address(0) || arguments.value == 0) {
                 revert InvalidArguments();
             }
 
-            checkStart(transfer.schedule);
+            checkStart(arguments.schedule);
         } else {
-            checkInterval(transfer.schedule, executionState.lastExecuted);
+            checkInterval(arguments.schedule, executionState.lastExecuted);
         }
 
         // check if the account has enough balance to transfer
-        if (address(this).balance < transfer.value) {
+        if (address(this).balance < arguments.value) {
             revert InsufficientBalance();
         }
 
         // transfer the value to the target address, with a gas limit, and without returning any data
-        bool success = AssemblyUtils.safeTransferNoReturn(transfer.target, transfer.value, transfer.gasLimit);
+        bool success = AssemblyUtils.safeTransferNoReturn(arguments.target, arguments.value, arguments.gasLimit);
 
         // if the transfer fails, charge the user for gas used, emit an event, and automatically deactivate the instruction
         // we do this instead of reverting to protect the Executor from gas griefing attacks
         if (!success) {
             // if the fee is not sponsored, set the execution fee to 1 to only charge the user for gas used
-            if (transfer.fee.executionFee > 0) {
-                transfer.fee.executionFee = 1;
+            if (arguments.fee.executionFee > 0) {
+                arguments.fee.executionFee = 1;
             }
 
             // emit that the transfer failed
-            emit TransferActionFailed(transfer.target);
+            emit TransferActionFailed(arguments.target);
 
             // deactivate the instruction
             deactivate = true;
         }
 
         // charge the fee
-        chargeFee(startGas - gasleft(), transfer.fee);
+        chargeFee(startGas - gasleft(), arguments.fee);
     }
 }

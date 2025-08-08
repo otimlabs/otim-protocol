@@ -30,15 +30,15 @@ contract TransferERC20Action is IAction, ITransferERC20Action, Interval, OtimFee
     }
 
     /// @inheritdoc ITransferERC20Action
-    function hash(TransferERC20 memory transferERC20) public pure returns (bytes32) {
+    function hash(TransferERC20 memory arguments) public pure returns (bytes32) {
         return keccak256(
             abi.encode(
                 ARGUMENTS_TYPEHASH,
-                transferERC20.token,
-                transferERC20.target,
-                transferERC20.value,
-                hash(transferERC20.schedule),
-                hash(transferERC20.fee)
+                arguments.token,
+                arguments.target,
+                arguments.value,
+                hash(arguments.schedule),
+                hash(arguments.fee)
             )
         );
     }
@@ -53,32 +53,32 @@ contract TransferERC20Action is IAction, ITransferERC20Action, Interval, OtimFee
         uint256 startGas = gasleft();
 
         // decode the arguments from the instruction
-        TransferERC20 memory transferERC20 = abi.decode(instruction.arguments, (TransferERC20));
+        TransferERC20 memory arguments = abi.decode(instruction.arguments, (TransferERC20));
 
         // if first execution, validate the input
         if (executionState.executionCount == 0) {
             // validate the arguments
-            if (transferERC20.token == address(0) || transferERC20.target == address(0) || transferERC20.value == 0) {
+            if (arguments.token == address(0) || arguments.target == address(0) || arguments.value == 0) {
                 revert InvalidArguments();
             }
 
-            checkStart(transferERC20.schedule);
+            checkStart(arguments.schedule);
         } else {
-            checkInterval(transferERC20.schedule, executionState.lastExecuted);
+            checkInterval(arguments.schedule, executionState.lastExecuted);
         }
 
-        IERC20 transferToken = IERC20(transferERC20.token);
+        IERC20 transferToken = IERC20(arguments.token);
 
         // check if the account has enough balance to transfer
-        if (transferToken.balanceOf(address(this)) < transferERC20.value) {
+        if (transferToken.balanceOf(address(this)) < arguments.value) {
             revert InsufficientBalance();
         }
 
         // transfer the value to the target address
-        transferToken.safeTransfer(transferERC20.target, transferERC20.value);
+        transferToken.safeTransfer(arguments.target, arguments.value);
 
         // charge the fee
-        chargeFee(startGas - gasleft(), transferERC20.fee);
+        chargeFee(startGas - gasleft(), arguments.fee);
 
         // this action has no auto-deactivation cases
         return false;

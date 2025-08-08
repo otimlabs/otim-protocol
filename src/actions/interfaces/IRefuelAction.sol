@@ -33,5 +33,5 @@ interface IRefuelAction is IOtimFee {
     event RefuelActionFailed(address indexed target);
 
     /// @notice calculates the EIP-712 hash of the Refuel struct
-    function hash(Refuel memory refuel) external pure returns (bytes32);
+    function hash(Refuel memory arguments) external pure returns (bytes32);
 }

@@ -31,5 +31,5 @@ interface ITransferERC20Action is IInterval, IOtimFee {
     }
 
     /// @notice calculates the EIP-712 hash of the TransferERC20 struct
-    function hash(TransferERC20 memory transferERC20) external pure returns (bytes32);
+    function hash(TransferERC20 memory arguments) external pure returns (bytes32);
 }

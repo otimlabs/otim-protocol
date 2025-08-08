@@ -41,5 +41,5 @@ interface IUniswapV3ExactInputAction is IInterval, IOtimFee {
     }
 
     /// @notice calculates the EIP-712 hash of the UniswapV3ExactInput struct
-    function hash(UniswapV3ExactInput memory uniswapV3ExactInput) external pure returns (bytes32);
+    function hash(UniswapV3ExactInput memory arguments) external pure returns (bytes32);
 }

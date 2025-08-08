@@ -30,5 +30,5 @@ interface IRefuelERC20Action is IOtimFee {
     }
 
     /// @notice calculates the EIP-712 hash of the RefuelERC20 struct
-    function hash(RefuelERC20 memory refuelERC20) external pure returns (bytes32);
+    function hash(RefuelERC20 memory arguments) external pure returns (bytes32);
 }

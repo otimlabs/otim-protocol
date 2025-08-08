@@ -27,15 +27,15 @@ contract RefuelAction is IAction, IRefuelAction, OtimFee {
     }
 
     /// @inheritdoc IRefuelAction
-    function hash(Refuel memory refuel) public pure returns (bytes32) {
+    function hash(Refuel memory arguments) public pure returns (bytes32) {
         return keccak256(
             abi.encode(
                 ARGUMENTS_TYPEHASH,
-                refuel.target,
-                refuel.threshold,
-                refuel.endBalance,
-                refuel.gasLimit,
-                hash(refuel.fee)
+                arguments.target,
+                arguments.threshold,
+                arguments.endBalance,
+                arguments.gasLimit,
+                hash(arguments.fee)
             )
         );
     }
@@ -50,26 +50,26 @@ contract RefuelAction is IAction, IRefuelAction, OtimFee {
         uint256 startGas = gasleft();
 
         // decode the arguments from the instruction
-        Refuel memory refuel = abi.decode(instruction.arguments, (Refuel));
+        Refuel memory arguments = abi.decode(instruction.arguments, (Refuel));
 
         // if first execution, validate the input
         if (executionState.executionCount == 0) {
             // validate the arguments
-            if (refuel.target == address(0) || refuel.threshold >= refuel.endBalance) {
+            if (arguments.target == address(0) || arguments.threshold >= arguments.endBalance) {
                 revert InvalidArguments();
             }
         }
 
         // get the target's balance
-        uint256 balance = refuel.target.balance;
+        uint256 balance = arguments.target.balance;
 
         // if the balance is above the threshold, revert
-        if (balance > refuel.threshold) {
+        if (balance > arguments.threshold) {
             revert BalanceOverThreshold();
         }
 
         // calculate the amount to refuel
-        uint256 refuelAmount = refuel.endBalance - balance;
+        uint256 refuelAmount = arguments.endBalance - balance;
 
         // if the contract doesn't have enough balance to refuel, revert
         if (address(this).balance < refuelAmount) {
@@ -77,24 +77,24 @@ contract RefuelAction is IAction, IRefuelAction, OtimFee {
         }
 
         // transfer the value to the target address, with a gas limit, and without returning any data
-        bool success = AssemblyUtils.safeTransferNoReturn(refuel.target, refuelAmount, refuel.gasLimit);
+        bool success = AssemblyUtils.safeTransferNoReturn(arguments.target, refuelAmount, arguments.gasLimit);
 
         // if the transfer fails, charge the user for the gas used, emit an event, and automatically deactivate the instruction
         // we do this instead of reverting to protect the Executor from gas griefing attacks
         if (!success) {
             // if the fee is not sponsored, set the execution fee to 1 to only charge the user for gas used
-            if (refuel.fee.executionFee > 0) {
-                refuel.fee.executionFee = 1;
+            if (arguments.fee.executionFee > 0) {
+                arguments.fee.executionFee = 1;
             }
 
             // emit that the refuel failed
-            emit RefuelActionFailed(refuel.target);
+            emit RefuelActionFailed(arguments.target);
 
             // deactivate the instruction
             deactivate = true;
         }
 
         // charge the fee
-        chargeFee(startGas - gasleft(), refuel.fee);
+        chargeFee(startGas - gasleft(), arguments.fee);
     }
 }
