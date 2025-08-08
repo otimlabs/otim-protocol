@@ -5,26 +5,26 @@ import {Script} from "forge-std/src/Script.sol";
 
 import {IAccessControl} from "@openzeppelin-contracts/access/IAccessControl.sol";
 
-/// @title RevokeActionManagerOwnerRole
+/// @title RevokeOwnerRole
 /// @author Otim Labs, Inc.
 /// @notice script to revoke the owner role from an address on ActionManager
-contract RevokeActionManagerOwnerRole is Script {
+contract RevokeOwnerRole is Script {
     /// @dev make sure to run `cp .env_example .env` and fill in each variable
     /// then run `source .env` in your terminal before copying and pasting one of the commands below
 
     // commands to revoke the owner role from an address on ActionManager (enter old owner address interactively):
     //
-    // - with private key (on Anvil): forge script RevokeActionManagerOwnerRole --broadcast --fork-url http://localhost:8545 --private-key $ANVIL_OWNER_PK
-    // - with private key:            forge script RevokeActionManagerOwnerRole --broadcast --rpc-url $RPC_URL --private-key $OWNER_PK
-    // - with Ledger:                 forge script RevokeActionManagerOwnerRole --broadcast --rpc-url $RPC_URL --ledger
-    // - with AWS:                    forge script RevokeActionManagerOwnerRole --broadcast --rpc-url $RPC_URL --aws
+    // - with private key (on Anvil): forge script RevokeOwnerRole --broadcast --fork-url http://localhost:8545 --private-key $ANVIL_OWNER_PK
+    // - with private key:            forge script RevokeOwnerRole --broadcast --rpc-url $RPC_URL --private-key $OWNER_PK
+    // - with Ledger:                 forge script RevokeOwnerRole --broadcast --rpc-url $RPC_URL --ledger
+    // - with AWS:                    forge script RevokeOwnerRole --broadcast --rpc-url $RPC_URL --aws
 
     // commands to revoke the owner role from an address on ActionManager (enter old owner address as a command line argument):
     //
-    // - with private key (on Anvil): forge script RevokeActionManagerOwnerRole --sig "run(address)" --broadcast --fork-url http://localhost:8545 --private-key $ANVIL_OWNER_PK <oldOwner>
-    // - with private key:            forge script RevokeActionManagerOwnerRole --sig "run(address)" --broadcast --rpc-url $RPC_URL --private-key $OWNER_PK <oldOwner>
-    // - with Ledger:                 forge script RevokeActionManagerOwnerRole --sig "run(address)" --broadcast --rpc-url $RPC_URL --ledger <oldOwner>
-    // - with AWS:                    forge script RevokeActionManagerOwnerRole --sig "run(address)" --broadcast --rpc-url $RPC_URL --aws <oldOwner>
+    // - with private key (on Anvil): forge script RevokeOwnerRole --sig "run(address)" --broadcast --fork-url http://localhost:8545 --private-key $ANVIL_OWNER_PK <oldOwner>
+    // - with private key:            forge script RevokeOwnerRole --sig "run(address)" --broadcast --rpc-url $RPC_URL --private-key $OWNER_PK <oldOwner>
+    // - with Ledger:                 forge script RevokeOwnerRole --sig "run(address)" --broadcast --rpc-url $RPC_URL --ledger <oldOwner>
+    // - with AWS:                    forge script RevokeOwnerRole --sig "run(address)" --broadcast --rpc-url $RPC_URL --aws <oldOwner>
 
     /// @dev this is the same as the DEFAULT_ADMIN_ROLE in OpenZeppelin's AccessControl.sol
     bytes32 public constant OWNER_ROLE = 0x00;
@@ -33,7 +33,7 @@ contract RevokeActionManagerOwnerRole is Script {
     error NoSelfRevoke();
 
     function run() public {
-        address oldOwner = vm.promptAddress("Enter old ActionManager owner address");
+        address oldOwner = vm.promptAddress("Enter old owner address");
 
         run(oldOwner);
     }
