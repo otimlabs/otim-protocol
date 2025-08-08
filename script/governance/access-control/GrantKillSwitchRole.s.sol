@@ -26,7 +26,7 @@ contract GrantKillSwitchRole is Script {
     // - with Ledger:                 forge script GrantKillSwitchRole --sig "run(address)" --broadcast --rpc-url $RPC_URL --ledger <newKillSwitchOwner>
     // - with AWS:                    forge script GrantKillSwitchRole --sig "run(address)" --broadcast --rpc-url $RPC_URL --aws <newKillSwitchOwner>
 
-    bytes32 public constant KILL_SWITCH_ROLE = keccak256("KILL_SWITCH_ROLE");
+    bytes32 public constant KILL_SWTICH_ROLE = keccak256("KILL_SWITCH_ROLE");
 
     error KillSwitchRoleAlreadyGranted();
 
@@ -42,14 +42,14 @@ contract GrantKillSwitchRole is Script {
 
         IAccessControl actionManager = IAccessControl(actionManagerAddress);
 
-        if (actionManager.hasRole(KILL_SWITCH_ROLE, newKillSwitchOwner)) {
+        if (actionManager.hasRole(KILL_SWTICH_ROLE, newKillSwitchOwner)) {
             revert KillSwitchRoleAlreadyGranted();
         }
 
         vm.startBroadcast();
 
         // grant kill-switch role to new address on ActionManager
-        actionManager.grantRole(KILL_SWITCH_ROLE, newKillSwitchOwner);
+        actionManager.grantRole(KILL_SWTICH_ROLE, newKillSwitchOwner);
 
         vm.stopBroadcast();
     }

@@ -26,7 +26,7 @@ contract RevokeKillSwitchRole is Script {
     // - with Ledger:                 forge script RevokeKillSwitchRole --sig "run(address)" --broadcast --rpc-url $RPC_URL --ledger <oldKillSwitchOwner>
     // - with AWS:                    forge script RevokeKillSwitchRole --sig "run(address)" --broadcast --rpc-url $RPC_URL --aws <oldKillSwitchOwner>
 
-    bytes32 public constant KILL_SWITCH_ROLE = keccak256("KILL_SWITCH_ROLE");
+    bytes32 public constant KILL_SWTICH_ROLE = keccak256("KILL_SWITCH_ROLE");
 
     error KillSwitchRoleAlreadyRevoked();
 
@@ -42,14 +42,14 @@ contract RevokeKillSwitchRole is Script {
 
         IAccessControl actionManager = IAccessControl(actionManagerAddress);
 
-        if (!actionManager.hasRole(KILL_SWITCH_ROLE, oldKillSwitchOwner)) {
+        if (!actionManager.hasRole(KILL_SWTICH_ROLE, oldKillSwitchOwner)) {
             revert KillSwitchRoleAlreadyRevoked();
         }
 
         vm.startBroadcast();
 
         // revoke kill-switch role from address on ActionManager
-        actionManager.revokeRole(KILL_SWITCH_ROLE, oldKillSwitchOwner);
+        actionManager.revokeRole(KILL_SWTICH_ROLE, oldKillSwitchOwner);
 
         vm.stopBroadcast();
     }
