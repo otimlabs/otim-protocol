@@ -53,7 +53,7 @@ EstimateSweepGasConstant:testFuzz_sweep_gasConstant(uint256,uint256,(address,uin
 EstimateTransferERC20GasConstant:testFuzz_transferERC20_gasConstant(uint256,uint256,(address,address,uint256,(uint256,uint256,uint256,uint256),(address,uint256,uint256,uint256))) (runs: 256, μ: 3386, ~: 3249)
 EstimateTransferGasConstant:testFuzz_transfer_gasConstant(uint256,uint256,(address,uint256,uint256,(uint256,uint256,uint256,uint256),(address,uint256,uint256,uint256))) (runs: 256, μ: 3380, ~: 3276)
 EstimateTransferOnceERC20GasConstant:testFuzz_transferERC20Once_gasConstant(uint256,(address,address,uint256,(address,uint256,uint256,uint256))) (runs: 256, μ: 2067, ~: 1956)
-EstimateTransferOnceGasConstant:testFuzz_transferOnce_gasConstant(uint256,(address,uint256,uint256,(address,uint256,uint256,uint256))) (runs: 256, μ: 2022, ~: 1956)
+EstimateTransferOnceGasConstant:testFuzz_transferOnce_gasConstant(uint256,(address,uint256,uint256,(address,uint256,uint256,uint256))) (runs: 256, μ: 2015, ~: 1956)
 EstimateUniswapV3ExactInputConstant:testFuzz_uniswapV3ExactInput_gasConstant(uint256,uint256,(address,address,address,uint24,uint256,uint256,uint32,uint32,(uint256,uint256,uint256,uint256),(address,uint256,uint256,uint256))) (runs: 256, μ: 4609, ~: 4560)
 FeeTokenRegistryTest:test_addFeeToken_alreadyRegistered() (gas: 1925)
 FeeTokenRegistryTest:test_addFeeToken_happyPath() (gas: 37614)
