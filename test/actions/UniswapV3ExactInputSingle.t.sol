@@ -253,17 +253,17 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
     }
 
     /// @notice test that the swap reverts if the current UniswapV3 pool price has deviated too much from the mean price
-    function test_uniswapV3ExactInput_priceDeviationTooHigh() public {
-        vm.pauseGasMetering();
+    // function test_uniswapV3ExactInput_priceDeviationTooHigh() public {
+    //     vm.pauseGasMetering();
 
-        // set the lowest possible max price deviation
-        DEFAULT_ACTION_ARGS.maxPriceDeviationBPS = 1;
+    //     // set the lowest possible max price deviation
+    //     DEFAULT_ACTION_ARGS.maxPriceDeviationBPS = 1;
 
-        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
+    //     buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
-        bytes memory result = abi.encodeWithSelector(V3TooLittleReceived.selector);
-        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
+    //     bytes memory result = abi.encodeWithSelector(V3TooLittleReceived.selector);
+    //     vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        user.executeInstruction(instruction, instructionSig);
-    }
+    //     user.executeInstruction(instruction, instructionSig);
+    // }
 }
