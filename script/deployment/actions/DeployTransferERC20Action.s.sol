@@ -30,14 +30,14 @@ contract DeployTransferERC20Action is Script {
 
     // command to generate the expected deployment address (without actually deploying):
     //
-    // forge script DeployTransferAction
+    // forge script DeployTransferERC20Action
 
     // commands to deterministically deploy (and check the expected address before deploying):
     //
-    // - with private key (on Anvil): forge script DeployTransferAction --broadcast --fork-url http://localhost:8545 --private-key $ANVIL_DEPLOYER_PK
-    // - with private key:            forge script DeployTransferAction --broadcast --rpc-url $RPC_URL --private-key $DEPLOYER_PK
-    // - with Ledger:                 forge script DeployTransferAction --broadcast --rpc-url $RPC_URL --ledger
-    // - with AWS:                    forge script DeployTransferAction --broadcast --rpc-url $RPC_URL --aws
+    // - with private key (on Anvil): forge script DeployTransferERC20Action --broadcast --fork-url http://localhost:8545 --private-key $ANVIL_DEPLOYER_PK
+    // - with private key:            forge script DeployTransferERC20Action --broadcast --rpc-url $RPC_URL --private-key $DEPLOYER_PK
+    // - with Ledger:                 forge script DeployTransferERC20Action --broadcast --rpc-url $RPC_URL --ledger
+    // - with AWS:                    forge script DeployTransferERC20Action --broadcast --rpc-url $RPC_URL --aws
 
     bytes32 constant salt = keccak256("ON_TIME_INSTRUCTED_MONEY");
 
