@@ -13,7 +13,7 @@ import {OtimFee} from "./fee-models/OtimFee.sol";
 import {IAction} from "./interfaces/IAction.sol";
 import {ISweepCCTPAction, INSTRUCTION_TYPEHASH, ARGUMENTS_TYPEHASH} from "./interfaces/ISweepCCTPAction.sol";
 
-import {InvalidArguments, CCTPTokenNotSupported, BalanceUnderThreshold} from "./errors/Errors.sol";
+import {InvalidArguments, BalanceUnderThreshold, CCTPTokenNotSupported} from "./errors/Errors.sol";
 
 /// @title SweepCCTPAction
 /// @author Otim Labs, Inc.
