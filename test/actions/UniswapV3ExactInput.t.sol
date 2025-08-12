@@ -239,6 +239,8 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
 
     /// @notice test that the swap reverts if the UniswapV3 pool doesn't exist
     function test_uniswapV3ExactInput_nonExistentPool() public {
+        vm.pauseGasMetering();
+
         // not a valid fee tier
         DEFAULT_ACTION_ARGS.feeTier = 501;
 
@@ -247,9 +249,7 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(UniswapV3PoolDoesNotExist.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
-        vm.pauseGasMetering();
     }
 
     /// @notice test that the swap reverts if the current UniswapV3 pool price has deviated too much from the mean price
