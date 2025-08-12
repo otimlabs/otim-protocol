@@ -83,7 +83,7 @@ contract SweepCCTPTest is InstructionForkTestContext {
         DEFAULT_ARGS = abi.encode(DEFAULT_ACTION_ARGS);
     }
 
-    /// @notice test that sweeping USDC to the CCTP relayer works as expected
+    /// @notice test that sweeping USDC via CCTP works as expected
     function test_sweepCCTP_happyPath() public {
         buildInstruction();
 
@@ -112,7 +112,7 @@ contract SweepCCTPTest is InstructionForkTestContext {
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
-        // check that the deposit account is empty after the sweep
+        // check that the user's balance is equal to endBalance after the sweep
         assertEq(IERC20(SEPOLIA_USDC).balanceOf(address(user)), DEFAULT_END_BALANCE);
     }
 
@@ -148,11 +148,11 @@ contract SweepCCTPTest is InstructionForkTestContext {
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
-        // check that the deposit account is empty after the sweep
+        // check that the user's balance is equal to 0 after the sweep
         assertEq(IERC20(SEPOLIA_USDC).balanceOf(address(user)), 0);
     }
 
-    /// @notice test that sweeping USDC to the CCTP relayer works as expected even when the deposit account has more USDC than the burn limit
+    /// @notice test that sweeping USDC via CCTP works as expected even when the user has more USDC than the burn limit
     function test_sweepCCTP_happyPath_overBurnLimit() public {
         buildInstruction();
 
@@ -183,7 +183,7 @@ contract SweepCCTPTest is InstructionForkTestContext {
         user.executeInstruction(instruction, instructionSig);
         vm.pauseGasMetering();
 
-        // check that the deposit account was swept up to the max burn limit (minus the fee)
+        // check that the user's balance is equal to the starting balance minus the burn limit
         assertEq(IERC20(SEPOLIA_USDC).balanceOf(address(user)), maxBurnPerMessage * 2);
     }
 
@@ -203,7 +203,6 @@ contract SweepCCTPTest is InstructionForkTestContext {
 
     /// @notice test that the Instruction reverts when the destinationMintRecipient is set to the zero address
     function test_sweepCCTP_destinationMintRecipientZero() public {
-        // set the destinationMintRecipient to the zero address
         DEFAULT_ACTION_ARGS.destinationMintRecipient = bytes32(0);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -218,7 +217,6 @@ contract SweepCCTPTest is InstructionForkTestContext {
 
     /// @notice test that the Instruction reverts when the endBalance > threshold
     function test_sweepCCTP_endBalanceOverThreshold() public {
-        // set the destinationMintRecipient to the zero address
         DEFAULT_ACTION_ARGS.endBalance = DEFAULT_THRESHOLD + 1;
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
@@ -248,7 +246,7 @@ contract SweepCCTPTest is InstructionForkTestContext {
         vm.pauseGasMetering();
     }
 
-    /// @notice test that the Instruction reverts when the token is set to the zero address
+    /// @notice test that the Instruction reverts when the CCTP token is not supported
     function test_sweepCCTP_tokenNotSupported() public {
         DEFAULT_ACTION_ARGS.token = SEPOLIA_WETH9;
 
