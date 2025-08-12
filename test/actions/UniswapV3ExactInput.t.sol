@@ -196,6 +196,8 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
 
     /// @notice test that ETH to ERC20 swapping reverts if the user has insufficient ETH
     function test_uniswapV3ExactInput_insufficientEthBalance() public {
+        vm.pauseGasMetering();
+
         vm.deal(address(user), 0);
 
         buildInstruction();
@@ -203,13 +205,13 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(InsufficientBalance.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
-        vm.pauseGasMetering();
     }
 
     /// @notice test that ERC20 to ERC20 swapping reverts if the user has insufficient token balance
     function test_uniswapV3ExactInput_insufficientTokenBalance() public {
+        vm.pauseGasMetering();
+
         DEFAULT_ACTION_ARGS.tokenIn = SEPOLIA_USDC;
         DEFAULT_ACTION_ARGS.tokenOut = SEPOLIA_WETH9;
 
@@ -218,9 +220,7 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
         bytes memory result = abi.encodeWithSelector(InsufficientBalance.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
-        vm.resetGasMetering();
         user.executeInstruction(instruction, instructionSig);
-        vm.pauseGasMetering();
     }
 
     /// @notice test that the swap reverts if the user receives less than the minimum amount out
