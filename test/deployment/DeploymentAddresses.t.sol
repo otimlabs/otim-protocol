@@ -12,6 +12,7 @@ import {TransferAction} from "../../src/actions/TransferAction.sol";
 import {TransferERC20Action} from "../../src/actions/TransferERC20Action.sol";
 import {RefuelAction} from "../../src/actions/RefuelAction.sol";
 import {RefuelERC20Action} from "../../src/actions/RefuelERC20Action.sol";
+import {UniswapV3ExactInputAction} from "../../src/actions/UniswapV3ExactInputAction.sol";
 import {DeactivateInstructionAction} from "../../src/actions/DeactivateInstructionAction.sol";
 import {TransferOnceAction} from "../../src/actions/TransferOnceAction.sol";
 import {TransferERC20OnceAction} from "../../src/actions/TransferERC20OnceAction.sol";
@@ -19,6 +20,7 @@ import {SweepAction} from "../../src/actions/SweepAction.sol";
 import {SweepERC20Action} from "../../src/actions/SweepERC20Action.sol";
 import {CallOnceAction} from "../../src/actions/CallOnceAction.sol";
 import {SweepCCTPAction} from "../../src/actions/SweepCCTPAction.sol";
+import {TransferCCTPAction} from "../../src/actions/TransferCCTPAction.sol";
 
 contract DeploymentAddressesTest is Test {
     // expected core addresses
@@ -41,6 +43,7 @@ contract DeploymentAddressesTest is Test {
     address constant EXPECTED_SWEEP_ERC20_ACTION_ADDRESS = 0x85dCC0E70aD4288b4540D1A5f3Ba49b7934c2E88;
     address constant EXPECTED_CALL_ONCE_ACTION_ADDRESS = 0xCD6cBec852F898C403dC9BFB080aD04b9Fb4Cf8a;
     address constant EXPECTED_SWEEP_CCTP_ACTION_ADDRESS = 0x3B5fddE24b46465bbeC022Eb01a156597b917E7b;
+    address constant EXPECTED_TRANSFER_CCTP_ACTION_ADDRESS = 0x7acaecB323eD03B0EF621F9d7C2C1fE1d275F615;
 
     ////////////////////
     // Core addresses //
@@ -70,8 +73,6 @@ contract DeploymentAddressesTest is Test {
     // Action addresses //
     //////////////////////
 
-    /// @dev SweepSkipCCTPDepositAccountAction and UniswapV3ExactInputAction are not deployed with Create2 so we don't need to test them
-
     function test_transferAction_deployedAddress() public {
         address deployed = address(new TransferAction{salt: bytes32(0)}(address(0), address(0), 0));
         assertEq(deployed, EXPECTED_TRANSFER_ACTION_ADDRESS);
@@ -90,6 +91,16 @@ contract DeploymentAddressesTest is Test {
     function test_refuelERC20Action_deployedAddress() public {
         address deployed = address(new RefuelERC20Action{salt: bytes32(0)}(address(0), address(0), 0));
         assertEq(deployed, EXPECTED_REFUEL_ERC20_ACTION_ADDRESS);
+    }
+
+    function test_uniswapV3ExactInputAction_deployedAddress() public {
+        address deployed = address(
+            new UniswapV3ExactInputAction{salt: bytes32(0)}(
+                address(0), address(0), address(0), address(0), address(0), 0
+            )
+        );
+
+        assertEq(deployed, EXPECTED_UNISWAP_V3_EXACT_INPUT_ACTION_ADDRESS);
     }
 
     function test_deactivateInstructionAction_deployedAddress() public {
@@ -127,5 +138,11 @@ contract DeploymentAddressesTest is Test {
         address deployed =
             address(new SweepCCTPAction{salt: bytes32(0)}(address(0), address(0), address(0), address(0), 0));
         assertEq(deployed, EXPECTED_SWEEP_CCTP_ACTION_ADDRESS);
+    }
+
+    function test_transferCCTPAction_deployedAddress() public {
+        address deployed =
+            address(new TransferCCTPAction{salt: bytes32(0)}(address(0), address(0), address(0), address(0), 0));
+        assertEq(deployed, EXPECTED_TRANSFER_CCTP_ACTION_ADDRESS);
     }
 }
