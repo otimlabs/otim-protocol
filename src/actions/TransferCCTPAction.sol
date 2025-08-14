@@ -8,17 +8,18 @@ import {ITokenController} from "./external/ITokenController.sol";
 
 import {InstructionLib} from "../libraries/Instruction.sol";
 
+import {Interval} from "./schedules/Interval.sol";
 import {OtimFee} from "./fee-models/OtimFee.sol";
 
 import {IAction} from "./interfaces/IAction.sol";
-import {ISweepCCTPAction, INSTRUCTION_TYPEHASH, ARGUMENTS_TYPEHASH} from "./interfaces/ISweepCCTPAction.sol";
+import {ITransferCCTPAction, INSTRUCTION_TYPEHASH, ARGUMENTS_TYPEHASH} from "./interfaces/ITransferCCTPAction.sol";
 
-import {InvalidArguments, BalanceUnderThreshold, CCTPTokenNotSupported} from "./errors/Errors.sol";
+import {InvalidArguments, InsufficientBalance, CCTPTokenNotSupported} from "./errors/Errors.sol";
 
-/// @title SweepCCTPAction
+/// @title TransferCCTPAction
 /// @author Otim Labs, Inc.
-/// @notice an Action that sweeps ERC20 tokens from the user's account to a target on a different chain via CCTP when the balance is greater than or equal to a threshold
-contract SweepCCTPAction is IAction, ISweepCCTPAction, OtimFee {
+/// @notice an Action that transfers ERC20 tokens from the user's account to a target on a different chain via CCTP
+contract TransferCCTPAction is IAction, ITransferCCTPAction, Interval, OtimFee {
     using InstructionLib for InstructionLib.Instruction;
 
     /// @notice the CCTP TokenMessenger contract
@@ -40,19 +41,19 @@ contract SweepCCTPAction is IAction, ISweepCCTPAction, OtimFee {
 
     /// @inheritdoc IAction
     function argumentsHash(bytes calldata arguments) public pure returns (bytes32, bytes32) {
-        return (INSTRUCTION_TYPEHASH, hash(abi.decode(arguments, (SweepCCTP))));
+        return (INSTRUCTION_TYPEHASH, hash(abi.decode(arguments, (TransferCCTP))));
     }
 
-    /// @inheritdoc ISweepCCTPAction
-    function hash(SweepCCTP memory arguments) public pure returns (bytes32) {
+    /// @inheritdoc ITransferCCTPAction
+    function hash(TransferCCTP memory arguments) public pure returns (bytes32) {
         return keccak256(
             abi.encode(
                 ARGUMENTS_TYPEHASH,
                 arguments.token,
+                arguments.amount,
                 arguments.destinationDomain,
                 arguments.destinationMintRecipient,
-                arguments.threshold,
-                arguments.endBalance,
+                hash(arguments.schedule),
                 hash(arguments.fee)
             )
         );
@@ -68,27 +69,28 @@ contract SweepCCTPAction is IAction, ISweepCCTPAction, OtimFee {
         uint256 startGas = gasleft();
 
         // decode the arguments from the instruction
-        SweepCCTP memory arguments = abi.decode(instruction.arguments, (SweepCCTP));
+        TransferCCTP memory arguments = abi.decode(instruction.arguments, (TransferCCTP));
 
         // if first execution, validate the arguments
         if (executionState.executionCount == 0) {
             if (
-                arguments.token == address(0) || arguments.destinationMintRecipient == bytes32(0)
-                    || arguments.endBalance > arguments.threshold
+                arguments.token == address(0) || arguments.amount == 0
+                    || arguments.destinationMintRecipient == bytes32(0)
             ) {
                 revert InvalidArguments();
             }
+
+            checkStart(arguments.schedule);
+        } else {
+            checkInterval(arguments.schedule, executionState.lastExecuted);
         }
 
         // get the user's token balance
         uint256 balance = IERC20(arguments.token).balanceOf(address(this));
 
-        // if the balance is under the threshold or equal to the endBalance, revert.
-        // the endBalance check is to prevent the instruction from executing
-        // when threshold == endBalance == balance because in this case we would have transferAmount == 0
-        // slither-disable-next-line incorrect-equality
-        if (balance < arguments.threshold || balance == arguments.endBalance) {
-            revert BalanceUnderThreshold();
+        // if the balance is less than the amount, revert
+        if (balance < arguments.amount) {
+            revert InsufficientBalance();
         }
 
         // get the CCTP burnLimitPerMessage for the token
@@ -99,8 +101,8 @@ contract SweepCCTPAction is IAction, ISweepCCTPAction, OtimFee {
             revert CCTPTokenNotSupported();
         }
 
-        // calculate the transferAmount
-        uint256 transferAmount = balance - arguments.endBalance;
+        // initialize the transferAmount to the arguments.amount
+        uint256 transferAmount = arguments.amount;
 
         // if the transferAmount is over the burnLimitPerMessage, emit an event and just transfer the burnLimitPerMessage
         if (transferAmount > burnLimitPerMessage) {
