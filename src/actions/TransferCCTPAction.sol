@@ -101,8 +101,15 @@ contract TransferCCTPAction is IAction, ITransferCCTPAction, Interval, OtimFee {
             revert CCTPTokenNotSupported();
         }
 
-        // if the transferAmount is over the burnLimitPerMessage, just transfer the burnLimitPerMessage
-        uint256 transferAmount = arguments.amount > burnLimitPerMessage ? burnLimitPerMessage : arguments.amount;
+        // initialize the transferAmount to the arguments.amount
+        uint256 transferAmount = arguments.amount;
+
+        // if the transferAmount is over the burnLimitPerMessage, emit an event and just transfer the burnLimitPerMessage
+        if (transferAmount > burnLimitPerMessage) {
+            transferAmount = burnLimitPerMessage;
+
+            emit CCTPBurnLimitReached(arguments.token, burnLimitPerMessage);
+        }
 
         // approve the transferAmount to the CCTP TokenMessenger contract
         // slither-disable-next-line unused-return

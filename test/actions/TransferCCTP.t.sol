@@ -132,6 +132,9 @@ contract TransferCCTPTest is InstructionForkTestContext {
         IERC20(SEPOLIA_USDC).transfer(address(user), USER_START_BALANCE);
         vm.stopPrank();
 
+        vm.expectEmit(true, true, true, true);
+        emit ITransferCCTPAction.CCTPBurnLimitReached(SEPOLIA_USDC, burnLimitPerMessage);
+
         // check that the CCTP transfer was initiated correctly
         // don't check the nonce
         vm.expectEmit(false, true, true, true);

@@ -102,8 +102,12 @@ contract SweepCCTPAction is IAction, ISweepCCTPAction, OtimFee {
         // calculate the transferAmount
         uint256 transferAmount = balance - arguments.endBalance;
 
-        // if the transferAmount is over the burnLimitPerMessage, just transfer the burnLimitPerMessage
-        transferAmount = transferAmount > burnLimitPerMessage ? burnLimitPerMessage : transferAmount;
+        // if the transferAmount is over the burnLimitPerMessage, emit an event and just transfer the burnLimitPerMessage
+        if (transferAmount > burnLimitPerMessage) {
+            transferAmount = burnLimitPerMessage;
+
+            emit CCTPBurnLimitReached(arguments.token, burnLimitPerMessage);
+        }
 
         // approve the transferAmount to the CCTP TokenMessenger contract
         // slither-disable-next-line unused-return

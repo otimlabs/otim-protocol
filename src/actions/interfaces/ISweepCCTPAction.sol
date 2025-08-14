@@ -31,6 +31,11 @@ interface ISweepCCTPAction is IOtimFee {
         Fee fee;
     }
 
+    /// @notice emitted when the CCTP burn limit is reached
+    /// @param token - the token being transferred
+    /// @param burnLimitPerMessage - the burn limit per message for the token
+    event CCTPBurnLimitReached(address indexed token, uint256 burnLimitPerMessage);
+
     /// @notice calculates the EIP-712 hash of the SweepCCTP struct
     /// @param arguments - the arguments to hash
     /// @return argumentsHash - the EIP-712 hash of the arguments

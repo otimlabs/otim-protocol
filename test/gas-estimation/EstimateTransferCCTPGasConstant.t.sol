@@ -75,7 +75,7 @@ contract EstimateTransferCCTPGasConstant is InstructionForkTestContext {
         arguments.destinationMintRecipient = bytes32(uint256(1));
 
         // assume a reasonable amount
-        vm.assume(arguments.amount < IERC20(SEPOLIA_USDC).balanceOf(SEPOLIA_USDC_WHALE));
+        vm.assume(arguments.amount > 0 && arguments.amount < IERC20(SEPOLIA_USDC).balanceOf(SEPOLIA_USDC_WHALE));
 
         // fuzz test must pass schedule checks
         vm.assume(arguments.schedule.startAt < block.timestamp && arguments.schedule.startBy > block.timestamp);

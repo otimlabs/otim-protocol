@@ -162,6 +162,9 @@ contract SweepCCTPTest is InstructionForkTestContext {
         IERC20(SEPOLIA_USDC).transfer(address(user), maxBurnPerMessage * 3);
         vm.stopPrank();
 
+        vm.expectEmit(true, true, true, true);
+        emit ISweepCCTPAction.CCTPBurnLimitReached(SEPOLIA_USDC, maxBurnPerMessage);
+
         // check that the CCTP transfer was initiated correctly
         // don't check the nonce
         vm.expectEmit(false, true, true, true);
