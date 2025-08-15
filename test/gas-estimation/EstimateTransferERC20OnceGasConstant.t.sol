@@ -27,14 +27,10 @@ contract EstimateTransferOnceERC20GasConstant is InstructionForkTestContext {
 
     VmSafe.Wallet public target = vm.createWallet("target");
 
-    address public constant SEPOLIA_WETH9 = address(0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14);
-
     uint256 public constant TRANSFER_ERC20_ONCE_GAS_CONSTANT = 103_500;
 
     constructor() {
-        string memory rpcUrl = vm.envOr("SEPOLIA_RPC_URL", string("https://ethereum-sepolia-rpc.publicnode.com"));
-
-        vm.createSelectFork(rpcUrl);
+        setUpFork();
 
         treasury = new Treasury(address(this));
         feeTokenRegistry = new FeeTokenRegistry(address(this));

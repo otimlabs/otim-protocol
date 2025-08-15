@@ -27,20 +27,10 @@ contract EstimateTransferCCTPGasConstant is InstructionForkTestContext {
 
     VmSafe.Wallet public target = vm.createWallet("target");
 
-    address public constant SEPOLIA_TOKEN_MINTER = address(0xE997d7d2F6E065a9A93Fa2175E878Fb9081F1f0A);
-    address public constant SEPOLIA_TOKEN_MESSENGER = address(0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5);
-
-    address public constant SEPOLIA_WETH9 = address(0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14);
-
-    address public constant SEPOLIA_USDC = address(0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238);
-    address public constant SEPOLIA_USDC_WHALE = address(0x1fD9611f009fcB8Bec0A4854FDcA0832DfdB04E3);
-
     uint256 public constant TRANSFER_CCTP_ACTION_GAS_CONSTANT = 105_500;
 
     constructor() {
-        string memory rpcUrl = vm.envOr("SEPOLIA_RPC_URL", string("https://ethereum-sepolia-rpc.publicnode.com"));
-
-        vm.createSelectFork(rpcUrl);
+        setUpFork();
 
         treasury = new Treasury(address(this));
         feeTokenRegistry = new FeeTokenRegistry(address(this));
