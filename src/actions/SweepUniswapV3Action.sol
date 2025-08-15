@@ -110,10 +110,22 @@ contract SweepUniswapV3Action is IAction, ISweepUniswapV3Action, OtimFee {
             }
         }
 
-        // if swapping from ETH, set the internal tokenIn to WETH
-        address internalTokenIn = arguments.tokenIn == address(0) ? wethAddress : arguments.tokenIn;
-        // if swapping to ETH, set the internal tokenOut to WETH
-        address internalTokenOut = arguments.tokenOut == address(0) ? wethAddress : arguments.tokenOut;
+        address internalTokenIn = arguments.tokenIn;
+        address internalTokenOut = arguments.tokenOut;
+
+        uint256 tokenInBalance;
+
+        if (arguments.tokenIn == address(0)) {
+            internalTokenIn = wethAddress;
+
+            tokenInBalance = address(this).balance;
+        } else {
+            tokenInBalance = IERC20(arguments.tokenIn).balanceOf(address(this));
+
+            if (arguments.tokenOut == address(0)) {
+                internalTokenOut = wethAddress;
+            }
+        }
 
         // get the Uniswap V3 pool address for the given token pair and fee tier
         address poolAddress = uniswapV3Factory.getPool(internalTokenIn, internalTokenOut, arguments.feeTier);
@@ -123,14 +135,11 @@ contract SweepUniswapV3Action is IAction, ISweepUniswapV3Action, OtimFee {
             revert UniswapV3PoolDoesNotExist();
         }
 
-        uint256 inBalance =
-            arguments.tokenIn == address(0) ? address(this).balance : IERC20(arguments.tokenIn).balanceOf(address(this));
-
-        if (inBalance < arguments.threshold || inBalance == arguments.endBalance) {
+        if (tokenInBalance < arguments.threshold || tokenInBalance == arguments.endBalance) {
             revert BalanceUnderThreshold();
         }
 
-        uint256 swapAmount = inBalance - arguments.endBalance;
+        uint256 swapAmount = tokenInBalance - arguments.endBalance;
 
         // calculate the minimum amount out with TWAP deviation
         uint256 minAmountOutWithTwapDeviation = UniswapV3OracleParameters.getMinAmountOutWithTwapDeviation(
