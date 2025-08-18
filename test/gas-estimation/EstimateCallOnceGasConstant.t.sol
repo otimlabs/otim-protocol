@@ -27,14 +27,10 @@ contract EstimateCallOnceGasConstant is InstructionForkTestContext {
 
     VmSafe.Wallet public target = vm.createWallet("target");
 
-    address public constant SEPOLIA_WETH9 = address(0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14);
-
     uint256 public constant CALL_ONCE_GAS_CONSTANT = 106_500;
 
     constructor() {
-        string memory rpcUrl = vm.envOr("SEPOLIA_RPC_URL", string("https://sepolia.drpc.org"));
-
-        vm.createSelectFork(rpcUrl);
+        setUpFork();
 
         treasury = new Treasury(address(this));
         feeTokenRegistry = new FeeTokenRegistry(address(this));

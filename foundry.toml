@@ -9,6 +9,7 @@ cbor_metadata = false
 optimizer = true
 optimizer_runs = 1000
 always_use_create_2_factory = true
+fork_cache_size = "5GB"
 remappings = [
     "@chainlink-contracts/=dependencies/smartcontractkit-chainlink-2.25.0/contracts",
     "@openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.4.0/",
@@ -18,6 +19,10 @@ remappings = [
     "@uniswap-v3-periphery/=dependencies/@uniswap-v3-periphery-1.4.4/",
     "forge-std/=dependencies/forge-std-1.10.0/",
 ]
+
+[rpc_endpoints]
+mainnet = "https://eth.drpc.org"
+sepolia = "https://sepolia.drpc.org"
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 

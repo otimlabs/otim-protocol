@@ -19,6 +19,21 @@ abstract contract InstructionForkTestContext is Test {
     using InstructionLib for InstructionLib.Instruction;
     using InstructionLib for InstructionLib.InstructionDeactivation;
 
+    /// @notice Sepolia token addresses
+    address public constant SEPOLIA_WETH9 = address(0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14);
+    address public constant SEPOLIA_USDC = address(0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238);
+
+    /// @notice Sepolia USDC whale for spoofing test balance
+    address public constant SEPOLIA_USDC_WHALE = address(0x1fD9611f009fcB8Bec0A4854FDcA0832DfdB04E3);
+
+    /// @notice Sepolia Uniswap V3 addresses
+    address public constant SEPOLIA_UNIVERSAL_ROUTER = address(0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD);
+    address public constant SEPOLIA_V3_FACTORY = address(0x0227628f3F023bb0B980b67D528571c95c6DaC1c);
+
+    /// @notice Sepolia CCTP addresses
+    address public constant SEPOLIA_TOKEN_MESSENGER = address(0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5);
+    address public constant SEPOLIA_TOKEN_MINTER = address(0xE997d7d2F6E065a9A93Fa2175E878Fb9081F1f0A);
+
     /// @notice test Core contracts
     OtimDelegate public delegate = new OtimDelegate(address(this));
 
@@ -50,6 +65,19 @@ abstract contract InstructionForkTestContext is Test {
     uint256 public DEFAULT_MAX_EXECUTIONS;
     address public DEFAULT_ACTION;
     bytes public DEFAULT_ARGS;
+
+    uint256 public sharedForkId;
+
+    function setUpFork() public {
+        try vm.activeFork() returns (uint256 forkId) {
+            if (forkId != sharedForkId) {
+                vm.selectFork(sharedForkId);
+            }
+        } catch {
+            string memory rpcUrl = vm.envOr("SEPOLIA_RPC_URL", vm.rpcUrl("sepolia"));
+            sharedForkId = vm.createSelectFork(rpcUrl);
+        }
+    }
 
     function setUp() public virtual {
         /// @notice delegate user to OtimDelegate

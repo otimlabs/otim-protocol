@@ -17,7 +17,7 @@ import {Treasury} from "../../src/infrastructure/Treasury.sol";
 import {UniswapV3ExactInputAction} from "../../src/actions/UniswapV3ExactInputAction.sol";
 import {IUniswapV3ExactInputAction} from "../../src/actions/interfaces/IUniswapV3ExactInputAction.sol";
 
-contract EstimateUniswapV3ExactInputConstant is InstructionForkTestContext {
+contract EstimateUniswapV3ExactInputGasConstant is InstructionForkTestContext {
     using InstructionLib for InstructionLib.Instruction;
 
     Treasury treasury;
@@ -27,18 +27,10 @@ contract EstimateUniswapV3ExactInputConstant is InstructionForkTestContext {
 
     VmSafe.Wallet public target = vm.createWallet("target");
 
-    address public constant SEPOLIA_UNIVERSAL_ROUTER = address(0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD);
-    address public constant SEPOLIA_V3_FACTORY = address(0x0227628f3F023bb0B980b67D528571c95c6DaC1c);
-    address public constant SEPOLIA_WETH9 = address(0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14);
-
-    address public constant SEPOLIA_USDC = address(0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238);
-
     uint256 public constant UNISWAP_V3_EXACT_INPUT_GAS_CONSTANT = 107_000;
 
     constructor() {
-        string memory rpcUrl = vm.envOr("SEPOLIA_RPC_URL", string("https://ethereum-sepolia-rpc.publicnode.com"));
-
-        vm.createSelectFork(rpcUrl);
+        setUpFork();
 
         treasury = new Treasury(address(this));
         feeTokenRegistry = new FeeTokenRegistry(address(this));
