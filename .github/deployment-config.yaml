@@ -39,6 +39,10 @@ contracts:
       RefuelERC20Action:
         env_var: "EXPECTED_REFUEL_ERC20_ACTION_ADDRESS"
       UniswapV3ExactInputAction:
-        env_var: "UNISWAP_V3_EXACT_INPUT_ACTION_ADDRESS"
+        env_var: "EXPECTED_UNISWAP_V3_EXACT_INPUT_ACTION_ADDRESS"
       DeactivateInstructionAction:
         env_var: "EXPECTED_DEACTIVATE_INSTRUCTION_ACTION_ADDRESS"
+      TransferCCTPAction:
+        env_var: "EXPECTED_TRANSFER_CCTP_ACTION_ADDRESS"
+      SweepCCTPAction:
+        env_var: "EXPECTED_SWEEP_CCTP_ACTION_ADDRESS"
