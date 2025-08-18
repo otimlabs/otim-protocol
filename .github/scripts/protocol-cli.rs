@@ -1,10 +1,10 @@
 #!/usr/bin/env rust-script
 //! ```cargo
 //! [package]
-//! name = "contract-deploy-ci"
+//! name = "protocol-cli"
 //! version = "0.1.0"
 //! edition = "2021"
-//! description = "Contract deployment automation with address validation and chain config generation"
+//! description = "Protocol development and deployment tools including contract deployment, action whitelisting, and directory comparison"
 //!
 //! [dependencies]
 //! anyhow = "1.0"
@@ -17,20 +17,23 @@
 //! indexmap = { version = "2.10", features = ["serde"] }
 //! colored = "3.0"
 //! tempfile = "3.8"
+//! merkle_hash = "3.8"
+//! camino = "1.0"
 //! ```
 
 use anyhow::{anyhow, Context, Result, bail};
 use clap::{Parser, Subcommand};
 use colored::*;
 use indexmap::IndexMap;
+use merkle_hash::{MerkleTree, Encodable};
 use std::collections::HashMap;
 use std::env;
 use std::fs;
 use std::path::Path;
 
 #[derive(Parser)]
-#[command(name = "contract-deployer")]
-#[command(about = "Contract deployment automation")]
+#[command(name = "protocol-cli")]
+#[command(about = "Protocol development and deployment tools")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -51,14 +54,32 @@ enum Commands {
         update: bool,
     },
 
-    /// Deploy contracts to specified network
+    /// Deploy contracts to configured network
     DeployContracts {
         /// Configuration file with network and contract details
         #[arg(short, long)]
         config_file: String,
-        /// Target network for deployment
+    },
+
+    /// Whitelist actions in the action manager
+    WhitelistActions {
+        /// Configuration file with network and contract details
         #[arg(short, long)]
-        network: String,
+        config_file: String,
+    },
+
+    /// Compare directory contents using Merkle trees
+    CompareDirectories {
+        /// First directory to compare
+        dir1: String,
+        /// Second directory to compare
+        dir2: String,
+        /// Pattern to ignore during comparison
+        #[arg(long)]
+        ignore: Option<String>,
+        /// Show detailed differences when directories don't match
+        #[arg(long)]
+        show_diff: bool,
     },
 }
 
@@ -78,11 +99,16 @@ struct TierConfig {
 #[derive(Debug, serde::Deserialize)]
 struct ContractDetails {
     script: Option<String>,
-    env_var: String,
+    env_var: Option<String>,
 }
 
 struct DeploymentManager {
     config: Option<DeploymentConfig>,
+}
+
+/// Prints an informational message with colored formatting
+fn info(msg: &str) {
+    println!("{} {}", "[INFO]".green().bold(), msg);
 }
 
 impl DeploymentManager {
@@ -236,28 +262,26 @@ impl DeploymentManager {
             
             for (contract, address) in &addresses {
                 calculated_addresses.insert(contract.clone(), address.clone());
-                if let Some(details) = self.find_contract_details(contract) {
-                    env::set_var(&details.env_var, address);
+                if let Some(ContractDetails { env_var: Some(env_var), .. }) = self.find_contract_details(contract) {
+                    env::set_var(env_var, address);
                 }
             }
         }
 
         // Compare and update if needed
         for (contract, calculated_address) in &calculated_addresses {
-            if let Some(details) = self.find_contract_details(contract) {
-                let current_address = current_env.get(&details.env_var)
-                    .cloned()
-                    .unwrap_or_else(|| "NOT_SET".to_string());
-                
-                if current_address != *calculated_address {
-                    has_changes = true;
-                    info(&format!("{}: {} → {}", 
-                        contract, current_address, calculated_address));
-                    
-                    if update {
-                        updates.insert(details.env_var.clone(), calculated_address.clone());
+            match self.find_contract_details(contract) {
+                Some(ContractDetails { env_var: Some(env_var), .. }) => {
+                    let current_address = current_env.get(env_var).cloned().unwrap_or_else(|| "NOT_SET".to_string());
+                    if current_address != *calculated_address {
+                        has_changes = true;
+                        info(&format!("{}: {} → {}", contract, current_address, calculated_address));
+                        if update {
+                            updates.insert(env_var.clone(), calculated_address.clone());
+                        }
                     }
                 }
+                _ => info(&format!("{}: {}", contract, calculated_address)),
             }
         }
 
@@ -311,16 +335,9 @@ impl DeploymentManager {
     // CONTRACT DEPLOYMENT
     // =============================================================================
 
-    /// Deploys all contracts to the specified network in tier order
-    async fn deploy_contracts(&self, network: &str) -> Result<()> {
-        info(&format!("Deploying contracts to: {}", network));
-        
-        let config = self.get_config()?;
-
-        // Validate network exists
-        if !config.networks.contains(&network.to_string()) {
-            bail!("Network '{}' not found in configuration", network);
-        }
+    /// Deploys all contracts in tier order
+    async fn deploy_contracts(&self) -> Result<()> {
+        info("Deploying contracts...");
 
         // Deploy in tier order
         for tier in ["core", "infrastructure", "actions"] {
@@ -333,8 +350,8 @@ impl DeploymentManager {
                         info(&format!("  {}: {}", contract, address));
                         
                         // Update environment for next tier dependencies
-                        if let Some(details) = self.find_contract_details(contract) {
-                            env::set_var(&details.env_var, address);
+                        if let Some(ContractDetails { env_var: Some(env_var), .. }) = self.find_contract_details(contract) {
+                            env::set_var(env_var, address);
                         }
                     }
                 }
@@ -345,13 +362,13 @@ impl DeploymentManager {
                        error_msg.contains("empty revert data") {
                         info(&format!("{} contracts already deployed", tier));
                     } else {
-                        bail!("Deployment failed for {} on {}: {}", tier, network, e);
+                        bail!("Deployment failed for {}: {}", tier, e);
                     }
                 }
             }
         }
 
-        info(&format!("Deployment to {} completed", network));
+        info("Deployment completed successfully!");
         Ok(())
     }
 
@@ -377,11 +394,98 @@ impl DeploymentManager {
 
         Ok(addresses)
     }
-}
 
-/// Prints an informational message with colored formatting
-fn info(msg: &str) {
-    println!("{} {}", "[INFO]".green().bold(), msg);
+    // =============================================================================
+    // ACTION MANAGEMENT
+    // =============================================================================
+
+    /// Whitelists all action contracts in the action manager
+    async fn whitelist_actions(&self) -> Result<()> {
+        info("Starting action whitelisting...");
+        
+        for (contract_name, details) in &self.get_tier_config("actions")?.contracts {
+            let Some(env_var) = &details.env_var else { continue };
+            let action_address = env::var(env_var).with_context(|| format!("{}: {}", contract_name, env_var))?;
+            info(&format!("Whitelisting {} at {}...", contract_name, action_address));
+            
+            let output = tokio::process::Command::new("forge")
+                .args(&["script", "AddAction", "--sig", "run(address)", "--broadcast", "--rpc-url", &env::var("RPC_URL")?, "--aws", &action_address])
+                .output().await?;
+            
+            if !output.status.success() && !String::from_utf8_lossy(&output.stderr).contains("AlreadyAdded") {
+                bail!("Failed to whitelist {}: {}", contract_name, String::from_utf8_lossy(&output.stderr));
+            }
+            
+            info(&format!("✓ {} whitelisted", contract_name));
+        }
+        
+        info("✓ Action whitelisting completed!");
+        Ok(())
+    }
+
+    // =============================================================================
+    // DIRECTORY COMPARISON
+    // =============================================================================
+
+    /// Compare two directories using Merkle trees
+    fn compare_directories(dir1: &str, dir2: &str, ignore: Option<&str>, show_diff: bool) -> Result<bool> {
+        let tree1 = MerkleTree::builder(dir1).build()?;
+        let tree2 = MerkleTree::builder(dir2).build()?;
+
+        let files1: HashMap<_, _> = tree1.iter()
+            .filter(|i| !Self::should_ignore_path(&i.path.relative, ignore))
+            .filter(|i| std::path::Path::new(dir1).join(&i.path.relative).is_file())
+            .map(|i| (i.path.relative.to_string(), i.hash.to_hex_string()))
+            .collect();
+
+        let files2: HashMap<_, _> = tree2.iter()
+            .filter(|i| !Self::should_ignore_path(&i.path.relative, ignore))
+            .filter(|i| std::path::Path::new(dir2).join(&i.path.relative).is_file())
+            .map(|i| (i.path.relative.to_string(), i.hash.to_hex_string()))
+            .collect();
+
+        let matches = files1 == files2;
+        if !matches && show_diff {
+            Self::print_differences(&files1, &files2, dir1, dir2);
+        }
+
+        Ok(matches)
+    }
+
+    fn should_ignore_path(relative_path: &camino::Utf8Path, ignore: Option<&str>) -> bool {
+        let path_str = relative_path.as_str();
+        if path_str.is_empty() {
+            return true;
+        }
+        ignore.map_or(false, |pattern| path_str.contains(pattern))
+    }
+
+    fn print_differences(files1: &HashMap<String, String>, files2: &HashMap<String, String>, _dir1: &str, dir2: &str) {
+        let mut diff_count = 0;
+
+        for (path, hash1) in files1 {
+            match files2.get(path) {
+                Some(hash2) if hash1 != hash2 => {
+                    println!("{}: content differs", path);
+                    diff_count += 1;
+                }
+                None => {
+                    println!("{}: missing in {}", path, dir2);
+                    diff_count += 1;
+                }
+                _ => {}
+            }
+        }
+
+        for path in files2.keys() {
+            if !files1.contains_key(path) {
+                println!("{}: extra in {}", path, dir2);
+                diff_count += 1;
+            }
+        }
+
+        println!("\n❌ Found {} differences", diff_count);
+    }
 }
 
 #[tokio::main]
@@ -394,9 +498,25 @@ async fn main() -> Result<()> {
                 .validate_addresses(&env_file, update).await
         }
 
-        Commands::DeployContracts { config_file, network } => {
+        Commands::DeployContracts { config_file } => {
             DeploymentManager::with_config(&config_file)?
-                .deploy_contracts(&network).await
+                .deploy_contracts().await
+        }
+
+        Commands::WhitelistActions { config_file } => {
+            DeploymentManager::with_config(&config_file)?
+                .whitelist_actions().await
+        }
+
+        Commands::CompareDirectories { dir1, dir2, ignore, show_diff } => {
+            match DeploymentManager::compare_directories(&dir1, &dir2, ignore.as_deref(), show_diff) {
+                Ok(true) => std::process::exit(0),
+                Ok(false) => std::process::exit(1),
+                Err(e) => {
+                    eprintln!("Error: {}", e);
+                    std::process::exit(1);
+                }
+            }
         }
     }
 }
