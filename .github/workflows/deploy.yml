@@ -1,0 +1,77 @@
+name: Deploy Contracts
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      env_file:
+        description: Environment file to validate
+        type: string
+        default: ".github/networks/testnet/.env-otim-testnet"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  validate-and-update:
+    name: Validate Contract Addresses
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App Token
+        id: bot_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+        with:
+          app_id: ${{ secrets.GH_APP_ID }}
+          private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          token: ${{ steps.bot_token.outputs.token }}
+
+      - name: Validate contract addresses
+        id: validate
+        run: |
+          ENV_FILE="${{ inputs.env_file || '.github/networks/testnet/.env-otim-testnet' }}"
+          
+          docker run --rm -v "${{ github.workspace }}:/workspace" -w /workspace \
+            protocol:latest ./.github/scripts/protocol-cli.rs validate-contracts \
+            --config-file .github/deployment-config.yaml --env-file "$ENV_FILE" --update
+          
+          case $? in
+            0) echo "changes_made=false" >> $GITHUB_OUTPUT ;;
+            2) echo "changes_made=true" >> $GITHUB_OUTPUT ;;
+            *) exit $? ;;
+          esac
+
+      - name: Create address update PR
+        if: steps.validate.outputs.changes_made == 'true'
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        with:
+          token: ${{ steps.bot_token.outputs.token }}
+          commit-message: "deploy: update contract addresses"
+          title: "Deploy: Update contract addresses"
+          body: |
+            Contract address validation detected changes.
+            
+            **Environment File**: `${{ inputs.env_file || '.github/networks/testnet/.env-otim-testnet' }}`
+            **Run**: [View logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          branch: deploy/update-addresses
+          branch-suffix: short-commit-hash
+          base: main
+          delete-branch: true
+
+      - name: Trigger downstream deployment
+        if: steps.validate.outputs.changes_made == 'false'
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
+        with:
+          token: ${{ steps.bot_token.outputs.token }}
+          repository: otimlabs/otim-infrastructure
+          event-type: protocol-contract-deploy
+          client-payload: |
+            {
+              "protocol_ref": "latest"
+            }

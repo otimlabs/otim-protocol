@@ -1,12 +1,3 @@
-# Supported networks
-networks:
-  - ethereum-sepolia
-  - arbitrum-sepolia
-  - optimism-sepolia
-  - base-sepolia
-  - pecorino-host
-  - pecorino-signet
-
 # Contract deployment mapping
 contracts:
   core:
@@ -38,11 +29,8 @@ contracts:
         env_var: "EXPECTED_REFUEL_ACTION_ADDRESS"
       RefuelERC20Action:
         env_var: "EXPECTED_REFUEL_ERC20_ACTION_ADDRESS"
-      UniswapV3ExactInputAction:
-        env_var: "EXPECTED_UNISWAP_V3_EXACT_INPUT_ACTION_ADDRESS"
       DeactivateInstructionAction:
         env_var: "EXPECTED_DEACTIVATE_INSTRUCTION_ACTION_ADDRESS"
+      UniswapV3ExactInputAction:
       TransferCCTPAction:
-        env_var: "EXPECTED_TRANSFER_CCTP_ACTION_ADDRESS"
       SweepCCTPAction:
-        env_var: "EXPECTED_SWEEP_CCTP_ACTION_ADDRESS"
