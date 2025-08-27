@@ -36,8 +36,11 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         decimalsValue = numeratorDecimals > denominatorDecimals ? numeratorDecimals : denominatorDecimals;
 
         // Create cross-rate description showing the full formula: "(numerator) / (denominator)"
-        description =
-            string(abi.encodePacked("(", numeratorFeedContract.description(), ") / (", denominatorFeedContract.description(), ")"));
+        description = string(
+            abi.encodePacked(
+                "(", numeratorFeedContract.description(), ") / (", denominatorFeedContract.description(), ")"
+            )
+        );
         versionValue = 1;
     }
 
@@ -78,7 +81,8 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         uint256 denominatorUpdatedAt;
         uint80 denominatorRoundId;
         uint80 denominatorAnsweredInRound;
-        (denominatorRoundId, denominatorAnswer, denominatorStartedAt, denominatorUpdatedAt, denominatorAnsweredInRound) = denominatorFeedContract.latestRoundData();
+        (denominatorRoundId, denominatorAnswer, denominatorStartedAt, denominatorUpdatedAt, denominatorAnsweredInRound)
+        = denominatorFeedContract.latestRoundData();
 
         // Use the later timestamps to ensure both feeds have recent data
         if (denominatorUpdatedAt > updatedAt) {
