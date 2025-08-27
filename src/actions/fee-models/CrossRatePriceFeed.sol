@@ -43,10 +43,16 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
 
     /// @notice Get the cross-rate for a specific round (not supported)
     /// @dev Historical round data is not supported for cross-rate feeds.
-    function getRoundData(uint80 /* _roundId */)
+    function getRoundData(uint80 /* _roundId */ )
         external
         pure
-        returns (uint80 /* roundId */, int256 /* answer */, uint256 /* startedAt */, uint256 /* updatedAt */, uint80 /* answeredInRound */)
+        returns (
+            uint80, /* roundId */
+            int256, /* answer */
+            uint256, /* startedAt */
+            uint256, /* updatedAt */
+            uint80 /* answeredInRound */
+        )
     {
         revert GetRoundDataNotSupported();
     }
