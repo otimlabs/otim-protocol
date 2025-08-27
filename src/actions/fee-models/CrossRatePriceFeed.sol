@@ -4,6 +4,8 @@ pragma solidity ^0.8.26;
 import {AggregatorV3Interface} from "@chainlink-contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import {ICrossRatePriceFeed} from "./interfaces/ICrossRatePriceFeed.sol";
 
+error Overflow();
+
 /// @title CrossRatePriceFeed
 /// @author Otim Labs, Inc.
 /// @notice A dynamic price feed that combines two price feeds to create a cross-rate
@@ -110,13 +112,23 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
 
         // Scale to the higher precision
         if (numeratorDecimals < decimalsValue) {
-            scaledNumeratorAnswer = numeratorAnswer * int256(10 ** (decimalsValue - numeratorDecimals));
+            // Check for overflow during scaling
+            int256 scaleFactor = int256(10 ** (decimalsValue - numeratorDecimals));
+            if (numeratorAnswer > type(int256).max / scaleFactor) revert Overflow();
+            scaledNumeratorAnswer = numeratorAnswer * scaleFactor;
         }
         if (denominatorDecimals < decimalsValue) {
-            scaledDenominatorAnswer = denominatorAnswer * int256(10 ** (decimalsValue - denominatorDecimals));
+            // Check for overflow during scaling
+            int256 scaleFactor = int256(10 ** (decimalsValue - denominatorDecimals));
+            if (denominatorAnswer > type(int256).max / scaleFactor) revert Overflow();
+            scaledDenominatorAnswer = denominatorAnswer * scaleFactor;
         }
 
-        return (scaledNumeratorAnswer * int256(10 ** decimalsValue)) / scaledDenominatorAnswer;
+        // Check for overflow in final calculation
+        if (scaledNumeratorAnswer > type(int256).max / int256(10 ** decimalsValue)) revert Overflow();
+        int256 numerator = scaledNumeratorAnswer * int256(10 ** decimalsValue);
+
+        return numerator / scaledDenominatorAnswer;
     }
 
     // Interface function implementations

@@ -9,15 +9,27 @@ contract MaliciousPriceFeed is AggregatorV3Interface {
     function latestRoundData()
         external
         pure
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
+        returns (
+            uint80, /* roundId */
+            int256, /* answer */
+            uint256, /* startedAt */
+            uint256, /* updatedAt */
+            uint80 /* answeredInRound */
+        )
     {
         revert("Malicious feed always reverts");
     }
 
-    function getRoundData(uint80 _roundId)
+    function getRoundData(uint80 /* _roundId */ )
         external
         pure
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
+        returns (
+            uint80, /* roundId */
+            int256, /* answer */
+            uint256, /* startedAt */
+            uint256, /* updatedAt */
+            uint80 /* answeredInRound */
+        )
     {
         revert("Malicious feed always reverts");
     }
