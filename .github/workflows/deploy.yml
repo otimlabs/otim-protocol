@@ -41,18 +41,18 @@ jobs:
             --config-file .github/deployment-config.yaml --env-file "$ENV_FILE" --update
           
           case $? in
-            0) echo "changes_made=false" >> $GITHUB_OUTPUT ;;
-            2) echo "changes_made=true" >> $GITHUB_OUTPUT ;;
+            0) echo "changes_detected=false" >> $GITHUB_OUTPUT ;;
+            2) echo "changes_detected=true" >> $GITHUB_OUTPUT ;;
             *) exit $? ;;
           esac
 
-      - name: Create address update PR
-        if: steps.validate.outputs.changes_made == 'true'
+      - name: Create contract update PR
+        if: steps.validate.outputs.changes_detected == 'true'
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
           token: ${{ steps.bot_token.outputs.token }}
-          commit-message: "deploy: update contract addresses"
-          title: "Deploy: Update contract addresses"
+          commit-message: "sync: update contract addresses"
+          title: "Sync: Update contract addresses"
           body: |
             Contract address validation detected changes.
             
@@ -65,7 +65,7 @@ jobs:
           delete-branch: true
 
       - name: Trigger downstream deployment
-        if: steps.validate.outputs.changes_made == 'false'
+        if: steps.validate.outputs.changes_detected == 'false'
         uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
         with:
           token: ${{ steps.bot_token.outputs.token }}
