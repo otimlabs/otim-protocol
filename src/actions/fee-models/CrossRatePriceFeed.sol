@@ -4,8 +4,6 @@ pragma solidity ^0.8.26;
 import {AggregatorV3Interface} from "@chainlink-contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import {ICrossRatePriceFeed} from "./interfaces/ICrossRatePriceFeed.sol";
 
-error Overflow();
-
 /// @title CrossRatePriceFeed
 /// @author Otim Labs, Inc.
 /// @notice A dynamic price feed that combines two price feeds to create a cross-rate
@@ -103,32 +101,38 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
     /// @param denominatorAnswer The answer from the denominator feed
     /// @return The calculated cross-rate
     function _calculateCrossRate(int256 numeratorAnswer, int256 denominatorAnswer) internal view returns (int256) {
-        // Get decimals directly from feeds (no need to store them)
+        // Get decimals from feeds
         uint8 numeratorDecimals = numeratorFeedContract.decimals();
         uint8 denominatorDecimals = denominatorFeedContract.decimals();
 
-        int256 scaledNumeratorAnswer = numeratorAnswer;
-        int256 scaledDenominatorAnswer = denominatorAnswer;
+        // Use the higher of the two decimals as target precision
+        uint8 targetPrecision = numeratorDecimals > denominatorDecimals ? numeratorDecimals : denominatorDecimals;
 
-        // Scale to the higher precision
-        if (numeratorDecimals < decimalsValue) {
-            // Check for overflow during scaling
-            int256 scaleFactor = int256(10 ** (decimalsValue - numeratorDecimals));
-            if (numeratorAnswer > type(int256).max / scaleFactor) revert Overflow();
-            scaledNumeratorAnswer = numeratorAnswer * scaleFactor;
-        }
-        if (denominatorDecimals < decimalsValue) {
-            // Check for overflow during scaling
-            int256 scaleFactor = int256(10 ** (decimalsValue - denominatorDecimals));
-            if (denominatorAnswer > type(int256).max / scaleFactor) revert Overflow();
-            scaledDenominatorAnswer = denominatorAnswer * scaleFactor;
+        // Scale numerator to target precision (only if needed)
+        int256 scaledNumerator = numeratorAnswer;
+        if (numeratorDecimals != targetPrecision) {
+            // Scale up: multiply by 10^(targetPrecision - numeratorDecimals)
+            uint256 scaleFactor = 10 ** (targetPrecision - numeratorDecimals);
+            if (numeratorAnswer > type(int256).max / int256(scaleFactor)) revert Overflow();
+            scaledNumerator = numeratorAnswer * int256(scaleFactor);
         }
 
-        // Check for overflow in final calculation
-        if (scaledNumeratorAnswer > type(int256).max / int256(10 ** decimalsValue)) revert Overflow();
-        int256 numerator = scaledNumeratorAnswer * int256(10 ** decimalsValue);
+        // Scale denominator to target precision (only if needed)
+        int256 scaledDenominator = denominatorAnswer;
+        if (denominatorDecimals != targetPrecision) {
+            // Scale up: multiply by 10^(targetPrecision - denominatorDecimals)
+            uint256 scaleFactor = 10 ** (targetPrecision - denominatorDecimals);
+            if (denominatorAnswer > type(int256).max / int256(scaleFactor)) revert Overflow();
+            scaledDenominator = denominatorAnswer * int256(scaleFactor);
+        }
 
-        return numerator / scaledDenominatorAnswer;
+        // Check for division by zero
+        if (scaledDenominator == 0) revert DivisionByZero();
+
+        // Calculate final result ensuring the result has targetPrecision decimals
+        int256 finalNumerator = scaledNumerator * int256(10 ** targetPrecision);
+
+        return finalNumerator / scaledDenominator;
     }
 
     // Interface function implementations

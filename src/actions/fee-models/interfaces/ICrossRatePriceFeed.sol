@@ -23,4 +23,6 @@ interface ICrossRatePriceFeed is AggregatorV3Interface {
     function description() external view returns (string memory);
 
     error GetRoundDataNotSupported();
+    error Overflow();
+    error DivisionByZero();
 }

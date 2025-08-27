@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test} from "forge-std/src/Test.sol";
-import {CrossRatePriceFeed, Overflow} from "../../../src/actions/fee-models/CrossRatePriceFeed.sol";
+import {CrossRatePriceFeed} from "../../../src/actions/fee-models/CrossRatePriceFeed.sol";
 import {ICrossRatePriceFeed} from "../../../src/actions/fee-models/interfaces/ICrossRatePriceFeed.sol";
 import {AggregatorV3Interface} from "@chainlink-contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import {MockPriceFeed} from "../../mocks/MockPriceFeed.sol";
@@ -127,7 +127,7 @@ contract CrossRatePriceFeedTest is Test {
         CrossRatePriceFeed overflowCrossRate = new CrossRatePriceFeed(USDC_USD_FEED, address(overflowFeed));
 
         // Contract should revert on overflow
-        vm.expectRevert(Overflow.selector);
+        vm.expectRevert(ICrossRatePriceFeed.Overflow.selector);
         overflowCrossRate.latestRoundData();
     }
 
