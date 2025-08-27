@@ -73,6 +73,9 @@ contract EstimateUniswapV3ExactInputGasConstant is InstructionForkTestContext {
         // disregard fuzz generated minAmountOut
         arguments.floorAmountOut = 0;
 
+        // constrain the fuzz-generated lookback period to a reasonable range
+        vm.assume(arguments.meanPriceLookBack <= 900); // max 15 minutes
+        vm.assume(arguments.meanPriceLookBack > 0); // must be positive
         // set look back period to 15 minutes
         arguments.meanPriceLookBack = 900;
 

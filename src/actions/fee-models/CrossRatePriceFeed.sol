@@ -16,29 +16,29 @@ import {ICrossRatePriceFeed} from "./interfaces/ICrossRatePriceFeed.sol";
 ///
 /// The formula is: (numerator / denominator) to get the rate of numerator in terms of denominator
 contract CrossRatePriceFeed is ICrossRatePriceFeed {
-    AggregatorV3Interface public immutable NUMERATOR_FEED; // The feed in the numerator (e.g., USDC/USD)
-    AggregatorV3Interface public immutable DENOMINATOR_FEED; // The feed in the denominator (e.g., ETH/USD)
+    AggregatorV3Interface public immutable _numeratorFeed; // The feed in the numerator (e.g., USDC/USD)
+    AggregatorV3Interface public immutable _denominatorFeed; // The feed in the denominator (e.g., ETH/USD)
 
-    uint8 public immutable DECIMALS;
-    uint256 public immutable VERSION;
+    uint8 public immutable _decimals;
+    uint256 public immutable _version;
     string public description;
 
     /// @notice Constructor for CrossRatePriceFeed
-    /// @param _numeratorFeed The price feed for the numerator (e.g., USDC/USD)
-    /// @param _denominatorFeed The price feed for the denominator (e.g., ETH/USD)
-    constructor(address _numeratorFeed, address _denominatorFeed) {
-        NUMERATOR_FEED = AggregatorV3Interface(_numeratorFeed);
-        DENOMINATOR_FEED = AggregatorV3Interface(_denominatorFeed);
+    /// @param numeratorFeedAddress The price feed for the numerator (e.g., USDC/USD)
+    /// @param denominatorFeedAddress The price feed for the denominator (e.g., ETH/USD)
+    constructor(address numeratorFeedAddress, address denominatorFeedAddress) {
+        _numeratorFeed = AggregatorV3Interface(numeratorFeedAddress);
+        _denominatorFeed = AggregatorV3Interface(denominatorFeedAddress);
 
         // Use the higher precision for calculations to maintain accuracy
-        uint8 numeratorDecimals = NUMERATOR_FEED.decimals();
-        uint8 denominatorDecimals = DENOMINATOR_FEED.decimals();
-        DECIMALS = numeratorDecimals > denominatorDecimals ? numeratorDecimals : denominatorDecimals;
+        uint8 numeratorDecimals = _numeratorFeed.decimals();
+        uint8 denominatorDecimals = _denominatorFeed.decimals();
+        _decimals = numeratorDecimals > denominatorDecimals ? numeratorDecimals : denominatorDecimals;
 
         // Create cross-rate description showing the full formula: "(numerator) / (denominator)"
         description =
-            string(abi.encodePacked("(", NUMERATOR_FEED.description(), ") / (", DENOMINATOR_FEED.description(), ")"));
-        VERSION = 1;
+            string(abi.encodePacked("(", _numeratorFeed.description(), ") / (", _denominatorFeed.description(), ")"));
+        _version = 1;
     }
 
     /// @notice Get the cross-rate for a specific round (not supported)
@@ -71,11 +71,12 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         int256 numeratorAnswer;
         int256 denominatorAnswer;
 
-        // Get latest data from numerator feed
-        (roundId, numeratorAnswer, startedAt, updatedAt, answeredInRound) = NUMERATOR_FEED.latestRoundData();
+        // Get latest data from both feeds
+        (roundId, numeratorAnswer, startedAt, updatedAt, answeredInRound) = _numeratorFeed.latestRoundData();
 
-        // Get timestamp data from denominator feed to use the latest
-        (,, uint256 denominatorStartedAt, uint256 denominatorUpdatedAt,) = DENOMINATOR_FEED.latestRoundData();
+        uint256 denominatorStartedAt;
+        uint256 denominatorUpdatedAt;
+        (, denominatorAnswer, denominatorStartedAt, denominatorUpdatedAt,) = _denominatorFeed.latestRoundData();
 
         // Use the later timestamps to ensure both feeds have recent data
         if (denominatorUpdatedAt > updatedAt) {
@@ -84,9 +85,6 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         if (denominatorStartedAt > startedAt) {
             startedAt = denominatorStartedAt;
         }
-
-        // Get the latest answer from denominator feed
-        (, denominatorAnswer,,,) = DENOMINATOR_FEED.latestRoundData();
 
         // Calculate cross-rate: (numerator / denominator)
         answer = _calculateCrossRate(numeratorAnswer, denominatorAnswer);
@@ -98,37 +96,37 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
     /// @return The calculated cross-rate
     function _calculateCrossRate(int256 numeratorAnswer, int256 denominatorAnswer) internal view returns (int256) {
         // Get decimals directly from feeds (no need to store them)
-        uint8 numeratorDecimals = NUMERATOR_FEED.decimals();
-        uint8 denominatorDecimals = DENOMINATOR_FEED.decimals();
+        uint8 numeratorDecimals = _numeratorFeed.decimals();
+        uint8 denominatorDecimals = _denominatorFeed.decimals();
 
         int256 scaledNumeratorAnswer = numeratorAnswer;
         int256 scaledDenominatorAnswer = denominatorAnswer;
 
         // Scale to the higher precision
-        if (numeratorDecimals < DECIMALS) {
-            scaledNumeratorAnswer = numeratorAnswer * int256(10 ** (DECIMALS - numeratorDecimals));
+        if (numeratorDecimals < _decimals) {
+            scaledNumeratorAnswer = numeratorAnswer * int256(10 ** (_decimals - numeratorDecimals));
         }
-        if (denominatorDecimals < DECIMALS) {
-            scaledDenominatorAnswer = denominatorAnswer * int256(10 ** (DECIMALS - denominatorDecimals));
+        if (denominatorDecimals < _decimals) {
+            scaledDenominatorAnswer = denominatorAnswer * int256(10 ** (_decimals - denominatorDecimals));
         }
 
-        return (scaledNumeratorAnswer * int256(10 ** DECIMALS)) / scaledDenominatorAnswer;
+        return (scaledNumeratorAnswer * int256(10 ** _decimals)) / scaledDenominatorAnswer;
     }
 
     // Interface function implementations
     function numeratorFeed() external view returns (AggregatorV3Interface) {
-        return NUMERATOR_FEED;
+        return _numeratorFeed;
     }
 
     function denominatorFeed() external view returns (AggregatorV3Interface) {
-        return DENOMINATOR_FEED;
+        return _denominatorFeed;
     }
 
     function decimals() external view returns (uint8) {
-        return DECIMALS;
+        return _decimals;
     }
 
     function version() external view returns (uint256) {
-        return VERSION;
+        return _version;
     }
 }
