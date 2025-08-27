@@ -64,7 +64,7 @@ contract EstimateUniswapV3ExactInputGasConstant is InstructionForkTestContext {
         vm.assume(arguments.recipient != address(0));
 
         // disregard fuzz generated values
-        arguments.tokenIn = address(0);
+        arguments.tokenIn = SEPOLIA_WETH9;
         arguments.tokenOut = SEPOLIA_USDC;
         arguments.feeTier = 500;
 

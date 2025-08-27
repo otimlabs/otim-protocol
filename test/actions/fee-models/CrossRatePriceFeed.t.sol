@@ -5,6 +5,8 @@ import {Test} from "forge-std/src/Test.sol";
 import {CrossRatePriceFeed} from "../../../src/actions/fee-models/CrossRatePriceFeed.sol";
 import {ICrossRatePriceFeed} from "../../../src/actions/fee-models/interfaces/ICrossRatePriceFeed.sol";
 import {AggregatorV3Interface} from "@chainlink-contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
+import {MockPriceFeed} from "../../mocks/MockPriceFeed.sol";
+import {MaliciousPriceFeed} from "../../mocks/MaliciousPriceFeed.sol";
 
 contract CrossRatePriceFeedTest is Test {
     // Sepolia price feed addresses
@@ -413,94 +415,5 @@ contract CrossRatePriceFeedTest is Test {
         // VULNERABILITY: Contract should detect very old data but doesn't
         (,,, uint256 updatedAt,) = oldCrossRate.latestRoundData();
         assertGt(updatedAt, 0); // Contract accepts very old data without validation
-    }
-}
-
-// ============ MOCK CONTRACTS FOR TESTING ============
-
-contract MockPriceFeed is AggregatorV3Interface {
-    int256 public mockAnswer;
-    uint80 public mockRoundId;
-    uint8 public mockDecimals;
-    uint256 public mockVersion;
-    uint256 public mockStartedAt;
-    uint256 public mockUpdatedAt;
-    uint80 public mockAnsweredInRound;
-    string public mockDescription;
-
-    function setMockData(
-        uint80 _roundId,
-        int256 _answer,
-        uint8 _decimals,
-        uint256 _version,
-        uint256 _updatedAt,
-        uint80 _answeredInRound
-    ) external {
-        mockRoundId = _roundId;
-        mockAnswer = _answer;
-        mockDecimals = _decimals;
-        mockVersion = _version;
-        mockStartedAt = _updatedAt - 3600; // 1 hour before
-        mockUpdatedAt = _updatedAt;
-        mockAnsweredInRound = _answeredInRound;
-        mockDescription = "Mock Price Feed";
-    }
-
-    function latestRoundData()
-        external
-        view
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
-    {
-        return (mockRoundId, mockAnswer, mockStartedAt, mockUpdatedAt, mockAnsweredInRound);
-    }
-
-    function getRoundData(uint80 _roundId)
-        external
-        view
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
-    {
-        return (mockRoundId, mockAnswer, mockStartedAt, mockUpdatedAt, mockAnsweredInRound);
-    }
-
-    function decimals() external view returns (uint8) {
-        return mockDecimals;
-    }
-
-    function version() external view returns (uint256) {
-        return mockVersion;
-    }
-
-    function description() external view returns (string memory) {
-        return mockDescription;
-    }
-}
-
-contract MaliciousPriceFeed is AggregatorV3Interface {
-    function latestRoundData()
-        external
-        pure
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
-    {
-        revert("Malicious feed always reverts");
-    }
-
-    function getRoundData(uint80 _roundId)
-        external
-        pure
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
-    {
-        revert("Malicious feed always reverts");
-    }
-
-    function decimals() external pure returns (uint8) {
-        revert("Malicious feed always reverts");
-    }
-
-    function version() external pure returns (uint256) {
-        revert("Malicious feed always reverts");
-    }
-
-    function description() external pure returns (string memory) {
-        revert("Malicious feed always reverts");
     }
 }
