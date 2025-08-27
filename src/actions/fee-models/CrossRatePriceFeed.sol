@@ -41,40 +41,14 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         VERSION = 1;
     }
 
-    /// @notice Get the cross-rate for a specific round
-    /// @param _roundId The round ID to query
-    /// @return roundId The round ID
-    /// @return answer The cross-rate answer
-    /// @return startedAt When the round started
-    /// @return updatedAt When the round was updated
-    /// @return answeredInRound The round in which the answer was computed
-    function getRoundData(uint80 _roundId)
+    /// @notice Get the cross-rate for a specific round (not supported)
+    /// @dev Historical round data is not supported for cross-rate feeds.
+    function getRoundData(uint80 /* _roundId */)
         external
-        view
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
+        pure
+        returns (uint80 /* roundId */, int256 /* answer */, uint256 /* startedAt */, uint256 /* updatedAt */, uint80 /* answeredInRound */)
     {
-        int256 numeratorAnswer;
-        int256 denominatorAnswer;
-
-        // Get data from numerator feed (e.g., USDC/USD)
-        (roundId, numeratorAnswer, startedAt, updatedAt, answeredInRound) = NUMERATOR_FEED.getRoundData(_roundId);
-
-        // Get timestamp data from denominator feed to use the latest
-        (,, uint256 denominatorStartedAt, uint256 denominatorUpdatedAt,) = DENOMINATOR_FEED.getRoundData(_roundId);
-
-        // Use the later timestamps to ensure both feeds have data
-        if (denominatorUpdatedAt > updatedAt) {
-            updatedAt = denominatorUpdatedAt;
-        }
-        if (denominatorStartedAt > startedAt) {
-            startedAt = denominatorStartedAt;
-        }
-
-        // Get the answer from denominator feed for the same round
-        (, denominatorAnswer,,,) = DENOMINATOR_FEED.getRoundData(_roundId);
-
-        // Calculate cross-rate: (numerator / denominator)
-        answer = _calculateCrossRate(numeratorAnswer, denominatorAnswer);
+        revert GetRoundDataNotSupported();
     }
 
     /// @notice Get the latest cross-rate

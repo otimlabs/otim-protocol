@@ -21,4 +21,6 @@ interface ICrossRatePriceFeed is AggregatorV3Interface {
 
     /// @notice Get the description of the cross-rate
     function description() external view returns (string memory);
+
+    error GetRoundDataNotSupported();
 }
