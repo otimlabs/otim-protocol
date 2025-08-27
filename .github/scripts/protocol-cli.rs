@@ -98,7 +98,7 @@ struct TierConfig {
 #[derive(Debug, serde::Deserialize)]
 struct ContractDetails {
     script: Option<String>,
-    env_var: Option<String>,
+    expected_addr_envvar: Option<String>,
 }
 
 // =============================================================================
@@ -139,18 +139,18 @@ fn load_env_file(path: &str) -> Result<HashMap<String, String>> {
     }
     
     let content = fs::read_to_string(path)?;
-    let mut env_vars = HashMap::new();
+    let mut expected_addr_envvars = HashMap::new();
     
     for line in content.lines() {
         if let Some((key, value)) = line.split_once('=') {
             let key = key.trim();
             let value = value.trim();
-            env_vars.insert(key.to_string(), value.to_string());
+            expected_addr_envvars.insert(key.to_string(), value.to_string());
             env::set_var(key, value);
         }
     }
     
-    Ok(env_vars)
+    Ok(expected_addr_envvars)
 }
 
 /// Updates environment file with new key-value pairs, preserving comments and structure
@@ -245,18 +245,18 @@ async fn calculate_addresses_by_tier(config: &DeploymentConfig, tier: &str) -> R
     if let Some(script) = &tier_config.script {
         let output = run_forge_dry_run(script).await?;
         for (contract, details) in &tier_config.contracts {
-            // Skip contracts without env_var property
-            if details.env_var.is_none() {
-                info(&format!("Skipping {} - no env_var configured", contract));
+            // Skip contracts without expected_addr_envvar property
+            if details.expected_addr_envvar.is_none() {
+                info(&format!("Skipping {} - no expected_addr_envvar configured", contract));
                 continue;
             }
             addresses.insert(contract.clone(), extract_address(&output, contract)?);
         }
     } else {
         for (contract, details) in &tier_config.contracts {
-            // Skip contracts without env_var property
-            if details.env_var.is_none() {
-                info(&format!("Skipping {} - no env_var configured", contract));
+            // Skip contracts without expected_addr_envvar property
+            if details.expected_addr_envvar.is_none() {
+                info(&format!("Skipping {} - no expected_addr_envvar configured", contract));
                 continue;
             }
             let script = details.script.as_ref()
@@ -286,8 +286,8 @@ async fn validate_addresses(config: &DeploymentConfig, env_file: &str, update: b
         
         for (contract, address) in &addresses {
             calculated_addresses.insert(contract.clone(), address.clone());
-            if let Some(ContractDetails { env_var: Some(env_var), .. }) = find_contract_details(config, contract) {
-                env::set_var(env_var, address);
+            if let Some(ContractDetails { expected_addr_envvar: Some(expected_addr_envvar), .. }) = find_contract_details(config, contract) {
+                env::set_var(expected_addr_envvar, address);
             }
         }
     }
@@ -295,18 +295,18 @@ async fn validate_addresses(config: &DeploymentConfig, env_file: &str, update: b
     // Compare and update if needed
     for (contract, calculated_address) in &calculated_addresses {
         match find_contract_details(config, contract) {
-            Some(ContractDetails { env_var: Some(env_var), .. }) => {
-                let current_address = current_env.get(env_var).cloned().unwrap_or_else(|| "NOT_SET".to_string());
+            Some(ContractDetails { expected_addr_envvar: Some(expected_addr_envvar), .. }) => {
+                let current_address = current_env.get(expected_addr_envvar).cloned().unwrap_or_else(|| "NOT_SET".to_string());
                 if current_address != *calculated_address {
                     has_changes = true;
                     info(&format!("{}: {} → {}", contract, current_address, calculated_address));
                     if update {
-                        updates.insert(env_var.clone(), calculated_address.clone());
+                        updates.insert(expected_addr_envvar.clone(), calculated_address.clone());
                     }
                 }
             }
-            Some(ContractDetails { env_var: None, .. }) => {
-                info(&format!("{}: {} (skipped - no env_var configured)", contract, calculated_address));
+            Some(ContractDetails { expected_addr_envvar: None, .. }) => {
+                info(&format!("{}: {} (skipped - no expected_addr_envvar configured)", contract, calculated_address));
             }
             None => {
                 // This case shouldn't occur since we only calculate addresses for contracts in the config
@@ -371,8 +371,8 @@ async fn deploy_contracts(config: &DeploymentConfig) -> Result<()> {
                     info(&format!("  {}: {}", contract, address));
                     
                     // Update environment for next tier dependencies
-                    if let Some(ContractDetails { env_var: Some(env_var), .. }) = find_contract_details(config, contract) {
-                        env::set_var(env_var, address);
+                    if let Some(ContractDetails { expected_addr_envvar: Some(expected_addr_envvar), .. }) = find_contract_details(config, contract) {
+                        env::set_var(expected_addr_envvar, address);
                     }
                 }
             }
@@ -402,8 +402,8 @@ async fn whitelist_actions(config: &DeploymentConfig) -> Result<()> {
     info("Starting action whitelisting...");
     
     for (contract_name, details) in &get_tier_config(config, "actions")?.contracts {
-        let Some(env_var) = &details.env_var else { continue };
-        let action_address = env::var(env_var).with_context(|| format!("{}: {}", contract_name, env_var))?;
+        let Some(expected_addr_envvar) = &details.expected_addr_envvar else { continue };
+        let action_address = env::var(expected_addr_envvar).with_context(|| format!("{}: {}", contract_name, expected_addr_envvar))?;
         info(&format!("Whitelisting {} at {}...", contract_name, action_address));
         
         let rpc_url = env::var("RPC_URL")?;

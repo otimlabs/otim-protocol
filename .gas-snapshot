@@ -55,7 +55,7 @@ EstimateSweepCCTPGasConstant:testFuzz_sweepCCTP_gasConstant(uint256,uint256,(add
 EstimateSweepERC20GasConstant:testFuzz_sweepERC20_gasConstant(uint256,uint256,(address,address,uint256,uint256,(address,uint256,uint256,uint256))) (runs: 256, μ: 2528, ~: 2430)
 EstimateSweepGasConstant:testFuzz_sweep_gasConstant(uint256,uint256,(address,uint256,uint256,uint256,(address,uint256,uint256,uint256))) (runs: 256, μ: 2528, ~: 2421)
 EstimateTransferCCTPGasConstant:testFuzz_transferCCTP_gasConstant(uint256,uint256,(address,uint256,uint32,bytes32,(uint256,uint256,uint256,uint256),(address,uint256,uint256,uint256))) (runs: 256, μ: 3720, ~: 3666)
-EstimateTransferERC20GasConstant:testFuzz_transferERC20_gasConstant(uint256,uint256,(address,address,uint256,(uint256,uint256,uint256,uint256),(address,uint256,uint256,uint256))) (runs: 256, μ: 3444, ~: 3420)
+EstimateTransferERC20GasConstant:testFuzz_transferERC20_gasConstant(uint256,uint256,(address,address,uint256,(uint256,uint256,uint256,uint256),(address,uint256,uint256,uint256))) (runs: 256, μ: 3431, ~: 3330)
 EstimateTransferGasConstant:testFuzz_transfer_gasConstant(uint256,uint256,(address,uint256,uint256,(uint256,uint256,uint256,uint256),(address,uint256,uint256,uint256))) (runs: 256, μ: 3380, ~: 3231)
 EstimateTransferOnceERC20GasConstant:testFuzz_transferERC20Once_gasConstant(uint256,(address,address,uint256,(address,uint256,uint256,uint256))) (runs: 256, μ: 2064, ~: 1974)
 EstimateTransferOnceGasConstant:testFuzz_transferOnce_gasConstant(uint256,(address,uint256,uint256,(address,uint256,uint256,uint256))) (runs: 256, μ: 2033, ~: 1956)

@@ -4,33 +4,33 @@ contracts:
     script: "DeployCore"
     contracts:
       OtimDelegate:
-        env_var: "EXPECTED_OTIM_DELEGATE_ADDRESS"
+        expected_addr_envvar: "EXPECTED_OTIM_DELEGATE_ADDRESS"
       Gateway:
-        env_var: "EXPECTED_GATEWAY_ADDRESS"
+        expected_addr_envvar: "EXPECTED_GATEWAY_ADDRESS"
       InstructionStorage:
-        env_var: "EXPECTED_INSTRUCTION_STORAGE_ADDRESS"
+        expected_addr_envvar: "EXPECTED_INSTRUCTION_STORAGE_ADDRESS"
       ActionManager:
-        env_var: "ACTION_MANAGER_ADDRESS"
+        expected_addr_envvar: "ACTION_MANAGER_ADDRESS"
 
   infrastructure:
     contracts:
       FeeTokenRegistry:
-        env_var: "EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS"
+        expected_addr_envvar: "EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS"
       Treasury:
-        env_var: "EXPECTED_TREASURY_ADDRESS"
+        expected_addr_envvar: "EXPECTED_TREASURY_ADDRESS"
 
   actions:
     contracts:
       TransferAction:
-        env_var: "EXPECTED_TRANSFER_ACTION_ADDRESS"
+        expected_addr_envvar: "EXPECTED_TRANSFER_ACTION_ADDRESS"
       TransferERC20Action:
-        env_var: "EXPECTED_TRANSFER_ERC20_ACTION_ADDRESS"
+        expected_addr_envvar: "EXPECTED_TRANSFER_ERC20_ACTION_ADDRESS"
       RefuelAction:
-        env_var: "EXPECTED_REFUEL_ACTION_ADDRESS"
+        expected_addr_envvar: "EXPECTED_REFUEL_ACTION_ADDRESS"
       RefuelERC20Action:
-        env_var: "EXPECTED_REFUEL_ERC20_ACTION_ADDRESS"
+        expected_addr_envvar: "EXPECTED_REFUEL_ERC20_ACTION_ADDRESS"
       DeactivateInstructionAction:
-        env_var: "EXPECTED_DEACTIVATE_INSTRUCTION_ACTION_ADDRESS"
+        expected_addr_envvar: "EXPECTED_DEACTIVATE_INSTRUCTION_ACTION_ADDRESS"
       UniswapV3ExactInputAction:
       TransferCCTPAction:
       SweepCCTPAction:

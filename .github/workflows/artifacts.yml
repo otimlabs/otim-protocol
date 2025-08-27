@@ -75,7 +75,7 @@ jobs:
       - name: Compare and sync artifacts
         id: compare-artifacts
         run: |
-          if ./.github/scripts/protocol-cli.rs compare-directories "./out" "./offchain/crates/contracts/artifacts" --ignore "build-info" --show-diff; then
+          if ./.github/scripts/protocol-cli.rs compare-directories "./out" "./offchain/crates/contracts/artifacts" --ignore "build-info" --show-diff 2>&1; then
             echo "artifacts_match=true" >> $GITHUB_OUTPUT
             echo "✅ Artifacts match"
           else
