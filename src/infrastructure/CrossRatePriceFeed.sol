@@ -46,8 +46,10 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         decimals = numeratorDecimals > denominatorDecimals ? numeratorDecimals : denominatorDecimals;
 
         // check if the price feeds have been initialized
+        // slither-disable-start unused-return
         (uint80 numeratorRoundId,,, uint256 numeratorUpdatedAt,) = numeratorFeed.latestRoundData();
         (uint80 denominatorRoundId,,, uint256 denominatorUpdatedAt,) = denominatorFeed.latestRoundData();
+        // slither-disable-end unused-return
 
         if (numeratorRoundId == 0 || numeratorUpdatedAt == 0) {
             revert NumeratorPriceFeedNotInitialized();
