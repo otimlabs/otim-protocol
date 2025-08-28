@@ -86,9 +86,19 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         (roundId, answer, startedAt, updatedAt, answeredInRound) = numeratorFeed.latestRoundData();
 
         // slither-disable-next-line unused-return
-        (, int256 denominatorAnswer, uint256 denominatorStartedAt, uint256 denominatorUpdatedAt,) =
-            denominatorFeed.latestRoundData();
+        (
+            uint80 denominatorRoundId,
+            int256 denominatorAnswer,
+            uint256 denominatorStartedAt,
+            uint256 denominatorUpdatedAt,
+        ) = denominatorFeed.latestRoundData();
 
+        // if the latest price is zero or negative, revert
+        if (answer <= 0 || denominatorAnswer <= 0) {
+            revert InvalidPrice();
+        }
+
+        // if the price feed is stale, revert
         if (
             updatedAt < block.timestamp - numeratorHeartbeat
                 || denominatorUpdatedAt < block.timestamp - denominatorHeartbeat
@@ -96,6 +106,7 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
             revert StalePrice();
         }
 
+        roundId = denominatorRoundId < roundId ? denominatorRoundId : roundId;
         updatedAt = denominatorUpdatedAt < updatedAt ? denominatorUpdatedAt : updatedAt;
         startedAt = denominatorStartedAt < startedAt ? denominatorStartedAt : startedAt;
 

@@ -10,6 +10,7 @@ interface ICrossRatePriceFeed is AggregatorV3Interface {
     error PriceFeedNotInitialized();
     error DecimalsMismatch();
     error GetRoundDataNotSupported();
+    error InvalidPrice();
     error StalePrice();
 
     /// @notice Get the numerator price feed
