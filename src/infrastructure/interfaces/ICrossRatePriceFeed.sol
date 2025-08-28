@@ -7,11 +7,23 @@ import {AggregatorV3Interface} from "@chainlink-contracts/src/v0.8/shared/interf
 /// @author Otim Labs, Inc.
 /// @notice Interface for the CrossRatePriceFeed contract that combines two price feeds to create a cross-rate
 interface ICrossRatePriceFeed is AggregatorV3Interface {
+    error GetRoundDataNotSupported();
+    error Overflow();
+    error DivisionByZero();
+    error NumeratorPriceFeedNotInitialized();
+    error DenominatorPriceFeedNotInitialized();
+
     /// @notice Get the numerator price feed
     function numeratorFeed() external view returns (AggregatorV3Interface);
 
     /// @notice Get the denominator price feed
     function denominatorFeed() external view returns (AggregatorV3Interface);
+
+    /// @notice Get the numerator decimals
+    function numeratorDecimals() external view returns (uint8);
+
+    /// @notice Get the denominator decimals
+    function denominatorDecimals() external view returns (uint8);
 
     /// @notice Get the decimals precision of the cross-rate
     function decimals() external view returns (uint8);
@@ -21,8 +33,4 @@ interface ICrossRatePriceFeed is AggregatorV3Interface {
 
     /// @notice Get the description of the cross-rate
     function description() external view returns (string memory);
-
-    error GetRoundDataNotSupported();
-    error Overflow();
-    error DivisionByZero();
 }
