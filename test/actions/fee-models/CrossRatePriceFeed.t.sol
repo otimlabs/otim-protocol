@@ -5,7 +5,7 @@ import {Test} from "forge-std/src/Test.sol";
 import {CrossRatePriceFeed} from "../../../src/actions/fee-models/CrossRatePriceFeed.sol";
 import {ICrossRatePriceFeed} from "../../../src/actions/fee-models/interfaces/ICrossRatePriceFeed.sol";
 import {AggregatorV3Interface} from "@chainlink-contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
-import {MockPriceFeed} from "../../mocks/MockPriceFeed.sol";
+import {MockV3Aggregator} from "@chainlink-contracts/src/v0.8/shared/mocks/MockV3Aggregator.sol";
 
 contract CrossRatePriceFeedTest is Test {
     // Sepolia price feed addresses
@@ -62,8 +62,10 @@ contract CrossRatePriceFeedTest is Test {
 
     /// @notice test division by zero protection
     function test_latestRoundData_handlesZeroDenominator() public {
-        MockPriceFeed zeroDenominatorFeed = new MockPriceFeed();
-        zeroDenominatorFeed.setMockData(1, 0, 8, 1, block.timestamp, 1); // denominator = 0
+        MockV3Aggregator zeroDenominatorFeed = new MockV3Aggregator(8, 0);
+
+        // set denominator answer to zero
+        zeroDenominatorFeed.updateRoundData(1, 0, block.timestamp, 1);
 
         CrossRatePriceFeed zeroCrossRate =
             new CrossRatePriceFeed(USDC_USD_FEED, address(zeroDenominatorFeed), USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT);
@@ -74,8 +76,10 @@ contract CrossRatePriceFeedTest is Test {
 
     /// @notice test extreme price ratios
     function test_latestRoundData_handlesExtremeRatios() public {
-        MockPriceFeed extremeFeed = new MockPriceFeed();
-        extremeFeed.setMockData(1, 1, 8, 1, block.timestamp, 1); // very small denominator
+        MockV3Aggregator extremeFeed = new MockV3Aggregator(8, 0);
+
+        // set denominator answer to very small
+        extremeFeed.updateRoundData(1, 1, block.timestamp, 1); // very small denominator
 
         CrossRatePriceFeed extremeCrossRate =
             new CrossRatePriceFeed(USDC_USD_FEED, address(extremeFeed), USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT);
@@ -89,9 +93,7 @@ contract CrossRatePriceFeedTest is Test {
     function test_latestRoundData_protectsOverflow() public {
         // Create a scenario that will definitely cause overflow
         // Use a very large number that will overflow when multiplied by the scale factor
-        MockPriceFeed overflowFeed = new MockPriceFeed();
-        // Use a number that will definitely overflow when multiplied by 10^8 (scale factor)
-        overflowFeed.setMockData(1, type(int256).max, 8, 1, block.timestamp, 1); // 0 decimals, will scale by 10^8
+        MockV3Aggregator overflowFeed = new MockV3Aggregator(8, type(int256).max);
 
         CrossRatePriceFeed overflowCrossRate =
             new CrossRatePriceFeed(address(overflowFeed), ETH_USD_FEED, USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT);
@@ -101,8 +103,6 @@ contract CrossRatePriceFeedTest is Test {
         overflowCrossRate.latestRoundData();
     }
 
-    // ============ INTERFACE COMPLIANCE TESTS ============
-
     /// @notice test getRoundData reverts for any round ID
     function testFuzz_getRoundData_revertsForAnyRoundId(uint80 roundId) public {
         vm.expectRevert(ICrossRatePriceFeed.GetRoundDataNotSupported.selector);
@@ -110,10 +110,8 @@ contract CrossRatePriceFeedTest is Test {
     }
 
     function test_latestRoundData_realValues() public {
-        MockPriceFeed numeratorFeed = new MockPriceFeed();
-        MockPriceFeed denominatorFeed = new MockPriceFeed();
-        numeratorFeed.setMockData(1, 99987137, 8, 1, block.timestamp, 1);
-        denominatorFeed.setMockData(1, 450076000000, 8, 1, block.timestamp, 1);
+        MockV3Aggregator numeratorFeed = new MockV3Aggregator(8, 99987137);
+        MockV3Aggregator denominatorFeed = new MockV3Aggregator(8, 450076000000);
 
         CrossRatePriceFeed crossFeed = new CrossRatePriceFeed(
             address(numeratorFeed), address(denominatorFeed), USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT
@@ -129,10 +127,8 @@ contract CrossRatePriceFeedTest is Test {
         vm.assume(numeratorAnswer > 100_000 && numeratorAnswer < 100_000_000_000);
         vm.assume(denominatorAnswer > 0 && denominatorAnswer < 400_000_000_000_000);
 
-        MockPriceFeed numeratorFeed = new MockPriceFeed();
-        MockPriceFeed denominatorFeed = new MockPriceFeed();
-        numeratorFeed.setMockData(1, numeratorAnswer, 8, 1, block.timestamp, 1);
-        denominatorFeed.setMockData(1, denominatorAnswer, 8, 1, block.timestamp, 1);
+        MockV3Aggregator numeratorFeed = new MockV3Aggregator(8, numeratorAnswer);
+        MockV3Aggregator denominatorFeed = new MockV3Aggregator(8, denominatorAnswer);
 
         CrossRatePriceFeed crossFeed = new CrossRatePriceFeed(
             address(numeratorFeed), address(denominatorFeed), USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT
@@ -148,10 +144,8 @@ contract CrossRatePriceFeedTest is Test {
         vm.assume(numeratorAnswer > 1_000_000_000_000_000 && numeratorAnswer < 1_000_000_000_000_000_000_000_000);
         vm.assume(denominatorAnswer > 0 && denominatorAnswer < 4_000_000_000_000_000_000_000_000);
 
-        MockPriceFeed numeratorFeed = new MockPriceFeed();
-        MockPriceFeed denominatorFeed = new MockPriceFeed();
-        numeratorFeed.setMockData(1, numeratorAnswer, 18, 1, block.timestamp, 1);
-        denominatorFeed.setMockData(1, denominatorAnswer, 18, 1, block.timestamp, 1);
+        MockV3Aggregator numeratorFeed = new MockV3Aggregator(18, numeratorAnswer);
+        MockV3Aggregator denominatorFeed = new MockV3Aggregator(18, denominatorAnswer);
 
         CrossRatePriceFeed crossFeed = new CrossRatePriceFeed(
             address(numeratorFeed), address(denominatorFeed), USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT
@@ -185,6 +179,7 @@ contract CrossRatePriceFeedTest is Test {
 
         uint256 expectedStartedAt =
             denominatorStartedAt < numeratorStartedAt ? denominatorStartedAt : numeratorStartedAt;
+
         assertEq(crossStartedAt, expectedStartedAt);
     }
 
@@ -196,6 +191,7 @@ contract CrossRatePriceFeedTest is Test {
 
         uint256 expectedUpdatedAt =
             denominatorUpdatedAt < numeratorUpdatedAt ? denominatorUpdatedAt : numeratorUpdatedAt;
+
         assertEq(crossUpdatedAt, expectedUpdatedAt);
     }
 
