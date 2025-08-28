@@ -6,32 +6,27 @@ import {ICrossRatePriceFeed} from "./interfaces/ICrossRatePriceFeed.sol";
 
 /// @title CrossRatePriceFeed
 /// @author Otim Labs, Inc.
-/// @notice A dynamic price feed that combines two price feeds to create a cross-rate
-/// @dev This contract takes two price feeds and calculates the cross-rate by canceling out the common denominator
-///
-/// Example: To get USDC/ETH rate from ETH/USD and USDC/USD feeds:
-/// - Numerator Feed: USDC/USD = 1 (1 * 10^8 = 100000000)
-/// - Denominator Feed: ETH/USD = 3000 (3000 * 10^8 = 300000000000)
-/// - Cross Rate: USDC/ETH = (USDC/USD) / (ETH/USD) = 1/3000 = 0.000333...
-///
-/// The formula is: (numerator / denominator) to get the rate of numerator in terms of denominator
+/// @notice a contract that combines two price feeds to create a cross-rate price feed
 contract CrossRatePriceFeed is ICrossRatePriceFeed {
     /// @notice the numerator price feed (e.g., USDC/USD)
     AggregatorV3Interface public immutable numeratorFeed;
     /// @notice the denominator price feed (e.g., ETH/USD)
     AggregatorV3Interface public immutable denominatorFeed;
 
-    /// @notice the number of decimals for the cross-rate price feed
+    /// @notice the number of decimals of the cross-rate price feed
     uint8 public immutable decimals;
     /// @notice the version of the price feed
-    uint256 public immutable version;
+    uint256 public constant version = 1;
     /// @notice the description of the price feed
     string public description;
 
-    int256 private immutable scaleFactor;
-
+    /// @notice the heartbeat of the numerator price feed
     uint40 public immutable numeratorHeartbeat;
+    /// @notice the heartbeat of the denominator price feed
     uint40 public immutable denominatorHeartbeat;
+
+    /// @notice the scale factor used to maintain decimal precision when calculating the cross-rate
+    int256 private immutable scaleFactor;
 
     /// @notice Constructor for CrossRatePriceFeed
     /// @param numeratorFeedAddress - the price feed for the numerator (e.g., USDC/USD)
@@ -45,16 +40,9 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         numeratorFeed = AggregatorV3Interface(numeratorFeedAddress);
         denominatorFeed = AggregatorV3Interface(denominatorFeedAddress);
 
-        // Create cross-rate description showing the full formula: "(numerator) / (denominator)"
         description =
             string(abi.encodePacked("(", numeratorFeed.description(), ") / (", denominatorFeed.description(), ")"));
 
-        version = 1;
-
-        numeratorHeartbeat = _numeratorHeartbeat;
-        denominatorHeartbeat = _denominatorHeartbeat;
-
-        // Use the higher precision for calculations to maintain accuracy
         uint8 numeratorDecimals = numeratorFeed.decimals();
         uint8 denominatorDecimals = denominatorFeed.decimals();
 
@@ -65,7 +53,9 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         decimals = numeratorDecimals;
         scaleFactor = int256(10 ** decimals);
 
-        // check if the price feeds have been initialized
+        numeratorHeartbeat = _numeratorHeartbeat;
+        denominatorHeartbeat = _denominatorHeartbeat;
+
         // slither-disable-start unused-return
         (uint80 numeratorRoundId,,, uint256 numeratorUpdatedAt,) = numeratorFeed.latestRoundData();
         (uint80 denominatorRoundId,,, uint256 denominatorUpdatedAt,) = denominatorFeed.latestRoundData();
@@ -82,7 +72,7 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         revert GetRoundDataNotSupported();
     }
 
-    /// @notice get the latest cross-rate
+    /// @notice get the latest cross-rate price
     /// @return roundId - the round ID
     /// @return answer - the cross-rate answer
     /// @return startedAt - when the round started
@@ -93,10 +83,7 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         view
         returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
     {
-        int256 numeratorAnswer;
-
-        // Get latest data from both feeds
-        (roundId, numeratorAnswer, startedAt, updatedAt, answeredInRound) = numeratorFeed.latestRoundData();
+        (roundId, answer, startedAt, updatedAt, answeredInRound) = numeratorFeed.latestRoundData();
 
         // slither-disable-next-line unused-return
         (, int256 denominatorAnswer, uint256 denominatorStartedAt, uint256 denominatorUpdatedAt,) =
@@ -109,11 +96,10 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
             revert StalePrice();
         }
 
-        // Use the earlier timestamps
         updatedAt = denominatorUpdatedAt < updatedAt ? denominatorUpdatedAt : updatedAt;
         startedAt = denominatorStartedAt < startedAt ? denominatorStartedAt : startedAt;
 
-        // Calculate cross-rate: (numerator / denominator)
-        answer = numeratorAnswer * scaleFactor / denominatorAnswer;
+        answer *= scaleFactor;
+        answer /= denominatorAnswer;
     }
 }

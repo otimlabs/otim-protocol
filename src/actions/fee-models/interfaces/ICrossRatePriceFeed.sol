@@ -18,6 +18,12 @@ interface ICrossRatePriceFeed is AggregatorV3Interface {
     /// @notice Get the denominator price feed
     function denominatorFeed() external view returns (AggregatorV3Interface);
 
+    /// @notice Get the heartbeat of the numerator price feed
+    function numeratorHeartbeat() external view returns (uint40);
+
+    /// @notice Get the heartbeat of the denominator price feed
+    function denominatorHeartbeat() external view returns (uint40);
+
     /// @notice Get the decimals precision of the cross-rate
     function decimals() external view returns (uint8);
 
