@@ -26,6 +26,10 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
     /// @notice the number of decimals for the denominator price feed
     uint8 public immutable denominatorDecimals;
 
+    bool private numeratorDecimalsGreater;
+    uint8 private decimalDifference;
+    int256 private scaleFactor;
+
     /// @notice the number of decimals for the cross-rate price feed
     uint8 public immutable decimals;
     /// @notice the version of the price feed
@@ -43,7 +47,17 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         // Use the higher precision for calculations to maintain accuracy
         numeratorDecimals = numeratorFeed.decimals();
         denominatorDecimals = denominatorFeed.decimals();
-        decimals = numeratorDecimals > denominatorDecimals ? numeratorDecimals : denominatorDecimals;
+
+        if (numeratorDecimals > denominatorDecimals) {
+            numeratorDecimalsGreater = true;
+            decimals = numeratorDecimals;
+            decimalDifference = numeratorDecimals - denominatorDecimals;
+            scaleFactor = int256(10 ** decimalDifference);
+        } else {
+            decimals = denominatorDecimals;
+            decimalDifference = denominatorDecimals - numeratorDecimals;
+            scaleFactor = int256(10 ** decimalDifference);
+        }
 
         // check if the price feeds have been initialized
         // slither-disable-start unused-return
@@ -106,6 +120,7 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         = denominatorFeed.latestRoundData();
 
         // Use the later timestamps to ensure both feeds have recent data
+        // TODO: this should use the earliest timestamp to make sure we don't use stale data
         if (denominatorUpdatedAt > updatedAt) {
             updatedAt = denominatorUpdatedAt;
         }
@@ -122,25 +137,16 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
     /// @param denominatorAnswer - the answer from the denominator feed
     /// @return - the calculated cross-rate
     function _calculateCrossRate(int256 numeratorAnswer, int256 denominatorAnswer) internal view returns (int256) {
-        // Scale numerator to target precision (only if needed)
-        if (numeratorDecimals != decimals) {
-            // Scale up: multiply by 10^(targetPrecision - numeratorDecimals)
-            uint256 scaleFactor = 10 ** (decimals - numeratorDecimals);
-            if (numeratorAnswer > type(int256).max / int256(scaleFactor)) revert Overflow();
-            numeratorAnswer *= int256(scaleFactor);
+        if (decimalDifference > 0) {
+            if (numeratorDecimalsGreater) {
+                if (denominatorAnswer > type(int256).max / scaleFactor) revert Overflow();
+                denominatorAnswer *= scaleFactor;
+            } else {
+                if (numeratorAnswer > type(int256).max / scaleFactor) revert Overflow();
+                numeratorAnswer *= scaleFactor;
+            }
         }
 
-        // Scale denominator to target precision (only if needed)
-        if (denominatorDecimals != decimals) {
-            // Scale up: multiply by 10^(targetPrecision - denominatorDecimals)
-            uint256 scaleFactor = 10 ** (decimals - denominatorDecimals);
-            if (denominatorAnswer > type(int256).max / int256(scaleFactor)) revert Overflow();
-            denominatorAnswer *= int256(scaleFactor);
-        }
-
-        // Calculate final result ensuring the result has targetPrecision decimals
-        int256 finalNumerator = numeratorAnswer * int256(10 ** decimals);
-
-        return finalNumerator / denominatorAnswer;
+        return numeratorAnswer * int256(10 ** decimals) / denominatorAnswer;
     }
 }
