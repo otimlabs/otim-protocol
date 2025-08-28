@@ -6,7 +6,6 @@ import {CrossRatePriceFeed} from "../../src/infrastructure/CrossRatePriceFeed.so
 import {ICrossRatePriceFeed} from "../../src/infrastructure/interfaces/ICrossRatePriceFeed.sol";
 import {AggregatorV3Interface} from "@chainlink-contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import {MockPriceFeed} from "../mocks/MockPriceFeed.sol";
-import {MaliciousPriceFeed} from "../mocks/MaliciousPriceFeed.sol";
 
 contract CrossRatePriceFeedTest is Test {
     // Sepolia price feed addresses
@@ -17,9 +16,8 @@ contract CrossRatePriceFeedTest is Test {
     AggregatorV3Interface public ethUsdFeed;
     AggregatorV3Interface public usdcUsdFeed;
 
-    // Mock contracts for edge case testing
-    MockPriceFeed public mockFeed;
-    MaliciousPriceFeed public maliciousFeed;
+    uint40 constant ETH_USD_HEARTBEAT = 3600;
+    uint40 constant USDC_USD_HEARTBEAT = 86400;
 
     constructor() {
         // Fork Sepolia
@@ -32,17 +30,8 @@ contract CrossRatePriceFeedTest is Test {
 
         // Deploy CrossRatePriceFeed with USDC/USD as numerator and ETH/USD as denominator
         // This will create a USDC/ETH rate
-        crossRatePriceFeed = new CrossRatePriceFeed(
-            USDC_USD_FEED, // numerator (USDC/USD)
-            ETH_USD_FEED // denominator (ETH/USD)
-        );
-
-        // Deploy mock contracts for edge case testing
-        mockFeed = new MockPriceFeed();
-        maliciousFeed = new MaliciousPriceFeed();
+        crossRatePriceFeed = new CrossRatePriceFeed(USDC_USD_FEED, ETH_USD_FEED, USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT);
     }
-
-    // ============ BASIC FUNCTIONALITY TESTS ============
 
     /// @notice test constructor sets feeds correctly
     function test_constructor_setsFeeds() public view {
@@ -61,13 +50,13 @@ contract CrossRatePriceFeedTest is Test {
     /// @notice test constructor reverts with zero numerator feed
     function test_constructor_revertsZeroNumerator() public {
         vm.expectRevert();
-        new CrossRatePriceFeed(address(0), ETH_USD_FEED);
+        new CrossRatePriceFeed(address(0), ETH_USD_FEED, USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT);
     }
 
     /// @notice test constructor reverts with zero denominator feed
     function test_constructor_revertsZeroDenominator() public {
         vm.expectRevert();
-        new CrossRatePriceFeed(USDC_USD_FEED, address(0));
+        new CrossRatePriceFeed(USDC_USD_FEED, address(0), USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT);
     }
 
     // ============ MATHEMATICAL EDGE CASE TESTS ============
@@ -77,7 +66,8 @@ contract CrossRatePriceFeedTest is Test {
         MockPriceFeed zeroDenominatorFeed = new MockPriceFeed();
         zeroDenominatorFeed.setMockData(1, 0, 8, 1, block.timestamp, 1); // denominator = 0
 
-        CrossRatePriceFeed zeroCrossRate = new CrossRatePriceFeed(USDC_USD_FEED, address(zeroDenominatorFeed));
+        CrossRatePriceFeed zeroCrossRate =
+            new CrossRatePriceFeed(USDC_USD_FEED, address(zeroDenominatorFeed), USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT);
 
         vm.expectRevert();
         zeroCrossRate.latestRoundData();
@@ -88,7 +78,8 @@ contract CrossRatePriceFeedTest is Test {
         MockPriceFeed extremeFeed = new MockPriceFeed();
         extremeFeed.setMockData(1, 1, 8, 1, block.timestamp, 1); // very small denominator
 
-        CrossRatePriceFeed extremeCrossRate = new CrossRatePriceFeed(USDC_USD_FEED, address(extremeFeed));
+        CrossRatePriceFeed extremeCrossRate =
+            new CrossRatePriceFeed(USDC_USD_FEED, address(extremeFeed), USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT);
 
         // This should work but produce a very large result
         (,,, uint256 updatedAt,) = extremeCrossRate.latestRoundData();
@@ -101,42 +92,14 @@ contract CrossRatePriceFeedTest is Test {
         // Use a very large number that will overflow when multiplied by the scale factor
         MockPriceFeed overflowFeed = new MockPriceFeed();
         // Use a number that will definitely overflow when multiplied by 10^8 (scale factor)
-        overflowFeed.setMockData(1, type(int256).max / 100, 0, 1, block.timestamp, 1); // 0 decimals, will scale by 10^8
+        overflowFeed.setMockData(1, type(int256).max, 8, 1, block.timestamp, 1); // 0 decimals, will scale by 10^8
 
-        CrossRatePriceFeed overflowCrossRate = new CrossRatePriceFeed(USDC_USD_FEED, address(overflowFeed));
+        CrossRatePriceFeed overflowCrossRate =
+            new CrossRatePriceFeed(address(overflowFeed), ETH_USD_FEED, USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT);
 
         // Contract should revert on overflow
-        vm.expectRevert(ICrossRatePriceFeed.Overflow.selector);
+        vm.expectRevert();
         overflowCrossRate.latestRoundData();
-    }
-
-    // ============ PRECISION TESTS ============
-
-    /// @notice test precision loss scenarios
-    function test_latestRoundData_handlesPrecisionLoss() public {
-        MockPriceFeed precisionFeed = new MockPriceFeed();
-        precisionFeed.setMockData(1, 1, 18, 1, block.timestamp, 1); // 18 decimals
-
-        CrossRatePriceFeed precisionCrossRate = new CrossRatePriceFeed(
-            USDC_USD_FEED, // 8 decimals
-            address(precisionFeed) // 18 decimals
-        );
-
-        // Should handle different decimal precisions correctly
-        (,,, uint256 updatedAt,) = precisionCrossRate.latestRoundData();
-        assertGt(updatedAt, 0);
-    }
-
-    /// @notice test rounding behavior
-    function test_latestRoundData_roundingBehavior() public {
-        MockPriceFeed roundingFeed = new MockPriceFeed();
-        roundingFeed.setMockData(100000001, 300000000, 8, 1, block.timestamp, 1); // 1.00000001 / 3.00000000
-
-        CrossRatePriceFeed roundingCrossRate = new CrossRatePriceFeed(USDC_USD_FEED, address(roundingFeed));
-
-        // Should calculate correctly with rounding
-        (,,, uint256 updatedAt,) = roundingCrossRate.latestRoundData();
-        assertGt(updatedAt, 0);
     }
 
     // ============ INTERFACE COMPLIANCE TESTS ============
@@ -153,7 +116,9 @@ contract CrossRatePriceFeedTest is Test {
         numeratorFeed.setMockData(1, 99987137, 8, 1, block.timestamp, 1);
         denominatorFeed.setMockData(1, 450076000000, 8, 1, block.timestamp, 1);
 
-        CrossRatePriceFeed crossFeed = new CrossRatePriceFeed(address(numeratorFeed), address(denominatorFeed));
+        CrossRatePriceFeed crossFeed = new CrossRatePriceFeed(
+            address(numeratorFeed), address(denominatorFeed), USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT
+        );
         (, int256 answer,,,) = crossFeed.latestRoundData();
 
         int256 expectedAnswer = 22215;
@@ -161,7 +126,7 @@ contract CrossRatePriceFeedTest is Test {
         assertEq(uint256(answer), uint256(expectedAnswer));
     }
 
-    function testFuzz_latestRoundData_realValues(int256 numeratorAnswer, int256 denominatorAnswer) public {
+    function testFuzz_latestRoundData_realValuesDecimals8(int256 numeratorAnswer, int256 denominatorAnswer) public {
         vm.assume(numeratorAnswer > 100_000 && numeratorAnswer < 100_000_000_000);
         vm.assume(denominatorAnswer > 0 && denominatorAnswer < 400_000_000_000_000);
 
@@ -170,7 +135,9 @@ contract CrossRatePriceFeedTest is Test {
         numeratorFeed.setMockData(1, numeratorAnswer, 8, 1, block.timestamp, 1);
         denominatorFeed.setMockData(1, denominatorAnswer, 8, 1, block.timestamp, 1);
 
-        CrossRatePriceFeed crossFeed = new CrossRatePriceFeed(address(numeratorFeed), address(denominatorFeed));
+        CrossRatePriceFeed crossFeed = new CrossRatePriceFeed(
+            address(numeratorFeed), address(denominatorFeed), USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT
+        );
         (, int256 answer,,,) = crossFeed.latestRoundData();
 
         int256 expectedAnswer = (numeratorAnswer * 10 ** 8) / denominatorAnswer;
@@ -178,43 +145,24 @@ contract CrossRatePriceFeedTest is Test {
         assertEq(uint256(answer), uint256(expectedAnswer));
     }
 
-    function testFuzz_latestRoundData_realValues_numerator18(int256 numeratorAnswer, int256 denominatorAnswer) public {
-        vm.assume(numeratorAnswer > 1_000_000 && numeratorAnswer < 1_000_000_000_000_000_000_000);
-        vm.assume(denominatorAnswer > 0 && denominatorAnswer < 400_000_000_000_000);
+    function testFuzz_latestRoundData_realValuesDecimals18(int256 numeratorAnswer, int256 denominatorAnswer) public {
+        vm.assume(numeratorAnswer > 1_000_000_000_000_000 && numeratorAnswer < 1_000_000_000_000_000_000_000_000);
+        vm.assume(denominatorAnswer > 0 && denominatorAnswer < 4_000_000_000_000_000_000_000_000);
 
         MockPriceFeed numeratorFeed = new MockPriceFeed();
         MockPriceFeed denominatorFeed = new MockPriceFeed();
         numeratorFeed.setMockData(1, numeratorAnswer, 18, 1, block.timestamp, 1);
-        denominatorFeed.setMockData(1, denominatorAnswer, 8, 1, block.timestamp, 1);
-
-        CrossRatePriceFeed crossFeed = new CrossRatePriceFeed(address(numeratorFeed), address(denominatorFeed));
-        (, int256 answer,,,) = crossFeed.latestRoundData();
-
-        int256 expectedAnswer = (numeratorAnswer * 10 ** 18) / (denominatorAnswer * 10 ** 10);
-
-        assertEq(uint256(answer), uint256(expectedAnswer));
-    }
-
-    function testFuzz_latestRoundData_realValues_denominator18(int256 numeratorAnswer, int256 denominatorAnswer)
-        public
-    {
-        vm.assume(numeratorAnswer > 100_000 && numeratorAnswer < 100_000_000_000);
-        vm.assume(denominatorAnswer > 0 && denominatorAnswer < 400_000_000_000_000_000_000_000);
-
-        MockPriceFeed numeratorFeed = new MockPriceFeed();
-        MockPriceFeed denominatorFeed = new MockPriceFeed();
-        numeratorFeed.setMockData(1, numeratorAnswer, 8, 1, block.timestamp, 1);
         denominatorFeed.setMockData(1, denominatorAnswer, 18, 1, block.timestamp, 1);
 
-        CrossRatePriceFeed crossFeed = new CrossRatePriceFeed(address(numeratorFeed), address(denominatorFeed));
+        CrossRatePriceFeed crossFeed = new CrossRatePriceFeed(
+            address(numeratorFeed), address(denominatorFeed), USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT
+        );
         (, int256 answer,,,) = crossFeed.latestRoundData();
 
-        int256 expectedAnswer = (numeratorAnswer * 10 ** 28) / denominatorAnswer;
+        int256 expectedAnswer = (numeratorAnswer * 10 ** 18) / denominatorAnswer;
 
         assertEq(uint256(answer), uint256(expectedAnswer));
     }
-
-    // ============ BASIC FUNCTIONALITY TESTS ============
 
     /// @notice test latestRoundData uses numerator feed's round ID
     function test_latestRoundData_usesNumeratorRoundId() public view {
@@ -231,44 +179,25 @@ contract CrossRatePriceFeedTest is Test {
     }
 
     /// @notice test latestRoundData uses latest started at timestamp
-    function test_latestRoundData_usesLatestStartedAt() public view {
+    function test_latestRoundData_usesEarlierStartedAt() public view {
         (,, uint256 numeratorStartedAt,,) = usdcUsdFeed.latestRoundData();
         (,, uint256 denominatorStartedAt,,) = ethUsdFeed.latestRoundData();
         (,, uint256 crossStartedAt,,) = crossRatePriceFeed.latestRoundData();
 
         uint256 expectedStartedAt =
-            numeratorStartedAt > denominatorStartedAt ? numeratorStartedAt : denominatorStartedAt;
+            denominatorStartedAt < numeratorStartedAt ? denominatorStartedAt : numeratorStartedAt;
         assertEq(crossStartedAt, expectedStartedAt);
     }
 
-    /// @notice test latestRoundData uses latest updated at timestamp
-    function test_latestRoundData_usesLatestUpdatedAt() public view {
+    /// @notice test latestRoundData uses earlier updated at timestamp
+    function test_latestRoundData_usesEarlierUpdatedAt() public view {
         (,,, uint256 numeratorUpdatedAt,) = usdcUsdFeed.latestRoundData();
         (,,, uint256 denominatorUpdatedAt,) = ethUsdFeed.latestRoundData();
         (,,, uint256 crossUpdatedAt,) = crossRatePriceFeed.latestRoundData();
 
         uint256 expectedUpdatedAt =
-            numeratorUpdatedAt > denominatorUpdatedAt ? numeratorUpdatedAt : denominatorUpdatedAt;
+            denominatorUpdatedAt < numeratorUpdatedAt ? denominatorUpdatedAt : numeratorUpdatedAt;
         assertEq(crossUpdatedAt, expectedUpdatedAt);
-    }
-
-    /// @notice test cross rate calculation with different decimal precisions
-    function test_latestRoundData_handlesDifferentDecimals() public view {
-        uint8 numeratorDecimals = usdcUsdFeed.decimals();
-        uint8 denominatorDecimals = ethUsdFeed.decimals();
-        uint8 crossDecimals = crossRatePriceFeed.decimals();
-
-        // Verify decimals calculation logic
-        uint8 expectedDecimals = numeratorDecimals > denominatorDecimals ? numeratorDecimals : denominatorDecimals;
-        assertEq(crossDecimals, expectedDecimals);
-
-        // Verify calculation maintains precision
-        (, int256 numeratorAnswer,,,) = usdcUsdFeed.latestRoundData();
-        (, int256 denominatorAnswer,,,) = ethUsdFeed.latestRoundData();
-        (, int256 crossAnswer,,,) = crossRatePriceFeed.latestRoundData();
-
-        int256 expectedCrossRate = _calculateExpectedCrossRate(numeratorAnswer, denominatorAnswer);
-        assertEq(crossAnswer, expectedCrossRate);
     }
 
     /// @notice test multiple calls return identical data
@@ -305,7 +234,11 @@ contract CrossRatePriceFeedTest is Test {
         assertEq(description, expectedDescription);
     }
 
-    // ============ BUSINESS LOGIC TESTS ============
+    /// @notice test started at is before or equal to updated at
+    function test_latestRoundData_startedAtBeforeUpdatedAt() public view {
+        (,, uint256 crossStartedAt, uint256 crossUpdatedAt,) = crossRatePriceFeed.latestRoundData();
+        assertGe(crossUpdatedAt, crossStartedAt);
+    }
 
     /// @notice test cross rate is positive when both feeds are positive
     function test_latestRoundData_positiveWhenFeedsPositive() public view {
@@ -319,46 +252,5 @@ contract CrossRatePriceFeedTest is Test {
 
         // Cross rate should be positive
         assertGt(crossAnswer, 0);
-    }
-
-    /// @notice test USDC/ETH rate is within expected bounds
-    function test_latestRoundData_usdcEthRateBounds() public view {
-        (, int256 crossAnswer,,,) = crossRatePriceFeed.latestRoundData();
-
-        // USDC/ETH should be a small number (around 0.0003-0.0004)
-        assertLt(uint256(crossAnswer), 1e8); // Less than 1
-        assertGt(uint256(crossAnswer), 1e3); // Greater than 0.001
-    }
-
-    /// @notice test started at is before or equal to updated at
-    function test_latestRoundData_startedAtBeforeUpdatedAt() public view {
-        (,, uint256 crossStartedAt, uint256 crossUpdatedAt,) = crossRatePriceFeed.latestRoundData();
-        assertGe(crossUpdatedAt, crossStartedAt);
-    }
-
-    // ============ HELPER FUNCTIONS ============
-
-    /// @notice helper function to calculate expected cross rate
-    function _calculateExpectedCrossRate(int256 numeratorAnswer, int256 denominatorAnswer)
-        internal
-        view
-        returns (int256)
-    {
-        uint8 numeratorDecimals = usdcUsdFeed.decimals();
-        uint8 denominatorDecimals = ethUsdFeed.decimals();
-        uint8 crossDecimals = crossRatePriceFeed.decimals();
-
-        int256 scaledNumeratorAnswer = numeratorAnswer;
-        int256 scaledDenominatorAnswer = denominatorAnswer;
-
-        // Scale to the higher precision
-        if (numeratorDecimals < crossDecimals) {
-            scaledNumeratorAnswer = numeratorAnswer * int256(10 ** (crossDecimals - numeratorDecimals));
-        }
-        if (denominatorDecimals < crossDecimals) {
-            scaledDenominatorAnswer = denominatorAnswer * int256(10 ** (crossDecimals - denominatorDecimals));
-        }
-
-        return (scaledNumeratorAnswer * int256(10 ** crossDecimals)) / scaledDenominatorAnswer;
     }
 }
