@@ -1,8 +1,6 @@
 name: Deploy Contracts
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       env_file:
@@ -37,8 +35,8 @@ jobs:
           ENV_FILE="${{ inputs.env_file || '.github/networks/testnet/.env-otim-testnet' }}"
           
           docker run --rm -v "${{ github.workspace }}:/workspace" -w /workspace \
-            protocol:latest ./.github/scripts/protocol-cli.rs validate-contracts \
-            --config-file .github/deployment-config.yaml --env-file "$ENV_FILE" --update
+            protocol:latest /scripts/protocol-cli.rs validate-contracts \
+            --config-file /scripts/deployment-config.yaml --env-file "$ENV_FILE" --update
           
           case $? in
             0) echo "changes_detected=false" >> $GITHUB_OUTPUT ;;

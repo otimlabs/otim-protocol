@@ -17,6 +17,12 @@ jobs:
       offchain_ref: main
     secrets: inherit
 
+  deploy:
+    needs: [check-artifacts]
+    if: needs.check-artifacts.outputs.artifacts_match == 'true'
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+
   build-and-publish:
     needs: [check-artifacts]
     if: always()

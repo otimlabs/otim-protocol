@@ -12,13 +12,16 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 
 COPY . .
 
+# Setup scripts and configs
+RUN mkdir /scripts && \
+    cp .github/scripts/protocol-cli.rs /scripts/ && \
+    cp .github/deployment-config.yaml /scripts/ && \
+    chmod +x /scripts/protocol-cli.rs
+
 # Build contracts and run tests
 RUN forge soldeer update
 RUN forge build
 RUN forge test
-
-# Make scripts executable
-RUN chmod +x .github/scripts/protocol-cli.rs
 
 ENTRYPOINT ["forge"]
 CMD ["--version"]
