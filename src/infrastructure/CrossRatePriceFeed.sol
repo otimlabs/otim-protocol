@@ -26,9 +26,9 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
     /// @notice the number of decimals for the denominator price feed
     uint8 public immutable denominatorDecimals;
 
-    bool private numeratorDecimalsGreater;
-    uint8 private decimalDifference;
-    int256 private scaleFactor;
+    bool private immutable numeratorDecimalsGreater;
+    uint8 private immutable decimalDifference;
+    int256 private immutable scaleFactor;
 
     /// @notice the number of decimals for the cross-rate price feed
     uint8 public immutable decimals;
