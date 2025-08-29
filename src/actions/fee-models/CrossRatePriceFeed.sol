@@ -28,9 +28,6 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
     /// @notice the scale factor used to maintain decimal precision when calculating the cross-rate
     int256 private immutable scaleFactor;
 
-    /// @notice Constructor for CrossRatePriceFeed
-    /// @param numeratorFeedAddress - the price feed for the numerator (e.g., USDC/USD)
-    /// @param denominatorFeedAddress - the price feed for the denominator (e.g., ETH/USD)
     constructor(
         address numeratorFeedAddress,
         address denominatorFeedAddress,
@@ -40,9 +37,6 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         numeratorFeed = AggregatorV3Interface(numeratorFeedAddress);
         denominatorFeed = AggregatorV3Interface(denominatorFeedAddress);
 
-        description =
-            string(abi.encodePacked("(", numeratorFeed.description(), ") / (", denominatorFeed.description(), ")"));
-
         uint8 numeratorDecimals = numeratorFeed.decimals();
         uint8 denominatorDecimals = denominatorFeed.decimals();
 
@@ -51,10 +45,14 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         }
 
         decimals = numeratorDecimals;
-        scaleFactor = int256(10 ** decimals);
+
+        description =
+            string(abi.encodePacked("(", numeratorFeed.description(), ") / (", denominatorFeed.description(), ")"));
 
         numeratorHeartbeat = _numeratorHeartbeat;
         denominatorHeartbeat = _denominatorHeartbeat;
+
+        scaleFactor = int256(10 ** decimals);
 
         // slither-disable-start unused-return
         (uint80 numeratorRoundId,,, uint256 numeratorUpdatedAt,) = numeratorFeed.latestRoundData();
@@ -75,9 +73,9 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
     /// @notice get the latest cross-rate price
     /// @return roundId - the round ID
     /// @return answer - the cross-rate answer
-    /// @return startedAt - when the round started
-    /// @return updatedAt - when the round was updated
-    /// @return answeredInRound - the round in which the answer was computed
+    /// @return startedAt - when the round started (the earlier of the two feeds)
+    /// @return updatedAt - when the round was updated (the earlier of the two feeds)
+    /// @return answeredInRound - the round in which the answer was computed (earlier of the two feeds)
     function latestRoundData()
         external
         view
@@ -91,6 +89,7 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
             int256 denominatorAnswer,
             uint256 denominatorStartedAt,
             uint256 denominatorUpdatedAt,
+            uint80 denominatorAnsweredInRound
         ) = denominatorFeed.latestRoundData();
 
         // if the latest price is zero or negative, revert
@@ -106,10 +105,13 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
             revert StalePrice();
         }
 
+        // use earliest values
         roundId = denominatorRoundId < roundId ? denominatorRoundId : roundId;
         updatedAt = denominatorUpdatedAt < updatedAt ? denominatorUpdatedAt : updatedAt;
         startedAt = denominatorStartedAt < startedAt ? denominatorStartedAt : startedAt;
+        answeredInRound = denominatorAnsweredInRound < answeredInRound ? denominatorAnsweredInRound : answeredInRound;
 
+        // scale numerator by the scale factor and divide by thedenominator answer
         answer *= scaleFactor;
         answer /= denominatorAnswer;
     }
