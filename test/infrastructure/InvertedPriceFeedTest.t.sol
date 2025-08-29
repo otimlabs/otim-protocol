@@ -5,7 +5,7 @@ import {Test} from "forge-std/src/Test.sol";
 
 import {MockV3Aggregator} from "@chainlink-contracts/src/v0.8/shared/mocks/MockV3Aggregator.sol";
 
-import {InvertedPriceFeed} from "../../src/mocks/InvertedPriceFeed.sol";
+import {InvertedPriceFeed} from "../../src/infrastructure/InvertedPriceFeed.sol";
 
 contract InvertedPriceFeedTest is Test {
     MockV3Aggregator public mockPriceFeed;
