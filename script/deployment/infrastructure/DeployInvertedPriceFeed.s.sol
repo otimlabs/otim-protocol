@@ -3,7 +3,7 @@ pragma solidity ^0.8.26;
 
 import {Script, console2} from "forge-std/src/Script.sol";
 
-import {InvertedPriceFeed} from "../../../src/mocks/InvertedPriceFeed.sol";
+import {InvertedPriceFeed} from "../../../src/infrastructure/InvertedPriceFeed.sol";
 
 contract DeployInvertedPriceFeed is Script {
     // command to run the script without actually deploying:

@@ -28,7 +28,7 @@ contract UniswapV3ExactInputTest is InstructionForkTestContext {
     address DEFAULT_RECIPIENT = address(user);
     uint256 DEFAULT_AMOUNT_IN = 1 ether;
     uint256 DEFAULT_FLOOR_AMOUNT_OUT = 1;
-    uint32 DEFAULT_MEAN_PRICE_LOOKBACK = 3600; // 1 hour in seconds
+    uint32 DEFAULT_MEAN_PRICE_LOOKBACK = 900; // 15 minutes in seconds
     uint32 DEFAULT_MAX_PRICE_DEVIATION_BPS = 500; // 5%
 
     uint256 DEFAULT_START_AT;

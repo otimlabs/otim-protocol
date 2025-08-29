@@ -73,8 +73,8 @@ contract EstimateUniswapV3ExactInputGasConstant is InstructionForkTestContext {
         // disregard fuzz generated minAmountOut
         arguments.floorAmountOut = 0;
 
-        // set look back period to 30 minutes
-        arguments.meanPriceLookBack = 1800;
+        // set look back period to 15 minutes
+        arguments.meanPriceLookBack = 900;
 
         // set maxPriceDeviationBPS to 100% (10_000 BPS) for simplicity
         arguments.maxPriceDeviationBPS = 10000;
