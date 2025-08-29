@@ -27,7 +27,7 @@ contract EstimateCallOnceGasConstant is InstructionForkTestContext {
 
     VmSafe.Wallet public target = vm.createWallet("target");
 
-    uint256 public constant CALL_ONCE_GAS_CONSTANT = 107_000;
+    uint256 public constant CALL_ONCE_GAS_CONSTANT = 106_500;
 
     constructor() {
         setUpFork();
