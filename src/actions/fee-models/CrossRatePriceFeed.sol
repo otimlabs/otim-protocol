@@ -6,149 +6,107 @@ import {ICrossRatePriceFeed} from "./interfaces/ICrossRatePriceFeed.sol";
 
 /// @title CrossRatePriceFeed
 /// @author Otim Labs, Inc.
-/// @notice A dynamic price feed that combines two price feeds to create a cross-rate
-/// @dev This contract takes two price feeds and calculates the cross-rate by canceling out the common denominator
-///
-/// Example: To get USDC/ETH rate from ETH/USD and USDC/USD feeds:
-/// - Numerator Feed: USDC/USD = 1 (1 * 10^8 = 100000000)
-/// - Denominator Feed: ETH/USD = 3000 (3000 * 10^8 = 300000000000)
-/// - Cross Rate: USDC/ETH = (USDC/USD) / (ETH/USD) = 1/3000 = 0.000333...
-///
-/// The formula is: (numerator / denominator) to get the rate of numerator in terms of denominator
+/// @notice a contract that combines two price feeds to create a cross-rate price feed
 contract CrossRatePriceFeed is ICrossRatePriceFeed {
-    AggregatorV3Interface public immutable numeratorFeedContract; // The feed in the numerator (e.g., USDC/USD)
-    AggregatorV3Interface public immutable denominatorFeedContract; // The feed in the denominator (e.g., ETH/USD)
+    /// @notice the numerator price feed (e.g., USDC/USD)
+    AggregatorV3Interface public immutable numeratorFeed;
+    /// @notice the denominator price feed (e.g., ETH/USD)
+    AggregatorV3Interface public immutable denominatorFeed;
 
-    uint8 public immutable decimalsValue;
-    uint256 public immutable versionValue;
+    /// @notice the number of decimals of the cross-rate price feed
+    uint8 public immutable decimals;
+    /// @notice the version of the price feed
+    uint256 public constant version = 1;
+    /// @notice the description of the price feed
     string public description;
 
-    /// @notice Constructor for CrossRatePriceFeed
-    /// @param numeratorFeedAddress The price feed for the numerator (e.g., USDC/USD)
-    /// @param denominatorFeedAddress The price feed for the denominator (e.g., ETH/USD)
-    constructor(address numeratorFeedAddress, address denominatorFeedAddress) {
-        numeratorFeedContract = AggregatorV3Interface(numeratorFeedAddress);
-        denominatorFeedContract = AggregatorV3Interface(denominatorFeedAddress);
+    /// @notice the heartbeat of the numerator price feed
+    uint40 public immutable numeratorHeartbeat;
+    /// @notice the heartbeat of the denominator price feed
+    uint40 public immutable denominatorHeartbeat;
 
-        // Use the higher precision for calculations to maintain accuracy
-        uint8 numeratorDecimals = numeratorFeedContract.decimals();
-        uint8 denominatorDecimals = denominatorFeedContract.decimals();
-        decimalsValue = numeratorDecimals > denominatorDecimals ? numeratorDecimals : denominatorDecimals;
+    /// @notice the scale factor used to maintain decimal precision when calculating the cross-rate
+    /// @dev this will never change so we can cache it for gas savings
+    int256 private immutable _scaleFactor;
 
-        // Create cross-rate description showing the full formula: "(numerator) / (denominator)"
-        description = string(
-            abi.encodePacked(
-                "(", numeratorFeedContract.description(), ") / (", denominatorFeedContract.description(), ")"
-            )
-        );
-        versionValue = 1;
+    constructor(
+        address numeratorFeedAddress,
+        address denominatorFeedAddress,
+        uint40 _numeratorHeartbeat,
+        uint40 _denominatorHeartbeat
+    ) {
+        numeratorFeed = AggregatorV3Interface(numeratorFeedAddress);
+        denominatorFeed = AggregatorV3Interface(denominatorFeedAddress);
+
+        uint8 numeratorDecimals = numeratorFeed.decimals();
+        uint8 denominatorDecimals = denominatorFeed.decimals();
+
+        if (numeratorDecimals != denominatorDecimals) {
+            revert DecimalsMismatch();
+        }
+
+        decimals = numeratorDecimals;
+        _scaleFactor = int256(10 ** decimals);
+
+        description =
+            string(abi.encodePacked("(", numeratorFeed.description(), ") / (", denominatorFeed.description(), ")"));
+
+        numeratorHeartbeat = _numeratorHeartbeat;
+        denominatorHeartbeat = _denominatorHeartbeat;
+
+        // slither-disable-start unused-return
+        (uint80 numeratorRoundId,,, uint256 numeratorUpdatedAt,) = numeratorFeed.latestRoundData();
+        (uint80 denominatorRoundId,,, uint256 denominatorUpdatedAt,) = denominatorFeed.latestRoundData();
+        // slither-disable-end unused-return
+
+        if (numeratorRoundId == 0 || numeratorUpdatedAt == 0 || denominatorRoundId == 0 || denominatorUpdatedAt == 0) {
+            revert PriceFeedNotInitialized();
+        }
     }
 
-    /// @notice Get the cross-rate for a specific round (not supported)
-    /// @dev Historical round data is not supported for cross-rate feeds.
-    function getRoundData(uint80 /* _roundId */ )
-        external
-        pure
-        returns (
-            uint80, /* roundId */
-            int256, /* answer */
-            uint256, /* startedAt */
-            uint256, /* updatedAt */
-            uint80 /* answeredInRound */
-        )
-    {
+    /// @inheritdoc ICrossRatePriceFeed
+    function getRoundData(uint80) external pure returns (uint80, int256, uint256, uint256, uint80) {
         revert GetRoundDataNotSupported();
     }
 
-    /// @notice Get the latest cross-rate
-    /// @return roundId The round ID
-    /// @return answer The cross-rate answer
-    /// @return startedAt When the round started
-    /// @return updatedAt When the round was updated
-    /// @return answeredInRound The round in which the answer was computed
+    /// @inheritdoc ICrossRatePriceFeed
     function latestRoundData()
         external
         view
         returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
     {
-        int256 numeratorAnswer;
-        int256 denominatorAnswer;
+        (roundId, answer, startedAt, updatedAt, answeredInRound) = numeratorFeed.latestRoundData();
 
-        // Get latest data from both feeds
-        (roundId, numeratorAnswer, startedAt, updatedAt, answeredInRound) = numeratorFeedContract.latestRoundData();
+        // slither-disable-next-line unused-return
+        (
+            uint80 denominatorRoundId,
+            int256 denominatorAnswer,
+            uint256 denominatorStartedAt,
+            uint256 denominatorUpdatedAt,
+            uint80 denominatorAnsweredInRound
+        ) = denominatorFeed.latestRoundData();
 
-        uint256 denominatorStartedAt;
-        uint256 denominatorUpdatedAt;
-        uint80 denominatorRoundId;
-        uint80 denominatorAnsweredInRound;
-        (denominatorRoundId, denominatorAnswer, denominatorStartedAt, denominatorUpdatedAt, denominatorAnsweredInRound)
-        = denominatorFeedContract.latestRoundData();
-
-        // Use the later timestamps to ensure both feeds have recent data
-        if (denominatorUpdatedAt > updatedAt) {
-            updatedAt = denominatorUpdatedAt;
-        }
-        if (denominatorStartedAt > startedAt) {
-            startedAt = denominatorStartedAt;
+        // if the latest price is zero or negative, revert
+        if (answer <= 0 || denominatorAnswer <= 0) {
+            revert InvalidPrice();
         }
 
-        // Calculate cross-rate: (numerator / denominator)
-        answer = _calculateCrossRate(numeratorAnswer, denominatorAnswer);
-    }
-
-    /// @notice Calculate the cross-rate by scaling both answers to the same precision
-    /// @param numeratorAnswer The answer from the numerator feed
-    /// @param denominatorAnswer The answer from the denominator feed
-    /// @return The calculated cross-rate
-    function _calculateCrossRate(int256 numeratorAnswer, int256 denominatorAnswer) internal view returns (int256) {
-        // Get decimals from feeds
-        uint8 numeratorDecimals = numeratorFeedContract.decimals();
-        uint8 denominatorDecimals = denominatorFeedContract.decimals();
-
-        // Use the higher of the two decimals as target precision
-        uint8 targetPrecision = numeratorDecimals > denominatorDecimals ? numeratorDecimals : denominatorDecimals;
-
-        // Scale numerator to target precision (only if needed)
-        int256 scaledNumerator = numeratorAnswer;
-        if (numeratorDecimals != targetPrecision) {
-            // Scale up: multiply by 10^(targetPrecision - numeratorDecimals)
-            uint256 scaleFactor = 10 ** (targetPrecision - numeratorDecimals);
-            if (numeratorAnswer > type(int256).max / int256(scaleFactor)) revert Overflow();
-            scaledNumerator = numeratorAnswer * int256(scaleFactor);
+        // if the price feed is stale, revert
+        if (
+            updatedAt < block.timestamp - numeratorHeartbeat
+                || denominatorUpdatedAt < block.timestamp - denominatorHeartbeat
+        ) {
+            revert StalePrice();
         }
 
-        // Scale denominator to target precision (only if needed)
-        int256 scaledDenominator = denominatorAnswer;
-        if (denominatorDecimals != targetPrecision) {
-            // Scale up: multiply by 10^(targetPrecision - denominatorDecimals)
-            uint256 scaleFactor = 10 ** (targetPrecision - denominatorDecimals);
-            if (denominatorAnswer > type(int256).max / int256(scaleFactor)) revert Overflow();
-            scaledDenominator = denominatorAnswer * int256(scaleFactor);
-        }
+        // use earliest values
+        roundId = denominatorRoundId < roundId ? denominatorRoundId : roundId;
+        updatedAt = denominatorUpdatedAt < updatedAt ? denominatorUpdatedAt : updatedAt;
+        startedAt = denominatorStartedAt < startedAt ? denominatorStartedAt : startedAt;
+        answeredInRound = denominatorAnsweredInRound < answeredInRound ? denominatorAnsweredInRound : answeredInRound;
 
-        // Check for division by zero
-        if (scaledDenominator == 0) revert DivisionByZero();
-
-        // Calculate final result ensuring the result has targetPrecision decimals
-        int256 finalNumerator = scaledNumerator * int256(10 ** targetPrecision);
-
-        return finalNumerator / scaledDenominator;
-    }
-
-    // Interface function implementations
-    function numeratorFeed() external view returns (AggregatorV3Interface) {
-        return numeratorFeedContract;
-    }
-
-    function denominatorFeed() external view returns (AggregatorV3Interface) {
-        return denominatorFeedContract;
-    }
-
-    function decimals() external view returns (uint8) {
-        return decimalsValue;
-    }
-
-    function version() external view returns (uint256) {
-        return versionValue;
+        // scale numerator by the scale factor and divide by the denominator answer
+        answer *= _scaleFactor;
+        answer /= denominatorAnswer;
     }
 }
