@@ -2,10 +2,10 @@
 pragma solidity ^0.8.26;
 
 import {Test} from "forge-std/src/Test.sol";
-import {CrossRatePriceFeed} from "../../src/actions/fee-models/CrossRatePriceFeed.sol";
+import {CrossRatePriceFeed} from "../../src/infrastructure/CrossRatePriceFeed.sol";
 import {AggregatorV3Interface} from "@chainlink-contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
-contract CrossRateVsDirectPriceFeedTest is Test {
+contract CrossRateDifferentialTest is Test {
     // Mainnet price feed addresses
     address constant ETH_USD_FEED = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
     address constant USDC_USD_FEED = 0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6;
