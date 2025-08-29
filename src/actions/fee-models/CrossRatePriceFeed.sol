@@ -105,7 +105,7 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         startedAt = denominatorStartedAt < startedAt ? denominatorStartedAt : startedAt;
         answeredInRound = denominatorAnsweredInRound < answeredInRound ? denominatorAnsweredInRound : answeredInRound;
 
-        // scale numerator by the scale factor and divide by thedenominator answer
+        // scale numerator by the scale factor and divide by the denominator answer
         answer *= _scaleFactor;
         answer /= denominatorAnswer;
     }
