@@ -26,7 +26,8 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
     uint40 public immutable denominatorHeartbeat;
 
     /// @notice the scale factor used to maintain decimal precision when calculating the cross-rate
-    int256 private immutable scaleFactor;
+    /// @dev this will never change so we can cache it for gas savings
+    int256 private immutable _scaleFactor;
 
     constructor(
         address numeratorFeedAddress,
@@ -45,14 +46,13 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         }
 
         decimals = numeratorDecimals;
+        _scaleFactor = int256(10 ** decimals);
 
         description =
             string(abi.encodePacked("(", numeratorFeed.description(), ") / (", denominatorFeed.description(), ")"));
 
         numeratorHeartbeat = _numeratorHeartbeat;
         denominatorHeartbeat = _denominatorHeartbeat;
-
-        scaleFactor = int256(10 ** decimals);
 
         // slither-disable-start unused-return
         (uint80 numeratorRoundId,,, uint256 numeratorUpdatedAt,) = numeratorFeed.latestRoundData();
@@ -106,7 +106,7 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         answeredInRound = denominatorAnsweredInRound < answeredInRound ? denominatorAnsweredInRound : answeredInRound;
 
         // scale numerator by the scale factor and divide by thedenominator answer
-        answer *= scaleFactor;
+        answer *= _scaleFactor;
         answer /= denominatorAnswer;
     }
 }
