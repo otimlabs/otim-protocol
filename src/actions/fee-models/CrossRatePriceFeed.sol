@@ -64,18 +64,12 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
         }
     }
 
-    /// @notice get the cross-rate for a specific round (not supported)
-    /// @dev historical round data is not supported for this cross-rate feed
+    /// @inheritdoc ICrossRatePriceFeed
     function getRoundData(uint80) external pure returns (uint80, int256, uint256, uint256, uint80) {
         revert GetRoundDataNotSupported();
     }
 
-    /// @notice get the latest cross-rate price
-    /// @return roundId - the round ID
-    /// @return answer - the cross-rate answer
-    /// @return startedAt - when the round started (the earlier of the two feeds)
-    /// @return updatedAt - when the round was updated (the earlier of the two feeds)
-    /// @return answeredInRound - the round in which the answer was computed (earlier of the two feeds)
+    /// @inheritdoc ICrossRatePriceFeed
     function latestRoundData()
         external
         view

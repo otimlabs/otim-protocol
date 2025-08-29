@@ -33,4 +33,18 @@ interface ICrossRatePriceFeed is AggregatorV3Interface {
 
     /// @notice Get the description of the cross-rate
     function description() external view returns (string memory);
+
+    /// @notice [Not Supported] get the cross-rate for a specific round
+    function getRoundData(uint80) external pure returns (uint80, int256, uint256, uint256, uint80);
+
+    /// @notice get the latest cross-rate price
+    /// @return roundId - the round ID
+    /// @return answer - the cross-rate answer
+    /// @return startedAt - when the round started (the earlier of the two feeds)
+    /// @return updatedAt - when the round was updated (the earlier of the two feeds)
+    /// @return answeredInRound - the round in which the answer was computed (earlier of the two feeds)
+    function latestRoundData()
+        external
+        view
+        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
 }
