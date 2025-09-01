@@ -29,7 +29,7 @@ contract SweepUniswapV3Test is InstructionForkTestContext {
     uint256 DEFAULT_THRESHOLD = 2 gwei;
     uint256 DEFAULT_END_BALANCE = 1 gwei;
     uint256 DEFAULT_FLOOR_AMOUNT_OUT = 1;
-    uint32 DEFAULT_MEAN_PRICE_LOOKBACK = 3600; // 1 hour in seconds
+    uint32 DEFAULT_MEAN_PRICE_LOOKBACK = 900; // 15 minutes in seconds
     uint32 DEFAULT_MAX_PRICE_DEVIATION_BPS = 500; // 5%
 
     IOtimFee.Fee public DEFAULT_FEE;
@@ -112,13 +112,11 @@ contract SweepUniswapV3Test is InstructionForkTestContext {
 
         vm.deal(address(user), 0);
 
-        uint256 whaleBalance = IERC20(SEPOLIA_USDC).balanceOf(SEPOLIA_USDC_WHALE);
-
         vm.startPrank(SEPOLIA_USDC_WHALE);
-        IERC20(SEPOLIA_USDC).transfer(address(user), whaleBalance);
+        IERC20(SEPOLIA_USDC).transfer(address(user), 100e6); // 100 USDC
         vm.stopPrank();
 
-        assertEq(IERC20(SEPOLIA_USDC).balanceOf(address(user)), whaleBalance);
+        assertEq(IERC20(SEPOLIA_USDC).balanceOf(address(user)), 100e6);
         assertEq(address(user).balance, 0);
 
         DEFAULT_ACTION_ARGS.tokenIn = SEPOLIA_USDC;
