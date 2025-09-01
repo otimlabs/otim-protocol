@@ -135,6 +135,7 @@ contract SweepUniswapV3Action is IAction, ISweepUniswapV3Action, OtimFee {
             revert UniswapV3PoolDoesNotExist();
         }
 
+        // slither-disable-next-line incorrect-equality
         if (tokenInBalance < arguments.threshold || tokenInBalance == arguments.endBalance) {
             revert BalanceUnderThreshold();
         }
