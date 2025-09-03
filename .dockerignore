@@ -2,8 +2,6 @@
 broadcast/
 cache/
 out/
-
-# Dependencies
 dependencies/
 
 # Git

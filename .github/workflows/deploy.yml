@@ -35,7 +35,7 @@ jobs:
           ENV_FILE="${{ inputs.env_file || '.github/networks/testnet/.env-otim-testnet' }}"
           
           docker run --rm -v "${{ github.workspace }}:/workspace" -w /workspace \
-            protocol:latest /scripts/protocol-cli.rs validate-contracts \
+            ghcr.io/otimlabs/otim-protocol:latest /scripts/protocol-cli.rs validate-contracts \
             --config-file /scripts/deployment-config.yaml --env-file "$ENV_FILE" --update
           
           case $? in

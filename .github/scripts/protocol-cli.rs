@@ -54,18 +54,18 @@ enum Commands {
         update: bool,
     },
 
-    /// Deploy contracts to configured network
+    /// Deploy contracts to a configured network
     DeployContracts {
         /// Configuration file with network and contract details
         #[arg(short, long)]
         config_file: String,
     },
 
-    /// Whitelist actions in the action manager
+    /// Whitelist actions within an action manager
     WhitelistActions {
-        /// Configuration file with network and contract details
+        /// JSON file containing contract addresses (e.g., addresses.json from deploy)
         #[arg(short, long)]
-        config_file: String,
+        addresses_file: String,
     },
 
     /// Compare directory contents using Merkle trees
@@ -105,9 +105,13 @@ struct ContractDetails {
 // UTILITIES
 // =============================================================================
 
-/// Prints an informational message with colored formatting
+/// Prints log messages with colored formatting
 fn info(msg: &str) {
     println!("{} {}", "[INFO]".green().bold(), msg);
+}
+
+fn warn(msg: &str) {
+    println!("{} {}", "[WARN]".yellow().bold(), msg);
 }
 
 /// Loads and parses the deployment configuration from YAML file
@@ -274,47 +278,42 @@ async fn calculate_addresses_by_tier(config: &DeploymentConfig, tier: &str) -> R
 async fn validate_addresses(config: &DeploymentConfig, env_file: &str, update: bool) -> Result<()> {
     info(&format!("Validating addresses against: {}", env_file));
     
-    let current_env = load_env_file(env_file)?;
+    let original_env = load_env_file(env_file)?;
     let mut calculated_addresses = HashMap::new();
     let mut updates = HashMap::new();
-    let mut has_changes = false;
 
-    // Calculate addresses in deployment order
+    // Calculate addresses for all tiers
     for tier in ["core", "infrastructure", "actions"] {
         info(&format!("Calculating {} addresses...", tier));
         let addresses = calculate_addresses_by_tier(config, tier).await?;
         
+        // Update environment for next tier dependencies
         for (contract, address) in &addresses {
-            calculated_addresses.insert(contract.clone(), address.clone());
-            if let Some(ContractDetails { expected_addr_envvar: Some(expected_addr_envvar), .. }) = find_contract_details(config, contract) {
-                env::set_var(expected_addr_envvar, address);
+            if let Some(ContractDetails { expected_addr_envvar: Some(env_var), .. }) = find_contract_details(config, contract) {
+                env::set_var(env_var, address);
             }
         }
+        
+        calculated_addresses.extend(addresses);
     }
 
-    // Compare and update if needed
+    // Compare addresses and collect updates
     for (contract, calculated_address) in &calculated_addresses {
-        match find_contract_details(config, contract) {
-            Some(ContractDetails { expected_addr_envvar: Some(expected_addr_envvar), .. }) => {
-                let current_address = current_env.get(expected_addr_envvar).cloned().unwrap_or_else(|| "NOT_SET".to_string());
-                if current_address != *calculated_address {
-                    has_changes = true;
-                    info(&format!("{}: {} → {}", contract, current_address, calculated_address));
-                    if update {
-                        updates.insert(expected_addr_envvar.clone(), calculated_address.clone());
-                    }
-                }
+        if let Some(ContractDetails { expected_addr_envvar: Some(env_var), .. }) = find_contract_details(config, contract) {
+            let current_address = original_env.get(env_var).map(String::as_str).unwrap_or("NOT_SET");
+            if current_address != calculated_address {
+                warn(&format!("{}: {} → {}", contract, current_address, calculated_address));
+                updates.insert(env_var.clone(), calculated_address.clone());
+            } else {
+                info(&format!("{}: {} ✓", contract, calculated_address));
             }
-            Some(ContractDetails { expected_addr_envvar: None, .. }) => {
-                info(&format!("{}: {} (skipped - no expected_addr_envvar configured)", contract, calculated_address));
-            }
-            None => {
-                // This case shouldn't occur since we only calculate addresses for contracts in the config
-            }
+        } else {
+            info(&format!("{}: {} (skipped)", contract, calculated_address));
         }
     }
 
-    if has_changes {
+    // Apply updates and/or report differences
+    if !updates.is_empty() {
         if update {
             update_env_file(env_file, &updates)?;
             info(&format!("Updated {}", env_file));
@@ -333,64 +332,76 @@ async fn validate_addresses(config: &DeploymentConfig, env_file: &str, update: b
 // DEPLOY CONTRACTS
 // =============================================================================
 
-/// Deploys all contracts in a specific tier and returns their addresses
-async fn deploy_contracts_by_tier(config: &DeploymentConfig, tier: &str) -> Result<HashMap<String, String>> {
-    let tier_config = get_tier_config(config, tier)?;
-    let mut addresses = HashMap::new();
-
-    if let Some(script) = &tier_config.script {
-        let output = run_forge_deploy(script).await?;
-        for (contract, _) in &tier_config.contracts {
-            addresses.insert(contract.clone(), extract_address(&output, contract)?);
-        }
-    } else {
-        for (contract, details) in &tier_config.contracts {
-            let script = details.script.as_ref()
-                .map(|s| s.clone())
-                .unwrap_or_else(|| format!("Deploy{}", contract));
-            let output = run_forge_deploy(&script).await?;
-            addresses.insert(contract.clone(), extract_address(&output, contract)?);
-        }
-    }
-
-    Ok(addresses)
+/// Checks if a forge deployment error is a known/expected error to ignore
+fn is_known_deployment_error(error: &str) -> bool {
+    error.contains("CreateCollision") || 
+    error.contains("AlreadyAdded") || 
+    error.contains("empty revert data")
 }
 
 /// Deploys all contracts in tier order
-async fn deploy_contracts(config: &DeploymentConfig) -> Result<()> {
+async fn deploy_contracts(config: &DeploymentConfig) -> Result<HashMap<String, String>> {
     info("Deploying contracts...");
+    let mut all_addresses = HashMap::new();
 
-    // Deploy in tier order
     for tier in ["core", "infrastructure", "actions"] {
         info(&format!("Deploying {} contracts...", tier));
-        
-        match deploy_contracts_by_tier(config, tier).await {
-            Ok(addresses) => {
-                info(&format!("{} tier deployed:", tier));
-                for (contract, address) in &addresses {
-                    info(&format!("  {}: {}", contract, address));
-                    
-                    // Update environment for next tier dependencies
-                    if let Some(ContractDetails { expected_addr_envvar: Some(expected_addr_envvar), .. }) = find_contract_details(config, contract) {
-                        env::set_var(expected_addr_envvar, address);
+        let tier_config = get_tier_config(config, tier)?;
+
+        if let Some(script) = &tier_config.script {
+            // Single script for entire tier
+            match run_forge_deploy(script).await {
+                Ok(output) => {
+                    for (contract, _) in &tier_config.contracts {
+                        if let Ok(addr) = extract_address(&output, contract) {
+                            info(&format!("Deployed {}: {}", contract, addr));
+                            all_addresses.insert(contract.clone(), addr);
+                        }
+                    }
+                }
+                Err(e) => {
+                    if is_known_deployment_error(&e.to_string()) {
+                        info(&format!("Tier {} already deployed", tier));
+                    } else {
+                        info(&format!("Tier {} deployment failed: {}", tier, e));
                     }
                 }
             }
-            Err(e) => {
-                let error_msg = e.to_string();
-                if error_msg.contains("CreateCollision") || 
-                   error_msg.contains("AlreadyAdded") ||
-                   error_msg.contains("empty revert data") {
-                    info(&format!("{} contracts already deployed", tier));
-                } else {
-                    bail!("Deployment failed for {}: {}", tier, e);
+        } else {
+            // Individual scripts per contract
+            for (contract, details) in &tier_config.contracts {
+                let script = details.script.as_ref()
+                    .map(|s| s.clone())
+                    .unwrap_or_else(|| format!("Deploy{}", contract));
+                
+                match run_forge_deploy(&script).await {
+                    Ok(output) => {
+                        if let Ok(address) = extract_address(&output, contract) {
+                            info(&format!("Deployed {}: {}", contract, address));
+                            all_addresses.insert(contract.clone(), address);
+                        }
+                    }
+                    Err(e) => {
+                        if is_known_deployment_error(&e.to_string()) {
+                            info(&format!("Contract {} already deployed", contract));
+                        } else {
+                            info(&format!("Failed to deploy {}: {}", contract, e));
+                        }
+                    }
                 }
+            }
+        }
+
+        // Update environment for next tier dependencies
+        for (contract, address) in &all_addresses {
+            if let Some(ContractDetails { expected_addr_envvar: Some(expected_addr_envvar), .. }) = find_contract_details(config, &contract) {
+                env::set_var(expected_addr_envvar, &address);
             }
         }
     }
 
-    info("Deployment completed successfully!");
-    Ok(())
+    info(&format!("Deployment completed! Collected {} addresses", all_addresses.len()));
+    Ok(all_addresses)
 }
 
 // =============================================================================
@@ -398,34 +409,40 @@ async fn deploy_contracts(config: &DeploymentConfig) -> Result<()> {
 // =============================================================================
 
 /// Whitelists all action contracts in the action manager
-async fn whitelist_actions(config: &DeploymentConfig) -> Result<()> {
+async fn whitelist_actions(addresses_file: &str) -> Result<()> {
     info("Starting action whitelisting...");
     
-    for (contract_name, details) in &get_tier_config(config, "actions")?.contracts {
-        let Some(expected_addr_envvar) = &details.expected_addr_envvar else { continue };
-        let action_address = env::var(expected_addr_envvar).with_context(|| format!("{}: {}", contract_name, expected_addr_envvar))?;
+    let addresses: HashMap<String, String> = serde_json::from_str(&fs::read_to_string(addresses_file)?)
+        .with_context(|| format!("Failed to parse addresses file: {}", addresses_file))?;
+    
+    let action_contracts: Vec<_> = addresses.iter()
+        .filter(|(name, _)| name.ends_with("Action"))
+        .collect();
+    
+    if action_contracts.is_empty() {
+        info("No action contracts found in addresses file");
+        return Ok(());
+    }
+    
+    let rpc_url = env::var("RPC_URL")?;
+    for (contract_name, action_address) in &action_contracts {
         info(&format!("Whitelisting {} at {}...", contract_name, action_address));
         
-        let rpc_url = env::var("RPC_URL")?;
         let args = vec![
-            "script", "AddAction", 
-            "--sig", "run(address)", 
-            "--broadcast", 
-            "--rpc-url", &rpc_url, 
-            "--aws", 
-            &action_address
+            "script", "AddAction", "--sig", "run(address)", "--broadcast",
+            "--rpc-url", &rpc_url, "--aws", action_address
         ];
         
         match run_command("forge", &args).await {
-            Ok(_) => {},
-            Err(e) if e.to_string().contains("AlreadyAdded") => {},
+            Ok(_) => info(&format!("✓ {} whitelisted", contract_name)),
+            Err(e) if e.to_string().contains("AlreadyAdded") => {
+                info(&format!("- {} already whitelisted", contract_name));
+            }
             Err(e) => bail!("Failed to whitelist {}: {}", contract_name, e),
         }
-        
-        info(&format!("✓ {} whitelisted", contract_name));
     }
     
-    info("✓ Action whitelisting completed!");
+    info(&format!("✓ Action whitelisting completed! Processed {} contracts", action_contracts.len()));
     Ok(())
 }
 
@@ -507,12 +524,18 @@ async fn main() -> Result<()> {
 
         Commands::DeployContracts { config_file } => {
             let config = load_config(&config_file)?;
-            deploy_contracts(&config).await
+            let addresses = deploy_contracts(&config).await?;
+            
+            // Write addresses to file
+            let json_content = serde_json::to_string_pretty(&addresses)?;
+            std::fs::write("addresses.json", json_content)?;
+            info("Contract addresses written to addresses.json");
+            
+            Ok(())
         }
 
-        Commands::WhitelistActions { config_file } => {
-            let config = load_config(&config_file)?;
-            whitelist_actions(&config).await
+        Commands::WhitelistActions { addresses_file } => {
+            whitelist_actions(&addresses_file).await
         }
 
         Commands::CompareDirectories { dir1, dir2, ignore, show_diff } => {
@@ -565,3 +588,4 @@ mod tests {
         assert!(extract_address("No deployment info", "OtimDelegate").is_err());
     }
 }
+
