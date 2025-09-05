@@ -9,13 +9,6 @@ contract DeploySweepUniswapV3Action is Script {
     /// @dev make sure to run `cp .env_example .env` and fill in each variable
     /// then run `source .env` in your terminal before copying and pasting one of the commands below
 
-    // command to generate the expected deployment address (without actually deploying):
-    //
-    // - with private key (on Anvil): forge script DeploySweepUniswapV3Action --fork-url http://localhost:8545 --private-key $ANVIL_DEPLOYER_PK
-    // - with private key:            forge script DeploySweepUniswapV3Action --rpc-url $RPC_URL --private-key $DEPLOYER_PK
-    // - with Ledger:                 forge script DeploySweepUniswapV3Action --rpc-url $RPC_URL --ledger
-    // - with AWS:                    forge script DeploySweepUniswapV3Action --rpc-url $RPC_URL --aws
-
     // commands to deploy:
     //
     // - with private key (on Anvil): forge script DeploySweepUniswapV3Action --broadcast --fork-url http://localhost:8545 --private-key $ANVIL_DEPLOYER_PK
