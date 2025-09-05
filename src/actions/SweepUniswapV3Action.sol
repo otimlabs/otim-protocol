@@ -17,12 +17,7 @@ import {OtimFee} from "./fee-models/OtimFee.sol";
 import {IAction} from "./interfaces/IAction.sol";
 import {ISweepUniswapV3Action, INSTRUCTION_TYPEHASH, ARGUMENTS_TYPEHASH} from "./interfaces/ISweepUniswapV3Action.sol";
 
-import {
-    InvalidArguments,
-    InsufficientBalance,
-    BalanceUnderThreshold,
-    UniswapV3PoolDoesNotExist
-} from "./errors/Errors.sol";
+import {InvalidArguments, BalanceUnderThreshold, UniswapV3PoolDoesNotExist} from "./errors/Errors.sol";
 
 /// @title SweepUniswapV3Action
 /// @author Otim Labs, Inc.
