@@ -21,6 +21,7 @@ import {SweepERC20Action} from "../../src/actions/SweepERC20Action.sol";
 import {CallOnceAction} from "../../src/actions/CallOnceAction.sol";
 import {SweepCCTPAction} from "../../src/actions/SweepCCTPAction.sol";
 import {TransferCCTPAction} from "../../src/actions/TransferCCTPAction.sol";
+import {SweepUniswapV3Action} from "../../src/actions/SweepUniswapV3Action.sol";
 
 contract DeploymentAddressesTest is Test {
     // expected core addresses
@@ -44,6 +45,7 @@ contract DeploymentAddressesTest is Test {
     address constant EXPECTED_CALL_ONCE_ACTION_ADDRESS = 0xCD6cBec852F898C403dC9BFB080aD04b9Fb4Cf8a;
     address constant EXPECTED_SWEEP_CCTP_ACTION_ADDRESS = 0x8794e8ab128C0262f3b14D858d1e026219078d06;
     address constant EXPECTED_TRANSFER_CCTP_ACTION_ADDRESS = 0x5C7aA487188CBbeFcdb83814C7c8530FAC4f8f67;
+    address constant EXPECTED_SWEEP_UNISWAP_V3_ACTION_ADDRESS = 0xb163911E78663533384019C93e14f5F03ACD43E5;
 
     ////////////////////
     // Core addresses //
@@ -144,5 +146,12 @@ contract DeploymentAddressesTest is Test {
         address deployed =
             address(new TransferCCTPAction{salt: bytes32(0)}(address(0), address(0), address(0), address(0), 0));
         assertEq(deployed, EXPECTED_TRANSFER_CCTP_ACTION_ADDRESS);
+    }
+
+    function test_sweepUniswapV3Action_deployedAddress() public {
+        address deployed = address(
+            new SweepUniswapV3Action{salt: bytes32(0)}(address(0), address(0), address(0), address(0), address(0), 0)
+        );
+        assertEq(deployed, EXPECTED_SWEEP_UNISWAP_V3_ACTION_ADDRESS);
     }
 }

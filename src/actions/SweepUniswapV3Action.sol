@@ -26,7 +26,7 @@ import {
 
 /// @title SweepUniswapV3Action
 /// @author Otim Labs, Inc.
-/// @notice an Action that sweeps tokens to Uniswap V3
+/// @notice an Action that swaps tokens using Uniswap V3 when the token balance is greater than or equal to a threshold
 contract SweepUniswapV3Action is IAction, ISweepUniswapV3Action, OtimFee {
     using SafeERC20 for IERC20;
 
@@ -98,9 +98,8 @@ contract SweepUniswapV3Action is IAction, ISweepUniswapV3Action, OtimFee {
         // decode the arguments from the instruction
         SweepUniswapV3 memory arguments = abi.decode(instruction.arguments, (SweepUniswapV3));
 
-        // check if this is the first execution
+        // if first execution, validate the input
         if (executionState.executionCount == 0) {
-            // make sure arguments are well-formed
             if (
                 arguments.tokenIn == arguments.tokenOut || arguments.recipient == address(0)
                     || arguments.endBalance > arguments.threshold || arguments.meanPriceLookBack == 0
@@ -110,21 +109,26 @@ contract SweepUniswapV3Action is IAction, ISweepUniswapV3Action, OtimFee {
             }
         }
 
+        // initialize variables to hold the internal tokenIn and tokenOut
         address internalTokenIn = arguments.tokenIn;
         address internalTokenOut = arguments.tokenOut;
 
+        // initialize variable to hold the tokenIn balance
         uint256 tokenInBalance;
 
+        // if input is ETH, set internalTokenIn to WETH and set tokenInBalance to the account's ETH balance
         if (arguments.tokenIn == address(0)) {
             internalTokenIn = wethAddress;
 
             tokenInBalance = address(this).balance;
         } else {
-            tokenInBalance = IERC20(arguments.tokenIn).balanceOf(address(this));
-
+            // if input is not ETH and output is ETH, set internalTokenOut to WETH
             if (arguments.tokenOut == address(0)) {
                 internalTokenOut = wethAddress;
             }
+
+            // if input is not ETH, set tokenInBalance to the account's tokenIn balance
+            tokenInBalance = IERC20(arguments.tokenIn).balanceOf(address(this));
         }
 
         // get the Uniswap V3 pool address for the given token pair and fee tier
@@ -135,14 +139,16 @@ contract SweepUniswapV3Action is IAction, ISweepUniswapV3Action, OtimFee {
             revert UniswapV3PoolDoesNotExist();
         }
 
+        // if the tokenIn balance is under the threshold or equal to the endBalance, revert
         // slither-disable-next-line incorrect-equality
         if (tokenInBalance < arguments.threshold || tokenInBalance == arguments.endBalance) {
             revert BalanceUnderThreshold();
         }
 
+        // calculate the amount to swap
         uint256 swapAmount = tokenInBalance - arguments.endBalance;
 
-        // calculate the minimum amount out with TWAP deviation
+        // calculate the minimum amount out for the swap amount with TWAP deviation
         uint256 minAmountOutWithTwapDeviation = UniswapV3OracleParameters.getMinAmountOutWithTwapDeviation(
             poolAddress,
             internalTokenIn,
@@ -166,25 +172,23 @@ contract SweepUniswapV3Action is IAction, ISweepUniswapV3Action, OtimFee {
         bytes memory commands;
         bytes[] memory inputs;
 
-        // check if input token is ETH
         if (arguments.tokenIn == address(0)) {
-            // send amountIn ETH to the UniversalRouter
+            // if input is ETH, set ethValue to the swap amount
             ethValue = swapAmount;
 
             // encode commands and inputs to wrap the ETH then swap WETH for the ERC20,
             commands = ETH_TO_ERC20_COMMANDS;
             inputs = getEthToErc20Inputs(arguments, swapAmount, minAmountOut);
         } else {
-            // transfer ERC20 tokens to the UniversalRouter
+            // if input is not ETH, transfer the swapAmount of the tokenIn to the UniversalRouter
             IERC20(arguments.tokenIn).safeTransfer(address(router), swapAmount);
 
-            // check if output token is ETH
             if (arguments.tokenOut == address(0)) {
-                // encode commands and inputs to swap ERC20 for WETH then unwrap the WETH
+                // if output is ETH, encode commands and inputs to swap ERC20 for WETH then unwrap the WETH
                 commands = ERC20_TO_ETH_COMMANDS;
                 inputs = getErc20ToEthInputs(arguments, swapAmount, minAmountOut);
             } else {
-                // encode command and inputs to swap ERC20 for another ERC20
+                // if output is not ETH, encode command and inputs to swap ERC20 for another ERC20
                 commands = ERC20_TO_ERC20_COMMAND;
                 inputs = getErc20ToErc20Inputs(arguments, swapAmount, minAmountOut);
             }
@@ -202,6 +206,7 @@ contract SweepUniswapV3Action is IAction, ISweepUniswapV3Action, OtimFee {
 
     /// @notice encodes the inputs for wrapping ETH then swapping WETH for an ERC20
     /// @param arguments - the SweepUniswapV3 struct
+    /// @param swapAmount - the amount to swap
     /// @param minAmountOut - the minimum amount out to set for the swap
     /// @return inputs - the encoded UniversalRouter inputs
     function getEthToErc20Inputs(SweepUniswapV3 memory arguments, uint256 swapAmount, uint256 minAmountOut)
@@ -226,6 +231,7 @@ contract SweepUniswapV3Action is IAction, ISweepUniswapV3Action, OtimFee {
 
     /// @notice encodes the inputs for swapping an ERC20 for WETH then unwrapping the WETH
     /// @param arguments - the SweepUniswapV3 struct
+    /// @param swapAmount - the amount to swap
     /// @param minAmountOut - the minimum amount out to set for the swap
     /// @return inputs - the encoded UniversalRouter inputs
     function getErc20ToEthInputs(SweepUniswapV3 memory arguments, uint256 swapAmount, uint256 minAmountOut)
@@ -250,6 +256,7 @@ contract SweepUniswapV3Action is IAction, ISweepUniswapV3Action, OtimFee {
 
     /// @notice encodes the inputs for swapping an ERC20 for another ERC20
     /// @param arguments - the SweepUniswapV3 struct
+    /// @param swapAmount - the amount to swap
     /// @param minAmountOut - the minimum amount out to set for the swap
     /// @return inputs - the encoded UniversalRouter inputs
     function getErc20ToErc20Inputs(SweepUniswapV3 memory arguments, uint256 swapAmount, uint256 minAmountOut)

@@ -81,17 +81,23 @@ contract SweepUniswapV3Test is InstructionForkTestContext {
         user.executeInstruction(instruction, instructionSig);
 
         assertEq(address(user).balance, DEFAULT_END_BALANCE);
-        assertGt(IERC20(DEFAULT_TOKEN_OUT).balanceOf(DEFAULT_RECIPIENT), DEFAULT_FLOOR_AMOUNT_OUT);
+        assertGe(IERC20(DEFAULT_TOKEN_OUT).balanceOf(DEFAULT_RECIPIENT), DEFAULT_FLOOR_AMOUNT_OUT);
     }
 
     /// @notice test that swapping ERC20 to ERC20 works as expected
     function test_sweepUniswapV3_tokenToToken() public {
         vm.pauseGasMetering();
 
+        USER_START_BALANCE = 100e6;
+
+        vm.deal(address(user), USER_START_BALANCE);
+
         vm.prank(address(user));
         IWETH9(SEPOLIA_WETH9).deposit{value: USER_START_BALANCE}();
 
         DEFAULT_ACTION_ARGS.tokenIn = SEPOLIA_WETH9;
+        DEFAULT_ACTION_ARGS.threshold = USER_START_BALANCE;
+        DEFAULT_ACTION_ARGS.endBalance = 0;
 
         assertEq(IERC20(SEPOLIA_WETH9).balanceOf(address(user)), USER_START_BALANCE);
 
@@ -102,21 +108,23 @@ contract SweepUniswapV3Test is InstructionForkTestContext {
 
         user.executeInstruction(instruction, instructionSig);
 
-        assertEq(IERC20(SEPOLIA_WETH9).balanceOf(address(user)), DEFAULT_END_BALANCE);
-        assertGt(IERC20(DEFAULT_TOKEN_OUT).balanceOf(DEFAULT_RECIPIENT), DEFAULT_FLOOR_AMOUNT_OUT);
+        assertEq(IERC20(SEPOLIA_WETH9).balanceOf(address(user)), DEFAULT_ACTION_ARGS.endBalance);
+        assertGe(IERC20(DEFAULT_TOKEN_OUT).balanceOf(address(user)), DEFAULT_FLOOR_AMOUNT_OUT);
     }
 
     /// @notice test that swapping ERC20 to ETH works as expected
     function test_sweepUniswapV3_tokenToEth() public {
         vm.pauseGasMetering();
 
+        USER_START_BALANCE = 100e6;
+
         vm.deal(address(user), 0);
 
         vm.startPrank(SEPOLIA_USDC_WHALE);
-        IERC20(SEPOLIA_USDC).transfer(address(user), 100e6); // 100 USDC
+        IERC20(SEPOLIA_USDC).transfer(address(user), USER_START_BALANCE);
         vm.stopPrank();
 
-        assertEq(IERC20(SEPOLIA_USDC).balanceOf(address(user)), 100e6);
+        assertEq(IERC20(SEPOLIA_USDC).balanceOf(address(user)), USER_START_BALANCE);
         assertEq(address(user).balance, 0);
 
         DEFAULT_ACTION_ARGS.tokenIn = SEPOLIA_USDC;
@@ -132,8 +140,8 @@ contract SweepUniswapV3Test is InstructionForkTestContext {
 
         user.executeInstruction(instruction, instructionSig);
 
-        //assertEq(IERC20(SEPOLIA_USDC).balanceOf(address(user)), DEFAULT_END_BALANCE);
-        //assertGt(address(user).balance, DEFAULT_FLOOR_AMOUNT_OUT);
+        assertEq(IERC20(SEPOLIA_USDC).balanceOf(address(user)), 0);
+        assertGe(address(user).balance, DEFAULT_FLOOR_AMOUNT_OUT);
     }
 
     /// @notice test that the user can't swap the same token
@@ -209,6 +217,21 @@ contract SweepUniswapV3Test is InstructionForkTestContext {
         user.executeInstruction(instruction, instructionSig);
     }
 
+    /// @notice test that the swap reverts if the UniswapV3 pool doesn't exist
+    function test_sweepUniswapV3_nonExistentPool() public {
+        vm.pauseGasMetering();
+
+        // not a valid fee tier
+        DEFAULT_ACTION_ARGS.feeTier = 501;
+
+        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
+
+        bytes memory result = abi.encodeWithSelector(UniswapV3PoolDoesNotExist.selector);
+        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
+
+        user.executeInstruction(instruction, instructionSig);
+    }
+
     /// @notice test that ETH to ERC20 swapping reverts if the user has insufficient ETH
     function test_sweepUniswapV3_balanceUnderThreshold() public {
         vm.pauseGasMetering();
@@ -232,21 +255,6 @@ contract SweepUniswapV3Test is InstructionForkTestContext {
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
         bytes memory result = abi.encodeWithSelector(V3TooLittleReceived.selector);
-        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
-
-        user.executeInstruction(instruction, instructionSig);
-    }
-
-    /// @notice test that the swap reverts if the UniswapV3 pool doesn't exist
-    function test_sweepUniswapV3_nonExistentPool() public {
-        vm.pauseGasMetering();
-
-        // not a valid fee tier
-        DEFAULT_ACTION_ARGS.feeTier = 501;
-
-        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
-
-        bytes memory result = abi.encodeWithSelector(UniswapV3PoolDoesNotExist.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
         user.executeInstruction(instruction, instructionSig);
