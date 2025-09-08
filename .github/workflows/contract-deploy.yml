@@ -1,6 +1,8 @@
 name: Deploy Protocol Contracts
 
 on:
+  push:
+    branches: [ ahmad/contracts_deployment_workflow ]
   workflow_call:
     inputs:
       env_file:
@@ -22,10 +24,11 @@ jobs:
 
       - name: Validate contract addresses
         id: validate
-        uses: docker://ghcr.io/otimlabs/otim-protocol:latest
-        with:
-          entrypoint: sh
-          args: -c "rust-script /scripts/protocol-cli.rs validate-contracts --config-file /scripts/deployment-config.yaml --env-file ${{ inputs.env_file || '.github/networks/testnet/.env-otim-testnet' }} --update ; echo \"exit-code=$?\" >> /github/output"
+        run: |
+          docker run --rm --entrypoint="" -v ${{ github.workspace }}:/workspace -w /workspace \
+            ghcr.io/otimlabs/otim-protocol:ahmad-contracts_deployment_workflow \
+            rust-script /scripts/protocol-cli.rs validate-contracts --config-file /scripts/deployment-config.yaml --env-file ${{ inputs.env_file || '.github/networks/testnet/.env-otim-testnet' }} --update
+          echo "exit-code=$?" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       - name: Generate GitHub App Token
