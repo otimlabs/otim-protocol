@@ -1,0 +1,21 @@
+contracts:
+  - Core
+  - FeeTokenRegistry
+  - Treasury
+  - TransferAction
+  - TransferERC20Action
+  - RefuelAction
+  - RefuelERC20Action
+  - UniswapV3ExactInputAction
+  - DeactivateInstructionAction
+  - SweepAction
+  - SweepERC20Action
+  - SweepCCTPAction
+
+networks:
+  - sepolia
+  - base-sepolia
+  - arbitrum-sepolia
+  - optimism-sepolia
+  - pecorino-host
+  - pecorino-signet

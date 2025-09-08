@@ -14,8 +14,7 @@ COPY . .
 
 # Setup scripts and configs
 RUN mkdir /scripts && \
-    cp .github/scripts/protocol-cli.rs /scripts/ && \
-    cp .github/deployment-config.yaml /scripts/ && \
+    cp .github/scripts/protocol-cli.rs .github/scripts/deployment-config.yaml /scripts/ && \
     chmod +x /scripts/protocol-cli.rs
 
 # Build contracts and run tests
