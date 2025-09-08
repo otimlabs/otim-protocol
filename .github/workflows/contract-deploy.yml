@@ -1,8 +1,6 @@
 name: Deploy Protocol Contracts
 
 on:
-  push:
-    branches: [ ahmad/contracts_deployment_workflow ]
   workflow_call:
     inputs:
       env_file:
@@ -18,6 +16,8 @@ jobs:
   validate-and-update:
     name: Validate Contract Addresses
     runs-on: ubuntu-latest
+    env:
+      ENV_FILE: ${{ inputs.env_file || '.github/networks/testnet/.env-otim-testnet' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -25,11 +25,13 @@ jobs:
       - name: Validate contract addresses
         id: validate
         run: |
+          set +e  # Do not exit on error
           docker run --rm --entrypoint="" \
-            -v ${{ github.workspace }}/${{ inputs.env_file || '.github/networks/testnet/.env-otim-testnet' }}:/env-file \
+            -v ${{ github.workspace }}/${{ env.ENV_FILE }}:/env-file \
             ghcr.io/otimlabs/otim-protocol:ahmad-contracts_deployment_workflow \
             rust-script /scripts/protocol-cli.rs validate-contracts --config-file /scripts/deployment-config.yaml --env-file /env-file --update
-          echo "exit-code=$?" >> $GITHUB_OUTPUT
+          EXIT_CODE=$?
+          echo "exit-code=$EXIT_CODE" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       - name: Generate GitHub App Token
@@ -44,12 +46,12 @@ jobs:
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
           token: ${{ steps.bot_token.outputs.token }}
-          commit-message: "sync: update contract addresses"
-          title: "Sync: Update contract addresses"
+          commit-message: "sync: contract addresses"
+          title: "Sync: contract addresses"
           body: |
             Contract address validation detected changes.
             
-            **Environment File**: `${{ inputs.env_file }}`
+              **Environment File**: `${{ env.ENV_FILE }}`
             **Run**: [View logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           
           branch: deploy/update-addresses
