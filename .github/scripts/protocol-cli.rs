@@ -498,7 +498,7 @@ async fn validate_addresses(config: &DeploymentConfig, env_file: &str, update: b
             info(&format!("Updated {}", env_file));
         } else {
             info("Address differences detected. Use --update to apply changes.");
-            std::process::exit(1);
+            std::process::exit(2);
         }
     } else {
         info("All addresses match");

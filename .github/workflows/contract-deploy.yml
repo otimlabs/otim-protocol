@@ -25,9 +25,10 @@ jobs:
       - name: Validate contract addresses
         id: validate
         run: |
-          docker run --rm --entrypoint="" -v ${{ github.workspace }}:/workspace -w /workspace \
+          docker run --rm --entrypoint="" \
+            -v ${{ github.workspace }}/${{ inputs.env_file || '.github/networks/testnet/.env-otim-testnet' }}:/env-file \
             ghcr.io/otimlabs/otim-protocol:ahmad-contracts_deployment_workflow \
-            rust-script /scripts/protocol-cli.rs validate-contracts --config-file /scripts/deployment-config.yaml --env-file ${{ inputs.env_file || '.github/networks/testnet/.env-otim-testnet' }} --update
+            rust-script /scripts/protocol-cli.rs validate-contracts --config-file /scripts/deployment-config.yaml --env-file /env-file --update
           echo "exit-code=$?" >> $GITHUB_OUTPUT
         continue-on-error: true
 
