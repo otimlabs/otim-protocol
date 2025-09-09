@@ -1,0 +1,12 @@
+# Foundry build artifacts and cache
+broadcast/
+cache/
+out/
+dependencies/
+
+# Git
+.git/
+.gitignore
+
+# Logs
+*.log

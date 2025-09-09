@@ -1,0 +1,72 @@
+name: Deploy Protocol Contracts
+
+on:
+  workflow_call:
+    inputs:
+      env_file:
+        description: Environment file to validate
+        type: string
+        default: ".github/networks/testnet/.env-otim-testnet"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  validate-and-update:
+    name: Validate Contract Addresses
+    runs-on: ubuntu-latest
+    env:
+      ENV_FILE: ${{ inputs.env_file || '.github/networks/testnet/.env-otim-testnet' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Validate contract addresses
+        id: validate
+        run: |
+          set +e  # Do not exit on error
+          docker run --rm --entrypoint="" \
+            -v ${{ github.workspace }}/${{ env.ENV_FILE }}:/env-file \
+            ghcr.io/otimlabs/otim-protocol:ahmad-contracts_deployment_workflow \
+            rust-script /scripts/protocol-cli.rs validate-contracts --config-file /scripts/deployment-config.yaml --env-file /env-file --update
+          EXIT_CODE=$?
+          echo "exit-code=$EXIT_CODE" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Generate GitHub App Token
+        id: bot_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+        with:
+          app_id: ${{ secrets.GH_APP_ID }}
+          private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: Create contract update PR
+        if: steps.validate.outputs.exit-code == '2'
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        with:
+          token: ${{ steps.bot_token.outputs.token }}
+          commit-message: "sync: contract addresses"
+          title: "Sync: contract addresses"
+          body: |
+            Contract address validation detected changes.
+            
+              **Environment File**: `${{ env.ENV_FILE }}`
+            **Run**: [View logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          branch: deploy/update-addresses
+          branch-suffix: short-commit-hash
+          base: main
+          delete-branch: true
+
+      - name: Trigger downstream deployment
+        if: steps.validate.outputs.exit-code == '0'
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
+        with:
+          token: ${{ steps.bot_token.outputs.token }}
+          repository: otimlabs/otim-infrastructure
+          event-type: protocol-contract-deploy
+          client-payload: |
+            {
+              "protocol_ref": "latest"
+            }
