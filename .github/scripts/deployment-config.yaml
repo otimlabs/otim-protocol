@@ -1,0 +1,14 @@
+contracts:
+  - Core
+  - FeeTokenRegistry
+  - Treasury
+  - TransferAction
+  - TransferERC20Action
+  - RefuelAction
+  - RefuelERC20Action
+  - DeactivateInstructionAction
+  - SweepAction
+  - SweepERC20Action
+
+# No networks are needed since only validation is executed
+networks: []
