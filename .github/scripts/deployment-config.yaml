@@ -6,9 +6,14 @@ contracts:
   - TransferERC20Action
   - RefuelAction
   - RefuelERC20Action
+  - UniswapV3ExactInputAction
   - DeactivateInstructionAction
   - SweepAction
   - SweepERC20Action
+  - SweepCCTPAction
 
-# No networks are needed since only validation is executed
-networks: []
+networks:
+  - sepolia
+  - base-sepolia
+  - arbitrum-sepolia
+  - optimism-sepolia

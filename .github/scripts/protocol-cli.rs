@@ -74,7 +74,7 @@ enum Commands {
         private_key: Option<String>,
     },
 
-    /// Update chain configuration with deployed contract addresses for all networks
+    /// Update chain configuration with deployed contract addresses for a specific network
     UpdateChainConfig {
         /// JSON file containing contract addresses (e.g., addresses.json from deploy)
         #[arg(short, long)]
@@ -85,6 +85,9 @@ enum Commands {
         /// Chain config file to update
         #[arg(short, long)]
         chain_config_file: String,
+        /// Network name to update (e.g., anvil, base-sepolia)
+        #[arg(short, long)]
+        network: String,
     },
 
     /// Compare directory contents using Merkle trees
@@ -105,6 +108,7 @@ enum Commands {
 #[derive(Debug, serde::Deserialize)]
 struct DeploymentConfig {
     contracts: Vec<String>,
+    #[allow(dead_code)]
     networks: Vec<String>,
 }
 
@@ -655,91 +659,48 @@ async fn whitelist_actions(addresses_file: &str, private_key: Option<&str>) -> R
 // UPDATE CHAIN CONFIG
 // =============================================================================
 
-/// Update chain configuration with deployed contract addresses for all networks
-async fn update_chain_config(addresses_file: &str, deploy_config_file: &str, chain_config_file: &str) -> Result<()> {
-    info("Updating chain configuration for all networks");
+/// Update chain configuration with deployed contract addresses for a specific network
+async fn update_chain_config(addresses_file: &str, _deploy_config_file: &str, chain_config_file: &str, network: &str) -> Result<()> {
+    let addresses: HashMap<String, String> = serde_json::from_str(&fs::read_to_string(addresses_file)?)?;
+    let mut chain_config: serde_json::Value = serde_json::from_str(&fs::read_to_string(chain_config_file)?)?;
 
-    // Load addresses and config
-    let addresses: HashMap<String, String> = serde_json::from_str(&fs::read_to_string(addresses_file)?)
-        .with_context(|| format!("Failed to parse addresses file: {}", addresses_file))?;
+    let target_key = chain_config.as_object()
+        .and_then(|obj| obj.iter().find(|(_, v)| v.get("name").and_then(|n| n.as_str()) == Some(network)))
+        .map(|(k, _)| k.clone())
+        .ok_or_else(|| anyhow!("Network '{}' not found", network))?;
 
-    let config = load_config(deploy_config_file)?;
-
-    let mut chain_config: serde_json::Value = serde_json::from_str(&fs::read_to_string(chain_config_file)?)
-        .with_context(|| format!("Failed to parse chain config: {}", chain_config_file))?;
-
-    let chain_config_obj = chain_config.as_object_mut()
-        .ok_or_else(|| anyhow!("Chain config is not a valid JSON object"))?;
+    let target_block = chain_config[&target_key].as_object_mut()
+        .ok_or_else(|| anyhow!("Invalid network block"))?;
 
     let tier_mapping = get_contract_mapping();
-    let mut updated_networks = 0;
-
-    // Process each network from the deployment config
-    for network in &config.networks {
-        info(&format!("Processing network: {}", network));
-
-        // Find target network block
-        let target_key = chain_config_obj.iter()
-            .find(|(_, value)| {
-                value.get("name")
-                    .and_then(|name| name.as_str())
-                    .map_or(false, |name| name == network)
-            })
-            .map(|(key, _)| key.clone());
-
-        let target_key = if let Some(key) = target_key {
-            key
-        } else {
-            warn(&format!("Network '{}' not found in chain config, skipping", network));
-            continue;
-        };
-
-        // Ensure target block is an object
-        if !chain_config_obj[&target_key].is_object() {
-            chain_config_obj.insert(target_key.clone(), json!({}));
-        }
-
-        // Update contract addresses for this network
-        let target_block = chain_config_obj.get_mut(&target_key).unwrap().as_object_mut().unwrap();
-
-        for (contract_name, address) in &addresses {
-            // Find the contract details across all tiers
-            let mut contract_details = None;
-            for (_, tier_config) in tier_mapping.iter() {
-                if let Some(details) = tier_config.contracts.get(contract_name) {
-                    contract_details = Some(details);
-                    break;
-                }
-            }
-
-            if let Some(details) = contract_details {
-                if let Some(chain_config_key) = &details.chain_config_key {
-                    if chain_config_key.starts_with("actions.") {
-                        // Actions: address -> action_name mapping
-                        let action_name = chain_config_key.strip_prefix("actions.").unwrap();
-                        let actions_obj = target_block.entry("actions")
-                            .or_insert_with(|| json!({}))
-                            .as_object_mut()
-                            .unwrap();
+    let mut changes = false;
+    for (contract_name, address) in &addresses {
+        if let Some(details) = tier_mapping.values().find_map(|tier| tier.contracts.get(contract_name)) {
+            if let Some(key) = &details.chain_config_key {
+                if let Some(action_name) = key.strip_prefix("actions.") {
+                    let actions_obj = target_block.entry("actions").or_insert_with(|| json!({})).as_object_mut().unwrap();
+                    if actions_obj.get(address).map(|v| v.as_str()) != Some(Some(action_name)) {
                         actions_obj.insert(address.clone(), json!(action_name));
-                    } else {
-                        // Other contracts: direct field assignment
-                        target_block.insert(chain_config_key.clone(), json!(address));
+                        changes = true;
+                    }
+                } else {
+                    if target_block.get(key).and_then(|v| v.as_str()) != Some(address) {
+                        target_block.insert(key.clone(), json!(address));
+                        changes = true;
                     }
                 }
             }
         }
-
-        updated_networks += 1;
-        info(&format!("✓ Updated {} addresses for network '{}'", addresses.len(), network));
     }
 
-    // Save updated config
-    fs::write(chain_config_file, serde_json::to_string_pretty(&chain_config)?)
-        .with_context(|| format!("Failed to write chain config: {}", chain_config_file))?;
-
-    info(&format!("✓ Chain config updated for {} networks", updated_networks));
-    Ok(())
+    if changes {
+        fs::write(chain_config_file, serde_json::to_string_pretty(&chain_config)?)?;
+        info(&format!("✓ Updated addresses for network '{}'", network));
+        std::process::exit(2);
+    } else {
+        info(&format!("No changes needed for network '{}'", network));
+        std::process::exit(0);
+    }
 }
 
 // =============================================================================
@@ -834,8 +795,8 @@ async fn main() -> Result<()> {
             whitelist_actions(&addresses_file, private_key.as_deref()).await
         }
 
-        Commands::UpdateChainConfig { addresses_file, deploy_config_file, chain_config_file } => {
-            update_chain_config(&addresses_file, &deploy_config_file, &chain_config_file).await
+        Commands::UpdateChainConfig { addresses_file, deploy_config_file, chain_config_file, network } => {
+            update_chain_config(&addresses_file, &deploy_config_file, &chain_config_file, &network).await
         }
 
         Commands::CompareDirectories { dir1, dir2, ignore, show_diff } => {
