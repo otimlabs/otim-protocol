@@ -110,14 +110,11 @@ contract CrossRatePriceFeedTest is Test {
         crossRatePriceFeed.getRoundData(roundId);
     }
 
-    /// @notice test latestRoundData uses numerator feed's round ID
-    function test_latestRoundData_usesEarliestRoundId() public view {
-        (uint80 numeratorRoundId,,,,) = usdcUsdFeed.latestRoundData();
-        (uint80 denominatorRoundId,,,,) = ethUsdFeed.latestRoundData();
-        (uint80 crossRoundId,,,,) = crossRatePriceFeed.latestRoundData();
+    /// @notice test latestRoundData returns roundId == 1
+    function test_latestRoundData_roundIdOne() public view {
+        (uint80 roundId,,,,) = crossRatePriceFeed.latestRoundData();
 
-        uint80 expectedRoundId = numeratorRoundId < denominatorRoundId ? numeratorRoundId : denominatorRoundId;
-        assertEq(crossRoundId, expectedRoundId);
+        assertEq(roundId, 1);
     }
 
     /// @notice test latestRoundData uses earlier updated at timestamp
@@ -132,35 +129,18 @@ contract CrossRatePriceFeedTest is Test {
         assertEq(crossUpdatedAt, expectedUpdatedAt);
     }
 
-    /// @notice test latestRoundData uses latest started at timestamp
-    function test_latestRoundData_usesEarlierStartedAt() public view {
-        (,, uint256 numeratorStartedAt,,) = usdcUsdFeed.latestRoundData();
-        (,, uint256 denominatorStartedAt,,) = ethUsdFeed.latestRoundData();
-        (,, uint256 crossStartedAt,,) = crossRatePriceFeed.latestRoundData();
+    /// @notice test latestRoundData returns startedAt == 0
+    function test_latestRoundData_startedAtZero() public view {
+        (,, uint256 startedAt,,) = crossRatePriceFeed.latestRoundData();
 
-        uint256 expectedStartedAt =
-            denominatorStartedAt < numeratorStartedAt ? denominatorStartedAt : numeratorStartedAt;
-
-        assertEq(crossStartedAt, expectedStartedAt);
+        assertEq(startedAt, 0);
     }
 
-    /// @notice test latestRoundData uses earliest answered in round
-    function test_latestRoundData_usesEarlierAnsweredInRound() public view {
-        (,,,, uint80 numeratorAnsweredInRound) = usdcUsdFeed.latestRoundData();
-        (,,,, uint80 denominatorAnsweredInRound) = ethUsdFeed.latestRoundData();
-        (,,,, uint80 crossAnsweredInRound) = crossRatePriceFeed.latestRoundData();
+    /// @notice test latestRoundData returns answeredInRound == 0
+    function test_latestRoundData_answeredInRoundZero() public view {
+        (,,,, uint80 answeredInRound) = crossRatePriceFeed.latestRoundData();
 
-        uint80 expectedAnsweredInRound = numeratorAnsweredInRound < denominatorAnsweredInRound
-            ? numeratorAnsweredInRound
-            : denominatorAnsweredInRound;
-
-        assertEq(crossAnsweredInRound, expectedAnsweredInRound);
-    }
-
-    /// @notice test latestRoundData started at is before or equal to updated at
-    function test_latestRoundData_startedAtBeforeUpdatedAt() public view {
-        (,, uint256 crossStartedAt, uint256 crossUpdatedAt,) = crossRatePriceFeed.latestRoundData();
-        assertGe(crossUpdatedAt, crossStartedAt);
+        assertEq(answeredInRound, 0);
     }
 
     /// @notice test latestRoundData reverts on divide by zero

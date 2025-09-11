@@ -73,18 +73,12 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
     function latestRoundData()
         external
         view
-        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
+        returns (uint80 roundId, int256 answer, uint256, uint256 updatedAt, uint80)
     {
-        (roundId, answer, startedAt, updatedAt, answeredInRound) = numeratorFeed.latestRoundData();
-
-        // slither-disable-next-line unused-return
-        (
-            uint80 denominatorRoundId,
-            int256 denominatorAnswer,
-            uint256 denominatorStartedAt,
-            uint256 denominatorUpdatedAt,
-            uint80 denominatorAnsweredInRound
-        ) = denominatorFeed.latestRoundData();
+        // slither-disable-start unused-return
+        (, answer,, updatedAt,) = numeratorFeed.latestRoundData();
+        (, int256 denominatorAnswer,, uint256 denominatorUpdatedAt,) = denominatorFeed.latestRoundData();
+        // slither-disable-end unused-return
 
         // if the latest price is zero or negative, revert
         if (answer <= 0 || denominatorAnswer <= 0) {
@@ -99,11 +93,11 @@ contract CrossRatePriceFeed is ICrossRatePriceFeed {
             revert StalePrice();
         }
 
-        // use earliest values
-        roundId = denominatorRoundId < roundId ? denominatorRoundId : roundId;
+        // set round id to constant non-zero value
+        roundId = 1;
+
+        // use earlier updated at timestamp
         updatedAt = denominatorUpdatedAt < updatedAt ? denominatorUpdatedAt : updatedAt;
-        startedAt = denominatorStartedAt < startedAt ? denominatorStartedAt : startedAt;
-        answeredInRound = denominatorAnsweredInRound < answeredInRound ? denominatorAnsweredInRound : answeredInRound;
 
         // scale numerator by the scale factor and divide by the denominator answer
         answer *= _scaleFactor;
