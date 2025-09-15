@@ -79,9 +79,6 @@ enum Commands {
         /// JSON file containing contract addresses (e.g., addresses.json from deploy)
         #[arg(short, long)]
         addresses_file: String,
-        /// Deploy configuration file with network and contract details
-        #[arg(short, long)]
-        deploy_config_file: String,
         /// Chain config file to update
         #[arg(short, long)]
         chain_config_file: String,
@@ -108,8 +105,6 @@ enum Commands {
 #[derive(Debug, serde::Deserialize)]
 struct DeploymentConfig {
     contracts: Vec<String>,
-    #[allow(dead_code)]
-    networks: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -406,7 +401,7 @@ async fn calculate_addresses_by_tier(config: &DeploymentConfig, tier: &str) -> R
     let tier_mapping = get_contract_mapping();
 
     if let Some(tier_config) = tier_mapping.get(tier) {
-        // Group contracts by script for efficient execution
+        // Group contracts by script
         let mut script_groups: HashMap<String, Vec<String>> = HashMap::new();
 
         for contract in contracts {
@@ -660,7 +655,7 @@ async fn whitelist_actions(addresses_file: &str, private_key: Option<&str>) -> R
 // =============================================================================
 
 /// Update chain configuration with deployed contract addresses for a specific network
-async fn update_chain_config(addresses_file: &str, _deploy_config_file: &str, chain_config_file: &str, network: &str) -> Result<()> {
+async fn update_chain_config(addresses_file: &str, chain_config_file: &str, network: &str) -> Result<()> {
     let addresses: HashMap<String, String> = serde_json::from_str(&fs::read_to_string(addresses_file)?)?;
     let mut chain_config: serde_json::Value = serde_json::from_str(&fs::read_to_string(chain_config_file)?)?;
 
@@ -726,7 +721,7 @@ fn compare_directories(dir1: &str, dir2: &str, ignore: Option<&str>, show_diff: 
 
     let matches = files1 == files2;
     if !matches && show_diff {
-        print_differences(&files1, &files2, dir1, dir2);
+        print_differences(&files1, &files2, dir2);
     }
 
     Ok(matches)
@@ -740,7 +735,7 @@ fn should_ignore_path(relative_path: &camino::Utf8Path, ignore: Option<&str>) ->
     ignore.map_or(false, |pattern| path_str.contains(pattern))
 }
 
-fn print_differences(files1: &HashMap<String, String>, files2: &HashMap<String, String>, _dir1: &str, dir2: &str) {
+fn print_differences(files1: &HashMap<String, String>, files2: &HashMap<String, String>, dir2: &str) {
     let mut diff_count = 0;
 
     for (path, hash1) in files1 {
@@ -795,8 +790,8 @@ async fn main() -> Result<()> {
             whitelist_actions(&addresses_file, private_key.as_deref()).await
         }
 
-        Commands::UpdateChainConfig { addresses_file, deploy_config_file, chain_config_file, network } => {
-            update_chain_config(&addresses_file, &deploy_config_file, &chain_config_file, &network).await
+        Commands::UpdateChainConfig { addresses_file, chain_config_file, network } => {
+            update_chain_config(&addresses_file, &chain_config_file, &network).await
         }
 
         Commands::CompareDirectories { dir1, dir2, ignore, show_diff } => {
