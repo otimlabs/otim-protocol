@@ -11,6 +11,8 @@ contracts:
   - SweepAction
   - SweepERC20Action
   - SweepCCTPAction
+  - TransferCCTPAction
+  - SweepUniswapV3Action
 
 networks:
   - sepolia

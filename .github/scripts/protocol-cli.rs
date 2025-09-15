@@ -215,6 +215,16 @@ fn get_contract_mapping() -> HashMap<String, TierConfig> {
                     expected_addr_envvar: Some("EXPECTED_SWEEP_CCTP_ACTION_ADDRESS".to_string()),
                     chain_config_key: Some("actions.sweepCCTP".to_string()),
                 }),
+                ("TransferCCTPAction".to_string(), ContractDetails {
+                    script: Some("DeployTransferCCTPAction".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_TRANSFER_CCTP_ACTION_ADDRESS".to_string()),
+                    chain_config_key: Some("actions.transferCCTP".to_string()),
+                }),
+                ("SweepUniswapV3Action".to_string(), ContractDetails {
+                    script: Some("DeploySweepUniswapV3Action".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_SWEEP_UNISWAP_V3_ACTION_ADDRESS".to_string()),
+                    chain_config_key: Some("actions.sweepUniswapV3".to_string()),
+                }),
             ]),
         }),
     ])
