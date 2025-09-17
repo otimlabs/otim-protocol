@@ -3,7 +3,7 @@ FROM ghcr.io/foundry-rs/foundry:stable
 WORKDIR /app
 USER root
 
-# Install system dependencies
+# Install system dependencies (include yq for YAML processing)
 RUN apt-get update && apt-get install -y software-properties-common && \
     add-apt-repository ppa:rmescandon/yq -y && \
     apt-get update && apt-get install -y curl jq build-essential yq && \
@@ -16,8 +16,9 @@ RUN . ~/.cargo/env && rustup default stable && cargo install rust-script
 
 COPY . .
 
-# Setup deployment scripts
-RUN mkdir /scripts && cp .github/deployment/scripts/protocol-cli.rs /scripts/ && \
+# Setup deployment scripts and configs
+RUN mkdir /scripts && \
+    cp .github/deployment/scripts/protocol-cli.rs .github/deployment/configs/deployment-config.yaml /scripts/ && \
     chmod +x /scripts/protocol-cli.rs
 
 # Precompile rust-script to cache in image
