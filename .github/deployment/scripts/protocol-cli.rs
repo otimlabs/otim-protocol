@@ -453,22 +453,6 @@ async fn run_command(command: &str, args: &[&str], max_retries: u32, retry_error
     Err(last_error.unwrap_or_else(|| anyhow!("Max retries exceeded")))
 }
 
-/// Executes a forge deployment command with private key or AWS KMS signing
-async fn run_forge_deploy(script: &str, private_key: Option<&str>) -> Result<String> {
-    let rpc_url = env::var("RPC_URL").context("RPC_URL not found")?;
-    let use_legacy = env::var("FORGE_LEGACY").map(|v| v.eq_ignore_ascii_case("true") || v == "1").unwrap_or(false);
-
-    let mut args = vec!["script", script, "--broadcast", "--rpc-url", &rpc_url];
-    if use_legacy { args.push("--legacy"); }
-    match private_key {
-        Some(pk) => args.extend_from_slice(&["--private-key", pk]),
-        None => args.push("--aws"),
-    }
-    args.push("--json");
-    
-    let retry_errors = &["failed to get block", "timed out", "dispatch failure", "connection", "reset by peer"];
-    run_command("forge", &args, 3, retry_errors).await
-}
 
 /// Extracts contract address from forge deployment output using regex pattern matching
 fn extract_address(output: &str, contract: &str) -> Result<String> {
@@ -602,11 +586,55 @@ async fn validate_addresses(config: &DeploymentConfig, env_file: &str, update: b
 // DEPLOY CONTRACTS
 // =============================================================================
 
-/// Checks if a forge deployment error is a known/expected error to ignore
-fn is_known_deployment_error(error: &str) -> bool {
+/// Checks if an error is a known/expected error that should not be retried
+fn is_known_error(error: &str) -> bool {
     error.contains("CreateCollision") ||
     error.contains("AlreadyAdded") ||
     error.contains("empty revert data")
+}
+
+
+/// Executes a forge deployment command with optional retry logic
+async fn run_forge_deploy(script: &str, private_key: Option<&str>, retries: Option<usize>) -> Result<String> {
+    let retries = retries.unwrap_or(3);
+    
+    for attempt in 1..=retries {
+        if attempt > 1 {
+            warn(&format!("Retrying deployment (attempt {}/{}): {}", attempt, retries, script));
+            tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+        }
+        
+        let rpc_url = env::var("RPC_URL").context("RPC_URL not found")?;
+        let mut args = vec![
+            "script", script,
+            "--broadcast",
+            "--rpc-url", &rpc_url,
+            "--timeout", "30", // 30 second timeout
+        ];
+
+        if let Some(pk) = private_key {
+            args.extend_from_slice(&["--private-key", pk]);
+        } else {
+            args.push("--aws");
+        }
+
+        args.push("--json");
+        
+        match run_command("forge", &args).await {
+            Ok(output) => return Ok(output),
+            Err(e) => {
+                let error_str = e.to_string();
+                if is_known_error(&error_str) {
+                    return Err(e); // Known error, don't retry
+                } else if attempt < retries {
+                    continue; // Unknown error, retry
+                } else {
+                    return Err(e); // Max retries reached
+                }
+            }
+        }
+    }
+    unreachable!()
 }
 
 /// Deploys all contracts in tier order
@@ -621,11 +649,11 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
         let tier_config = tier_mapping.get(tier).unwrap();
 
         // Deploy each contract
-        for contract in contracts {
+        for contract in &contracts {
             if contract == "Core" && tier == "core" {
                 // Deploy all core contracts together
                 if let Some(script) = &tier_config.script {
-                    match run_forge_deploy(script, private_key).await {
+                    match run_forge_deploy(script, private_key, None).await {
                         Ok(output) => {
                             for (core_contract, details) in &tier_config.contracts {
                                 if let Ok(addr) = extract_address(&output, core_contract) {
@@ -637,7 +665,7 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
                                 }
                             }
                         }
-                        Err(e) if is_known_deployment_error(&e.to_string()) => {
+                        Err(e) if is_known_error(&e.to_string()) => {
                             info("Core already deployed, collecting existing addresses");
                             for (core_contract, details) in &tier_config.contracts {
                                 if let Some(env_var) = &details.expected_addr_envvar {
@@ -651,12 +679,12 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
                         Err(e) => bail!("Core deployment failed with unknown error: {}", e),
                     }
                 }
-            } else if let Some(details) = tier_config.contracts.get(&contract) {
+            } else if let Some(details) = tier_config.contracts.get(contract) {
                 // Deploy individual contract
                 let script = details.script.clone().unwrap_or_else(|| format!("Deploy{}", contract));
-                match run_forge_deploy(&script, private_key).await {
+                match run_forge_deploy(&script, private_key, None).await {
                     Ok(output) => {
-                        if let Ok(addr) = extract_address(&output, &contract) {
+                        if let Ok(addr) = extract_address(&output, contract) {
                             info(&format!("✓ Deployed {}: {}", contract, addr));
                             all_addresses.insert(contract.clone(), addr.clone());
                             if let Some(env_var) = &details.expected_addr_envvar {
@@ -664,16 +692,24 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
                             }
                         }
                     }
-                    Err(e) if is_known_deployment_error(&e.to_string()) => {
+                    Err(e) if is_known_error(&e.to_string()) => {
                         info(&format!("Contract {} already deployed", contract));
                         if let Some(env_var) = &details.expected_addr_envvar {
                             let existing_addr = env::var(env_var)
                                 .with_context(|| format!("No existing address found for {} ({})", contract, env_var))?;
                             info(&format!("- Using existing {}: {}", contract, existing_addr));
-                            all_addresses.insert(contract, existing_addr);
+                            all_addresses.insert(contract.clone(), existing_addr);
                         }
                     }
                     Err(e) => bail!("Contract {} deployment failed with unknown error: {}", contract, e),
+                }
+            }
+            
+            // Add delay between deployments to prevent nonce conflicts
+            // Skip delay for the last contract in the list
+            if let Some(last_contract) = contracts.last() {
+                if contract != last_contract {
+                    tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
                 }
             }
         }
@@ -718,6 +754,7 @@ async fn whitelist_actions_for_chain(chain: &str, addresses: &HashMap<String, St
         let mut args = vec![
             "script", "AddAction", "--sig", "run(address)", "--broadcast",
             "--rpc-url", &rpc_url,
+            "--timeout", "30", // 30 second timeout
         ];
 
         if use_legacy {
@@ -732,13 +769,39 @@ async fn whitelist_actions_for_chain(chain: &str, addresses: &HashMap<String, St
 
         args.push(action_address);
 
-        let retry_errors = &["failed to get block", "timed out", "dispatch failure", "connection", "reset by peer"];
-        match run_command("forge", &args, 3, retry_errors).await {
-            Ok(_) => info(&format!("✓ {} whitelisted", contract_name)),
-            Err(e) if e.to_string().contains("AlreadyAdded") => {
-                info(&format!("- {} already whitelisted", contract_name));
+        // Retry whitelisting with 3-second delays
+        for attempt in 1..=3 {
+            if attempt > 1 {
+                warn(&format!("Retrying whitelist (attempt {}/3): {}", attempt, contract_name));
+                tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
             }
-            Err(e) => bail!("Failed to whitelist {}: {}", contract_name, e),
+            
+            let retry_errors = &["failed to get block", "timed out", "dispatch failure", "connection", "reset by peer"];
+            match run_command("forge", &args, 3, retry_errors).await {
+                Ok(_) => {
+                    info(&format!("✓ {} whitelisted", contract_name));
+                    break;
+                }
+                Err(e) => {
+                    let error_str = e.to_string();
+                    if is_known_error(&error_str) {
+                        info(&format!("- {} already whitelisted", contract_name));
+                        break;
+                    } else if attempt < 3 {
+                        continue; // Unknown error, retry
+                    } else {
+                        bail!("Failed to whitelist {}: {}", contract_name, e);
+                    }
+                }
+            }
+        }
+        
+        // Add delay between whitelisting operations to prevent nonce conflicts
+        // Skip delay for the last contract in the list
+        if let Some((last_contract_name, _)) = action_contracts.last() {
+            if *contract_name != *last_contract_name {
+                tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
+            }
         }
     }
 
