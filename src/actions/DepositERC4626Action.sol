@@ -65,23 +65,18 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
             checkInterval(arguments.schedule, executionState.lastExecuted);
         }
 
-        // check if vault total assets is too low
-        if (IERC4626(arguments.vault).totalAssets() < arguments.minTotalAssets) {
-            revert TotalAssetsTooLow();
-        }
-
         // get the underlying token
         address underlyingToken = IERC4626(arguments.vault).asset();
-
-        // initialize deposit amount
-        uint256 depositAmount = arguments.value;
 
         // get the max deposit amount
         uint256 maxDeposit = IERC4626(arguments.vault).maxDeposit(address(this));
 
+        // initialize deposit amount
+        uint256 depositAmount = arguments.value;
+
         // if the max deposit amount is less than the deposit amount,
         // set the deposit amount to the max deposit amount and emit an event
-        if (maxDeposit < arguments.value) {
+        if (depositAmount > maxDeposit) {
             depositAmount = maxDeposit;
 
             emit MaxDepositReached(maxDeposit);
@@ -90,6 +85,11 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
         // check if the account has enough balance to deposit
         if (IERC20(underlyingToken).balanceOf(address(this)) < depositAmount) {
             revert InsufficientBalance();
+        }
+
+        // check if vault total assets is too low
+        if (IERC4626(arguments.vault).totalAssets() < arguments.minTotalAssets) {
+            revert TotalAssetsTooLow();
         }
 
         // approve the deposit amount to the vault
