@@ -469,7 +469,7 @@ fn extract_address(output: &str, contract: &str) -> Result<String> {
 // VALIDATE CONTRACTS
 // =============================================================================
 
-/// Calculates contract addresses for a specific deployment tier using dry-run
+/// Calculates expected contract addresses for a specific deployment tier
 async fn calculate_addresses_by_tier(config: &DeploymentConfig, tier: &str) -> Result<HashMap<String, String>> {
     let contracts = get_tier_contracts(config, tier);
     let mut addresses = HashMap::new();
