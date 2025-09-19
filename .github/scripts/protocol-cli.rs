@@ -394,24 +394,46 @@ async fn run_forge_dry_run(script: &str) -> Result<String> {
     run_command("forge", &args).await
 }
 
-/// Executes a forge deployment command with private key or AWS KMS signing
+/// Executes a forge deployment command with retry logic
 async fn run_forge_deploy(script: &str, private_key: Option<&str>) -> Result<String> {
     let rpc_url = env::var("RPC_URL").context("RPC_URL not found")?;
 
-    let mut args = vec![
-        "script", script,
-        "--broadcast",
-        "--rpc-url", &rpc_url,
-    ];
+    for attempt in 1..=3 {
+        if attempt > 1 {
+            warn(&format!("Retrying deployment (attempt {}/3): {}", attempt, script));
+            tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+        }
 
-    if let Some(pk) = private_key {
-        args.extend_from_slice(&["--private-key", pk]);
-    } else {
-        args.push("--aws");
+        let mut args = vec![
+            "script", script,
+            "--broadcast",
+            "--rpc-url", &rpc_url,
+            "--timeout", "30",
+        ];
+
+        if let Some(pk) = private_key {
+            args.extend_from_slice(&["--private-key", pk]);
+        } else {
+            args.push("--aws");
+        }
+
+        args.push("--json");
+
+        match run_command("forge", &args).await {
+            Ok(output) => return Ok(output),
+            Err(e) => {
+                let error_str = e.to_string();
+                if is_known_deployment_error(&error_str) {
+                    return Err(e); // Known error, don't retry
+                } else if attempt < 3 {
+                    continue; // Unknown error, retry
+                } else {
+                    return Err(e); // Max retries reached
+                }
+            }
+        }
     }
-
-    args.push("--json");
-    run_command("forge", &args).await
+    unreachable!()
 }
 
 /// Extracts contract address from forge deployment output using regex pattern matching
@@ -678,12 +700,29 @@ async fn whitelist_actions(addresses_file: &str, private_key: Option<&str>) -> R
 
         args.push(action_address);
 
-        match run_command("forge", &args).await {
-            Ok(_) => info(&format!("✓ {} whitelisted", contract_name)),
-            Err(e) if e.to_string().contains("AlreadyAdded") => {
-                info(&format!("- {} already whitelisted", contract_name));
+        for attempt in 1..=3 {
+            if attempt > 1 {
+                warn(&format!("Retrying whitelist (attempt {}/3): {}", attempt, contract_name));
+                tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
             }
-            Err(e) => bail!("Failed to whitelist {}: {}", contract_name, e),
+
+            match run_command("forge", &args).await {
+                Ok(_) => {
+                    info(&format!("✓ {} whitelisted", contract_name));
+                    break;
+                }
+                Err(e) => {
+                    let error_str = e.to_string();
+                    if error_str.contains("AlreadyAdded") {
+                        info(&format!("- {} already whitelisted", contract_name));
+                        break;
+                    } else if attempt < 3 {
+                        continue; // Unknown error, retry
+                    } else {
+                        bail!("Failed to whitelist {}: {}", contract_name, e);
+                    }
+                }
+            }
         }
         
         // Add delay between whitelisting operations to prevent nonce conflicts
