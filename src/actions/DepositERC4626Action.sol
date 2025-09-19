@@ -13,7 +13,7 @@ import {OtimFee} from "./fee-models/OtimFee.sol";
 import {IAction} from "./interfaces/IAction.sol";
 import {IDepositERC4626Action, INSTRUCTION_TYPEHASH, ARGUMENTS_TYPEHASH} from "./interfaces/IDepositERC4626Action.sol";
 
-import {InvalidArguments, InsufficientBalance} from "./errors/Errors.sol";
+import {InvalidArguments, InsufficientBalance, TotalAssetsTooLow} from "./errors/Errors.sol";
 
 /// @title DepositERC4626Action
 /// @author Otim Labs, Inc.
@@ -32,7 +32,12 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
     function hash(DepositERC4626 memory arguments) public pure returns (bytes32) {
         return keccak256(
             abi.encode(
-                ARGUMENTS_TYPEHASH, arguments.vault, arguments.value, hash(arguments.schedule), hash(arguments.fee)
+                ARGUMENTS_TYPEHASH,
+                arguments.vault,
+                arguments.value,
+                arguments.minTotalAssets,
+                hash(arguments.schedule),
+                hash(arguments.fee)
             )
         );
     }
@@ -51,7 +56,7 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
 
         // if first execution, validate the input
         if (executionState.executionCount == 0) {
-            if (arguments.vault == address(0) || arguments.value == 0) {
+            if (arguments.vault == address(0) || arguments.value == 0 || arguments.minTotalAssets == 0) {
                 revert InvalidArguments();
             }
 
@@ -60,18 +65,37 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
             checkInterval(arguments.schedule, executionState.lastExecuted);
         }
 
+        // check if vault total assets is too low
+        if (IERC4626(arguments.vault).totalAssets() < arguments.minTotalAssets) {
+            revert TotalAssetsTooLow();
+        }
+
+        // get the underlying token
         address underlyingToken = IERC4626(arguments.vault).asset();
 
+        // initialize deposit amount
+        uint256 depositAmount = arguments.value;
+
+        // get the max deposit amount
         uint256 maxDeposit = IERC4626(arguments.vault).maxDeposit(address(this));
 
-        uint256 depositAmount = maxDeposit < arguments.value ? maxDeposit : arguments.value;
+        // if the max deposit amount is less than the deposit amount,
+        // set the deposit amount to the max deposit amount and emit an event
+        if (maxDeposit < arguments.value) {
+            depositAmount = maxDeposit;
+
+            emit MaxDepositReached(maxDeposit);
+        }
 
         // check if the account has enough balance to deposit
         if (IERC20(underlyingToken).balanceOf(address(this)) < depositAmount) {
             revert InsufficientBalance();
         }
 
-        // deposit the value to the vault
+        // approve the deposit amount to the vault
+        IERC20(underlyingToken).approve(arguments.vault, depositAmount);
+
+        // deposit the deposit amount into the vault
         IERC4626(arguments.vault).deposit(depositAmount, address(this));
 
         // charge the fee

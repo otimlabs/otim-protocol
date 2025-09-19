@@ -19,6 +19,16 @@ abstract contract InstructionForkTestContext is Test {
     using InstructionLib for InstructionLib.Instruction;
     using InstructionLib for InstructionLib.InstructionDeactivation;
 
+    /// @notice Mainnet Steakhouse USDC vault
+    address public constant MAINNET_STEAKHOUSE_USDC_VAULT = address(0xBEEF01735c132Ada46AA9aA4c54623cAA92A64CB);
+
+    /// @notice Mainnet token addresses
+    address public constant MAINNET_WETH9 = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+    address public constant MAINNET_USDC = address(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+
+    /// @notice Mainnet USDC whale for spoofing test balance
+    address public constant MAINNET_USDC_WHALE = address(0xEe7aE85f2Fe2239E27D9c1E23fFFe168D63b4055);
+
     /// @notice Sepolia token addresses
     address public constant SEPOLIA_WETH9 = address(0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14);
     address public constant SEPOLIA_USDC = address(0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238);
