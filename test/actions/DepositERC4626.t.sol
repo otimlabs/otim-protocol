@@ -60,13 +60,14 @@ contract DepositERC4626Test is InstructionForkTestContext {
 
     /// @notice typical Transfer flow with ERC20 token
     function test_depositERC4626_happyPath() public {
-        buildInstruction();
-
         vm.startPrank(MAINNET_USDC_WHALE);
         IERC20(MAINNET_USDC).transfer(address(user), USER_START_BALANCE);
         vm.stopPrank();
 
-        assertEq(IERC20(MAINNET_USDC).balanceOf(address(user)), USER_START_BALANCE);
+        buildInstruction();
+
+        vm.expectEmit(true, true, true, false);
+        emit IERC4626.Deposit(address(user), address(user), DEFAULT_VALUE, 0);
 
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
@@ -80,6 +81,10 @@ contract DepositERC4626Test is InstructionForkTestContext {
 
     /// @notice typical deposit flow when max deposit is reached
     function test_depositERC4626_maxDepositReached() public {
+        vm.startPrank(MAINNET_USDC_WHALE);
+        IERC20(MAINNET_USDC).transfer(address(user), USER_START_BALANCE);
+        vm.stopPrank();
+
         mockVault.setMaxDeposit(DEFAULT_VALUE - 1);
         mockVault.setTotalAssets(DEFAULT_MIN_TOTAL_ASSETS + 1);
 
@@ -87,12 +92,11 @@ contract DepositERC4626Test is InstructionForkTestContext {
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
-        vm.startPrank(MAINNET_USDC_WHALE);
-        IERC20(MAINNET_USDC).transfer(address(user), USER_START_BALANCE);
-        vm.stopPrank();
-
         vm.expectEmit();
         emit IDepositERC4626Action.MaxDepositReached(DEFAULT_VALUE - 1);
+
+        vm.expectEmit(true, true, true, false);
+        emit IERC4626.Deposit(address(user), address(user), DEFAULT_VALUE - 1, 0);
 
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
@@ -148,12 +152,12 @@ contract DepositERC4626Test is InstructionForkTestContext {
 
     /// @notice test that execution reverts with total assets too low
     function test_depositERC4626_totalAssetsTooLow() public {
-        mockVault.setTotalAssets(DEFAULT_MIN_TOTAL_ASSETS - 1);
-        mockVault.setMaxDeposit(DEFAULT_VALUE + 1);
-
         vm.startPrank(MAINNET_USDC_WHALE);
         IERC20(MAINNET_USDC).transfer(address(user), USER_START_BALANCE);
         vm.stopPrank();
+
+        mockVault.setTotalAssets(DEFAULT_MIN_TOTAL_ASSETS - 1);
+        mockVault.setMaxDeposit(DEFAULT_VALUE + 1);
 
         DEFAULT_ACTION_ARGS.vault = address(mockVault);
 
