@@ -16,4 +16,5 @@ error CallOnceFailed(address target, bytes4 selector, bytes result);
 
 error CCTPTokenNotSupported();
 
+error MaxDepositZero();
 error TotalAssetsTooLow();

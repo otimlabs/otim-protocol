@@ -13,7 +13,7 @@ import {OtimFee} from "./fee-models/OtimFee.sol";
 import {IAction} from "./interfaces/IAction.sol";
 import {IDepositERC4626Action, INSTRUCTION_TYPEHASH, ARGUMENTS_TYPEHASH} from "./interfaces/IDepositERC4626Action.sol";
 
-import {InvalidArguments, InsufficientBalance, TotalAssetsTooLow} from "./errors/Errors.sol";
+import {InvalidArguments, MaxDepositZero, InsufficientBalance, TotalAssetsTooLow} from "./errors/Errors.sol";
 
 /// @title DepositERC4626Action
 /// @author Otim Labs, Inc.
@@ -70,6 +70,10 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
 
         // get the max deposit amount
         uint256 maxDeposit = IERC4626(arguments.vault).maxDeposit(address(this));
+
+        if (maxDeposit == 0) {
+            revert MaxDepositZero();
+        }
 
         // initialize deposit amount
         uint256 depositAmount = arguments.value;

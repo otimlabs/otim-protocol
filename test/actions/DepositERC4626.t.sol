@@ -149,12 +149,34 @@ contract DepositERC4626Test is InstructionForkTestContext {
     /// @notice test that execution reverts with total assets too low
     function test_depositERC4626_totalAssetsTooLow() public {
         mockVault.setTotalAssets(DEFAULT_MIN_TOTAL_ASSETS - 1);
+        mockVault.setMaxDeposit(DEFAULT_VALUE + 1);
+
+        vm.startPrank(MAINNET_USDC_WHALE);
+        IERC20(MAINNET_USDC).transfer(address(user), USER_START_BALANCE);
+        vm.stopPrank();
 
         DEFAULT_ACTION_ARGS.vault = address(mockVault);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
         bytes memory result = abi.encodeWithSelector(TotalAssetsTooLow.selector);
+        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
+
+        vm.resetGasMetering();
+        user.executeInstruction(instruction, instructionSig);
+        vm.pauseGasMetering();
+    }
+
+    /// @notice test that execution reverts with max deposit zero
+    function test_depositERC4626_maxDepositZero() public {
+        mockVault.setTotalAssets(DEFAULT_MIN_TOTAL_ASSETS + 1);
+        mockVault.setMaxDeposit(0);
+
+        DEFAULT_ACTION_ARGS.vault = address(mockVault);
+
+        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
+
+        bytes memory result = abi.encodeWithSelector(MaxDepositZero.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
         vm.resetGasMetering();

@@ -55,7 +55,7 @@ DeactivateInstruction:test_deactivateInstruction_maxExecutionsTooHigh() (gas: 33
 DeactivateInstruction:test_deactivateInstruction_maxExecutionsZero() (gas: 33304)
 DeploymentAddressesTest:test_callOnceAction_deployedAddress() (gas: 858805)
 DeploymentAddressesTest:test_deactivateInstructionAction_deployedAddress() (gas: 698711)
-DeploymentAddressesTest:test_depositERC4626Action_deployedAddress() (gas: 960481)
+DeploymentAddressesTest:test_depositERC4626Action_deployedAddress() (gas: 971716)
 DeploymentAddressesTest:test_feeTokenRegistry_deployedAddress() (gas: 732498)
 DeploymentAddressesTest:test_otimDelegate_deployedAddress() (gas: 2330366)
 DeploymentAddressesTest:test_refuelAction_deployedAddress() (gas: 693590)
