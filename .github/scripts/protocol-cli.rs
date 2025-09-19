@@ -451,7 +451,7 @@ fn extract_address(output: &str, contract: &str) -> Result<String> {
 // VALIDATE CONTRACTS
 // =============================================================================
 
-/// Calculates contract addresses for a specific deployment tier using dry-run
+/// Calculates expected contract addresses for a specific deployment tier
 async fn calculate_addresses_by_tier(config: &DeploymentConfig, tier: &str) -> Result<HashMap<String, String>> {
     let contracts = get_tier_contracts(config, tier);
     let mut addresses = HashMap::new();
@@ -567,7 +567,7 @@ async fn validate_addresses(config: &DeploymentConfig, env_file: &str, update: b
 // DEPLOY CONTRACTS
 // =============================================================================
 
-/// Checks if a forge deployment error is a known/expected error to ignore
+/// Checks if a forge deployment error is a known/expected error
 fn is_known_deployment_error(error: &str) -> bool {
     error.contains("CreateCollision") ||
     error.contains("AlreadyAdded") ||
