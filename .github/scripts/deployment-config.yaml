@@ -1,0 +1,26 @@
+contracts:
+  - Core
+  - FeeTokenRegistry
+  - Treasury
+  - TransferAction
+  - TransferERC20Action
+  - RefuelAction
+  - RefuelERC20Action
+  - UniswapV3ExactInputAction
+  - DeactivateInstructionAction
+  - SweepAction
+  - SweepERC20Action
+  - SweepCCTPAction
+  - TransferCCTPAction
+  - SweepUniswapV3Action
+  - DepositERC4626Action
+  - SweepDepositERC4626Action
+  - WithdrawERC4626Action
+  - SweepWithdrawERC4626Action
+  - CallOnceAction
+
+networks:
+  - sepolia
+  - base-sepolia
+  - arbitrum-sepolia
+  - optimism-sepolia

@@ -559,7 +559,7 @@ fn extract_address(output: &str, contract: &str) -> Result<String> {
 // VALIDATE CONTRACTS
 // =============================================================================
 
-/// Calculates contract addresses for a specific deployment tier using dry-run
+/// Calculates expected contract addresses for a specific deployment tier
 async fn calculate_addresses_by_tier(config: &DeploymentConfig, tier: &str) -> Result<HashMap<String, String>> {
     let contracts = get_tier_contracts(config, tier);
     let mut addresses = HashMap::new();
@@ -693,8 +693,8 @@ async fn validate_addresses(config: &DeploymentConfig, network_env_file: &str, c
 // DEPLOY CONTRACTS
 // =============================================================================
 
-/// Checks if an error is a known/expected error that should not be retried
-fn is_known_error(error: &str) -> bool {
+/// Checks if a forge deployment error is a known/expected error that should not be retried
+fn is_known_deployment_error(error: &str) -> bool {
     error.contains("CreateCollision") ||
     error.contains("AlreadyAdded") ||
     error.contains("empty revert data")
@@ -751,7 +751,7 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
                                 }
                             }
                         }
-                        Err(e) if is_known_error(&e.to_string()) => {
+                        Err(e) if is_known_deployment_error(&e.to_string()) => {
                             info("Core already deployed, collecting existing addresses");
                             for (core_contract, details) in &tier_config.contracts {
                                 if let Some(env_var) = &details.expected_addr_envvar {
@@ -778,7 +778,7 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
                             }
                         }
                     }
-                    Err(e) if is_known_error(&e.to_string()) => {
+                    Err(e) if is_known_deployment_error(&e.to_string()) => {
                         info(&format!("Contract {} already deployed", contract));
                         if let Some(env_var) = &details.expected_addr_envvar {
                             let existing_addr = env::var(env_var)
@@ -860,7 +860,7 @@ async fn whitelist_actions_for_chain(chain: &str, addresses: &HashMap<String, St
             }
             Err(e) => {
                 let error_str = e.to_string();
-                if is_known_error(&error_str) {
+                if is_known_deployment_error(&error_str) {
                     info(&format!("- {} already whitelisted", contract_name));
                 } else {
                     bail!("Failed to whitelist {}: {}", contract_name, e);
