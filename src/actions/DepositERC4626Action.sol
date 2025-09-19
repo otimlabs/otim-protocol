@@ -17,7 +17,7 @@ import {InvalidArguments, InsufficientBalance, TotalAssetsTooLow} from "./errors
 
 /// @title DepositERC4626Action
 /// @author Otim Labs, Inc.
-/// @notice
+/// @notice an Action that deposits ERC20 tokens into an ERC4626 vault
 contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimFee {
     constructor(address feeTokenRegistryAddress, address treasuryAddress, uint256 gasConstant_)
         OtimFee(feeTokenRegistryAddress, treasuryAddress, gasConstant_)
@@ -93,9 +93,11 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
         }
 
         // approve the deposit amount to the vault
+        // slither-disable-next-line unused-return
         IERC20(underlyingToken).approve(arguments.vault, depositAmount);
 
         // deposit the deposit amount into the vault
+        // slither-disable-next-line unused-return
         IERC4626(arguments.vault).deposit(depositAmount, address(this));
 
         // charge the fee
