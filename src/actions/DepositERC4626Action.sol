@@ -33,8 +33,8 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
         return keccak256(
             abi.encode(
                 ARGUMENTS_TYPEHASH,
-                arguments.recipient,
                 arguments.vault,
+                arguments.recipient,
                 arguments.value,
                 arguments.minTotalAssets,
                 hash(arguments.schedule),
