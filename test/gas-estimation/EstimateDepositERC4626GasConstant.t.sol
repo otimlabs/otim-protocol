@@ -25,7 +25,7 @@ contract EstimateDepositERC4626GasConstant is InstructionForkTestContext {
 
     DepositERC4626Action depositERC4626Action;
 
-    uint256 public constant DEPOSIT_ERC4626_GAS_CONSTANT = 105_000;
+    uint256 public constant DEPOSIT_ERC4626_GAS_CONSTANT = 105_500;
 
     constructor() {
         string memory rpcUrl = vm.envOr("MAINNET_RPC_URL", vm.rpcUrl("mainnet"));
@@ -62,6 +62,8 @@ contract EstimateDepositERC4626GasConstant is InstructionForkTestContext {
         vm.startPrank(MAINNET_USDC_WHALE);
         IERC20(MAINNET_USDC).transfer(address(user), whaleBalance);
         vm.stopPrank();
+
+        vm.assume(arguments.recipient != address(0));
 
         // fuzz test must pass argument validation
         vm.assume(arguments.value > 0 && arguments.value < whaleBalance);

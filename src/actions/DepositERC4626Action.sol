@@ -33,6 +33,7 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
         return keccak256(
             abi.encode(
                 ARGUMENTS_TYPEHASH,
+                arguments.recipient,
                 arguments.vault,
                 arguments.value,
                 arguments.minTotalAssets,
@@ -56,7 +57,10 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
 
         // if first execution, validate the input
         if (executionState.executionCount == 0) {
-            if (arguments.vault == address(0) || arguments.value == 0 || arguments.minTotalAssets == 0) {
+            if (
+                arguments.recipient == address(0) || arguments.vault == address(0) || arguments.value == 0
+                    || arguments.minTotalAssets == 0
+            ) {
                 revert InvalidArguments();
             }
 
@@ -69,7 +73,7 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
         address underlyingToken = IERC4626(arguments.vault).asset();
 
         // get the max deposit amount
-        uint256 maxDeposit = IERC4626(arguments.vault).maxDeposit(address(this));
+        uint256 maxDeposit = IERC4626(arguments.vault).maxDeposit(arguments.recipient);
 
         if (maxDeposit == 0) {
             revert MaxDepositZero();
@@ -102,7 +106,7 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
 
         // deposit the deposit amount into the vault
         // slither-disable-next-line unused-return
-        IERC4626(arguments.vault).deposit(depositAmount, address(this));
+        IERC4626(arguments.vault).deposit(depositAmount, arguments.recipient);
 
         // charge the fee
         chargeFee(startGas - gasleft(), arguments.fee);

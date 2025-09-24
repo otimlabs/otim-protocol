@@ -29,6 +29,7 @@ contract DepositERC4626Test is InstructionForkTestContext {
 
     ERC4626Mock public mockVault = new ERC4626Mock(IERC20(MAINNET_USDC));
 
+    address public DEFAULT_RECIPIENT = address(user);
     address public DEFAULT_VAULT = address(MAINNET_STEAKHOUSE_USDC_VAULT);
     uint256 public DEFAULT_VALUE = 100e6;
     uint256 public DEFAULT_MIN_TOTAL_ASSETS = 100e6;
@@ -47,6 +48,7 @@ contract DepositERC4626Test is InstructionForkTestContext {
         actionManager.addAction(address(depositERC4626));
 
         DEFAULT_ACTION_ARGS = IDepositERC4626Action.DepositERC4626({
+            recipient: DEFAULT_RECIPIENT,
             vault: DEFAULT_VAULT,
             value: DEFAULT_VALUE,
             minTotalAssets: DEFAULT_MIN_TOTAL_ASSETS,
@@ -67,7 +69,7 @@ contract DepositERC4626Test is InstructionForkTestContext {
         buildInstruction();
 
         vm.expectEmit(true, true, true, false);
-        emit IERC4626.Deposit(address(user), address(user), DEFAULT_VALUE, 0);
+        emit IERC4626.Deposit(DEFAULT_RECIPIENT, address(user), DEFAULT_VALUE, 0);
 
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
@@ -96,7 +98,7 @@ contract DepositERC4626Test is InstructionForkTestContext {
         emit IDepositERC4626Action.MaxDepositReached(DEFAULT_VALUE - 1);
 
         vm.expectEmit(true, true, true, false);
-        emit IERC4626.Deposit(address(user), address(user), DEFAULT_VALUE - 1, 0);
+        emit IERC4626.Deposit(DEFAULT_RECIPIENT, address(user), DEFAULT_VALUE - 1, 0);
 
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
@@ -106,6 +108,20 @@ contract DepositERC4626Test is InstructionForkTestContext {
         vm.pauseGasMetering();
 
         assertEq(IERC20(MAINNET_USDC).balanceOf(address(user)), USER_START_BALANCE - (DEFAULT_VALUE - 1));
+    }
+
+    /// @notice test that validation fails with vault == address(0)
+    function test_depositERC4626_recipientZero() public {
+        DEFAULT_ACTION_ARGS.recipient = address(0);
+
+        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
+
+        bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
+        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
+
+        vm.resetGasMetering();
+        user.executeInstruction(instruction, instructionSig);
+        vm.pauseGasMetering();
     }
 
     /// @notice test that validation fails with vault == address(0)
