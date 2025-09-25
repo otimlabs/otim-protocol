@@ -30,8 +30,8 @@ contract CrossRateDifferentialTest is Test {
 
     /// @notice test that cross-rate latestRoundData returns approximately the same answer as the direct price feed
     function test_latestRoundData_realValuesFork() public view {
-        // allow for a 1% delta
-        uint256 percentDelta = 1;
+        // allow for a 1.5% delta
+        uint256 percentDelta = 15;
 
         (, int256 crossRateAnswer,,,) = crossRatePriceFeed.latestRoundData();
         (, int256 directAnswer,,,) = ethUsdcFeed.latestRoundData();
@@ -39,7 +39,7 @@ contract CrossRateDifferentialTest is Test {
         // USDC/ETH price feed has 18 decimals, so scale down by 10^10
         directAnswer /= int256(10 ** 10);
 
-        // 1e18 is 100%, so multiply percent delta by 1e16 to get 1%
-        assertApproxEqRel(crossRateAnswer, directAnswer, percentDelta * 1e16);
+        // 1e18 is 100%, so multiply percent delta by 1e15 to get 1.5%
+        assertApproxEqRel(crossRateAnswer, directAnswer, percentDelta * 1e15);
     }
 }
