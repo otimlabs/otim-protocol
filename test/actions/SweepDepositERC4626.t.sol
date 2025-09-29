@@ -82,7 +82,7 @@ contract SweepDepositERC4626Test is InstructionForkTestContext {
     }
 
     /// @notice typical deposit flow when max deposit is reached
-    function test_depositERC4626_maxDepositReached() public {
+    function test_sweepDepositERC4626_maxDepositReached() public {
         vm.startPrank(MAINNET_USDC_WHALE);
         IERC20(MAINNET_USDC).transfer(address(user), USER_START_BALANCE);
         vm.stopPrank();
