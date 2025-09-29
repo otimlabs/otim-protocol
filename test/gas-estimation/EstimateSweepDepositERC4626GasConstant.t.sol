@@ -56,6 +56,7 @@ contract EstimateSweepDepositERC4626GasConstant is InstructionForkTestContext {
     ) public {
         // disregard fuzz generated values for token and target
         arguments.vault = address(MAINNET_STEAKHOUSE_USDC_VAULT);
+        arguments.recipient = address(user);
         arguments.minTotalAssets = 1;
 
         // fuzz test must pass argument validation

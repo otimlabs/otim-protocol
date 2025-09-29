@@ -29,6 +29,7 @@ contract SweepDepositERC4626Test is InstructionForkTestContext {
     ERC4626Mock public mockVault = new ERC4626Mock(IERC20(MAINNET_USDC));
 
     address public DEFAULT_VAULT = address(MAINNET_STEAKHOUSE_USDC_VAULT);
+    address public DEFAULT_RECIPIENT = address(user);
     uint256 public DEFAULT_THRESHOLD = 100e6;
     uint256 public DEFAULT_END_BALANCE = 0;
     uint256 public DEFAULT_MIN_TOTAL_ASSETS = 100e6;
@@ -47,6 +48,7 @@ contract SweepDepositERC4626Test is InstructionForkTestContext {
 
         DEFAULT_ACTION_ARGS = ISweepDepositERC4626Action.SweepDepositERC4626({
             vault: DEFAULT_VAULT,
+            recipient: DEFAULT_RECIPIENT,
             threshold: DEFAULT_THRESHOLD,
             endBalance: DEFAULT_END_BALANCE,
             minTotalAssets: DEFAULT_MIN_TOTAL_ASSETS,
@@ -67,7 +69,7 @@ contract SweepDepositERC4626Test is InstructionForkTestContext {
 
         // don't check number of shares emitted
         vm.expectEmit(true, true, true, false);
-        emit IERC4626.Deposit(address(user), address(user), USER_START_BALANCE, 0);
+        emit IERC4626.Deposit(address(user), DEFAULT_RECIPIENT, USER_START_BALANCE, 0);
 
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
@@ -97,7 +99,9 @@ contract SweepDepositERC4626Test is InstructionForkTestContext {
 
         // don't check number of shares emitted
         vm.expectEmit(true, true, true, false);
-        emit IERC4626.Deposit(address(user), address(user), USER_START_BALANCE - mockVault.maxDeposit(address(user)), 0);
+        emit IERC4626.Deposit(
+            address(user), DEFAULT_RECIPIENT, USER_START_BALANCE - mockVault.maxDeposit(DEFAULT_RECIPIENT), 0
+        );
 
         vm.expectEmit();
         emit IOtimDelegate.InstructionExecuted(instructionId, 1);
@@ -114,6 +118,20 @@ contract SweepDepositERC4626Test is InstructionForkTestContext {
     /// @notice test that validation fails with vault == address(0)
     function test_sweepDepositERC4626_vaultZero() public {
         DEFAULT_ACTION_ARGS.vault = address(0);
+
+        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
+
+        bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
+        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
+
+        vm.resetGasMetering();
+        user.executeInstruction(instruction, instructionSig);
+        vm.pauseGasMetering();
+    }
+
+    /// @notice test that validation fails with recipient == address(0)
+    function test_sweepDepositERC4626_recipientZero() public {
+        DEFAULT_ACTION_ARGS.recipient = address(0);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 

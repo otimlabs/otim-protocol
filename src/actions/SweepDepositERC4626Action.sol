@@ -36,6 +36,7 @@ contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimF
             abi.encode(
                 ARGUMENTS_TYPEHASH,
                 arguments.vault,
+                arguments.recipient,
                 arguments.threshold,
                 arguments.endBalance,
                 arguments.minTotalAssets,
@@ -59,8 +60,8 @@ contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimF
         // if first execution, validate the input
         if (executionState.executionCount == 0) {
             if (
-                arguments.vault == address(0) || arguments.endBalance > arguments.threshold
-                    || arguments.minTotalAssets == 0
+                arguments.vault == address(0) || arguments.recipient == address(0)
+                    || arguments.endBalance > arguments.threshold || arguments.minTotalAssets == 0
             ) {
                 revert InvalidArguments();
             }
@@ -81,7 +82,7 @@ contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimF
         }
 
         // get the max deposit amount
-        uint256 maxDeposit = IERC4626(arguments.vault).maxDeposit(address(this));
+        uint256 maxDeposit = IERC4626(arguments.vault).maxDeposit(arguments.recipient);
 
         if (maxDeposit == 0) {
             revert MaxDepositZero();
@@ -109,7 +110,7 @@ contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimF
 
         // deposit the deposit amount into the vault
         // slither-disable-next-line unused-return
-        IERC4626(arguments.vault).deposit(depositAmount, address(this));
+        IERC4626(arguments.vault).deposit(depositAmount, arguments.recipient);
 
         // charge the fee
         chargeFee(startGas - gasleft(), arguments.fee);
