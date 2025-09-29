@@ -14,21 +14,22 @@ import {InstructionForkTestContext} from "../utils/InstructionForkTestContext.so
 import {FeeTokenRegistry} from "../../src/infrastructure/FeeTokenRegistry.sol";
 import {Treasury} from "../../src/infrastructure/Treasury.sol";
 
-import {SweepUniswapV3Action} from "../../src/actions/SweepUniswapV3Action.sol";
-import {ISweepUniswapV3Action} from "../../src/actions/interfaces/ISweepUniswapV3Action.sol";
+import {DepositERC4626Action} from "../../src/actions/DepositERC4626Action.sol";
+import {IDepositERC4626Action} from "../../src/actions/interfaces/IDepositERC4626Action.sol";
 
-contract EstimateSweepUniswapV3GasConstant is InstructionForkTestContext {
+contract EstimateDepositERC4626GasConstant is InstructionForkTestContext {
     using InstructionLib for InstructionLib.Instruction;
 
     Treasury treasury;
     FeeTokenRegistry feeTokenRegistry;
 
-    SweepUniswapV3Action swapAction;
+    DepositERC4626Action depositERC4626Action;
 
-    uint256 public constant SWEEP_UNISWAP_V3_GAS_CONSTANT = 106_000;
+    uint256 public constant DEPOSIT_ERC4626_GAS_CONSTANT = 105_500;
 
     constructor() {
-        setUpFork();
+        string memory rpcUrl = vm.envOr("MAINNET_RPC_URL", vm.rpcUrl("mainnet"));
+        vm.createSelectFork(rpcUrl);
 
         treasury = new Treasury(address(this));
         feeTokenRegistry = new FeeTokenRegistry(address(this));
@@ -37,49 +38,43 @@ contract EstimateSweepUniswapV3GasConstant is InstructionForkTestContext {
         MockV3Aggregator priceFeed = new MockV3Aggregator(18, 1e18);
 
         // add WETH9 and mock price feed to fee token registry
-        feeTokenRegistry.addFeeToken(SEPOLIA_WETH9, address(priceFeed), type(uint40).max);
+        feeTokenRegistry.addFeeToken(MAINNET_WETH9, address(priceFeed), type(uint40).max);
 
         // deploy and whitelist action with new gas constant
-        swapAction = new SweepUniswapV3Action(
-            SEPOLIA_UNIVERSAL_ROUTER,
-            SEPOLIA_V3_FACTORY,
-            SEPOLIA_WETH9,
-            address(feeTokenRegistry),
-            address(treasury),
-            SWEEP_UNISWAP_V3_GAS_CONSTANT
-        );
+        depositERC4626Action =
+            new DepositERC4626Action(address(feeTokenRegistry), address(treasury), DEPOSIT_ERC4626_GAS_CONSTANT);
 
-        actionManager.addAction(address(swapAction));
+        actionManager.addAction(address(depositERC4626Action));
     }
 
-    // check that the UNISWAP_V3_EXACT_INPUT_GAS_CONSTANT doesn't result in an underpayment of the fee
-    function testFuzz_sweepUniswapV3_gasConstant(
+    // check that the DEPOSIT_ERC4626_GAS_CONSTANT doesn't result in an underpayment of the fee
+    function testFuzz_depositERC4626_gasConstant(
         uint256 salt,
         uint256 maxExecutions,
-        ISweepUniswapV3Action.SweepUniswapV3 memory arguments
+        IDepositERC4626Action.DepositERC4626 memory arguments
     ) public {
-        // fuzz test must pass argument validation
+        // disregard fuzz generated values for token and target
+        arguments.vault = address(MAINNET_STEAKHOUSE_USDC_VAULT);
+        arguments.minTotalAssets = 1;
+
+        uint256 whaleBalance = IERC20(MAINNET_USDC).balanceOf(MAINNET_USDC_WHALE);
+
+        vm.startPrank(MAINNET_USDC_WHALE);
+        IERC20(MAINNET_USDC).transfer(address(user), whaleBalance);
+        vm.stopPrank();
+
         vm.assume(arguments.recipient != address(0));
 
-        // disregard fuzz generated values
-        arguments.tokenIn = address(0);
-        arguments.tokenOut = SEPOLIA_USDC;
-        arguments.feeTier = 500;
+        // fuzz test must pass argument validation
+        vm.assume(arguments.value > 0 && arguments.value < whaleBalance);
 
-        // assume a reasonable amountIn
-        vm.assume(arguments.threshold < 100 ether);
-        vm.assume(arguments.endBalance <= arguments.threshold);
-        // disregard fuzz generated minAmountOut
-        arguments.floorAmountOut = 0;
-
-        // set look back period to 15 minutes
-        arguments.meanPriceLookBack = 900;
-
-        // set maxPriceDeviationBPS to 100% (10_000 BPS) for simplicity
-        arguments.maxPriceDeviationBPS = 10000;
+        // fuzz test must pass schedule checks
+        vm.assume(arguments.schedule.startAt < block.timestamp && arguments.schedule.startBy > block.timestamp);
+        // assume interval and timeout are not ridiculously high
+        vm.assume(arguments.schedule.interval < type(uint40).max && arguments.schedule.timeout < type(uint40).max);
 
         // disregard fuzz generated fee token
-        arguments.fee.token = SEPOLIA_WETH9;
+        arguments.fee.token = MAINNET_WETH9;
         // assume maxBaseFeePerGas and maxPriorityFeePerGas are non-zero and not ridiculously high
         vm.assume(arguments.fee.maxBaseFeePerGas > 0 && arguments.fee.maxBaseFeePerGas < type(uint64).max);
         vm.assume(arguments.fee.maxPriorityFeePerGas > 0 && arguments.fee.maxPriorityFeePerGas < type(uint64).max);
@@ -95,20 +90,17 @@ contract EstimateSweepUniswapV3GasConstant is InstructionForkTestContext {
         // deal enough fee balance and convert to WETH
         vm.deal(address(user), type(uint248).max - 1);
         vm.prank(address(user));
-        IWETH9(SEPOLIA_WETH9).deposit{value: address(user).balance}();
-
-        // deal enough ETH to swap based on fuzzed values
-        vm.deal(address(user), arguments.threshold + 1);
+        IWETH9(MAINNET_WETH9).deposit{value: address(user).balance}();
 
         // build Instruction with fuzz values
-        buildInstruction(salt, maxExecutions, address(swapAction), abi.encode(arguments));
+        buildInstruction(salt, maxExecutions, address(depositERC4626Action), abi.encode(arguments));
 
         // execute and measure gas used
         uint256 gasUsed = gasleft();
         gateway.safeExecuteInstruction(address(user), instruction, instructionSig);
         gasUsed -= gasleft();
 
-        uint256 feeCollected = IERC20(SEPOLIA_WETH9).balanceOf(address(treasury));
+        uint256 feeCollected = IERC20(MAINNET_WETH9).balanceOf(address(treasury));
         uint256 executionCost = gasUsed * tx.gasprice;
 
         // revert if fee collected is less than transaction cost + executor tip
