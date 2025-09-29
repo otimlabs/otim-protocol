@@ -84,6 +84,7 @@ contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimF
         // get the max deposit amount
         uint256 maxDeposit = IERC4626(arguments.vault).maxDeposit(arguments.recipient);
 
+        // if the max deposit amount is zero, revert
         if (maxDeposit == 0) {
             revert MaxDepositZero();
         }
