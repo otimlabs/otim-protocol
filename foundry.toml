@@ -11,13 +11,14 @@ optimizer_runs = 1000
 always_use_create_2_factory = true
 fork_cache_size = "5GB"
 remappings = [
-    "@chainlink-contracts/=dependencies/smartcontractkit-chainlink-2.25.0/contracts",
     "@openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.4.0/",
     "@openzeppelin/contracts/=dependencies/@openzeppelin-contracts-5.4.0/",
     "@uniswap-universal-router/=dependencies/@uniswap-universal-router-2.0.0/",
     "@uniswap-v3-core/=dependencies/@uniswap-v3-core-1.0.2-solc-0.8-simulate/",
     "@uniswap-v3-periphery/=dependencies/@uniswap-v3-periphery-1.4.4/",
     "forge-std/=dependencies/forge-std-1.10.0/",
+    "smartcontractkit-chainlink-evm/=dependencies/smartcontractkit-chainlink-evm-1.5.0-beta.1/",
+    "@chainlink-contracts/=dependencies/smartcontractkit-chainlink-evm-1.5.0-beta.1/contracts",
 ]
 
 [rpc_endpoints]
@@ -30,7 +31,7 @@ sepolia = "https://sepolia.drpc.org"
 "forge-std" = "1.10.0"
 "@openzeppelin-contracts" = "5.4.0"
 "@uniswap-universal-router" = "2.0.0"
-smartcontractkit-chainlink = "2.25.0"
+smartcontractkit-chainlink-evm = "1.5.0-beta.1"
 "@uniswap-v3-core" = "1.0.2-solc-0.8-simulate"
 "@uniswap-v3-periphery" = "1.4.4"
 
