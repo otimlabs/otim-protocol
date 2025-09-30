@@ -2,8 +2,6 @@
 pragma solidity ^0.8.26;
 
 import {IERC4626} from "@openzeppelin-contracts/interfaces/IERC4626.sol";
-import {IERC20} from "@openzeppelin-contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {InstructionLib} from "../libraries/Instruction.sol";
 
@@ -15,11 +13,11 @@ import {
     IWithdrawERC4626Action, INSTRUCTION_TYPEHASH, ARGUMENTS_TYPEHASH
 } from "./interfaces/IWithdrawERC4626Action.sol";
 
-import {InvalidArguments, InsufficientBalance, TotalAssetsTooLow} from "./errors/Errors.sol";
+import {InvalidArguments, TotalAssetsTooLow, MaxWithdrawZero} from "./errors/Errors.sol";
 
-/// @title DepositERC4626Action
+/// @title WithdrawERC4626Action
 /// @author Otim Labs, Inc.
-/// @notice an Action that deposits ERC20 tokens into an ERC4626 vault
+/// @notice an Action that withdraws ERC20 tokens from an ERC4626 vault
 contract WithdrawERC4626Action is IAction, IWithdrawERC4626Action, Interval, OtimFee {
     constructor(address feeTokenRegistryAddress, address treasuryAddress, uint256 gasConstant_)
         OtimFee(feeTokenRegistryAddress, treasuryAddress, gasConstant_)
@@ -36,6 +34,7 @@ contract WithdrawERC4626Action is IAction, IWithdrawERC4626Action, Interval, Oti
             abi.encode(
                 ARGUMENTS_TYPEHASH,
                 arguments.vault,
+                arguments.recipient,
                 arguments.value,
                 arguments.minTotalAssets,
                 hash(arguments.schedule),
@@ -58,7 +57,10 @@ contract WithdrawERC4626Action is IAction, IWithdrawERC4626Action, Interval, Oti
 
         // if first execution, validate the input
         if (executionState.executionCount == 0) {
-            if (arguments.vault == address(0) || arguments.value == 0 || arguments.minTotalAssets == 0) {
+            if (
+                arguments.vault == address(0) || arguments.recipient == address(0) || arguments.value == 0
+                    || arguments.minTotalAssets == 0
+            ) {
                 revert InvalidArguments();
             }
 
@@ -67,26 +69,23 @@ contract WithdrawERC4626Action is IAction, IWithdrawERC4626Action, Interval, Oti
             checkInterval(arguments.schedule, executionState.lastExecuted);
         }
 
-        // get the underlying token
-        address underlyingToken = IERC4626(arguments.vault).asset();
-
         // get the max withdraw amount
         uint256 maxWithdraw = IERC4626(arguments.vault).maxWithdraw(address(this));
+
+        // if the max withdraw amount is zero, revert
+        if (maxWithdraw == 0) {
+            revert MaxWithdrawZero();
+        }
 
         // initialize deposit amount
         uint256 withdrawAmount = arguments.value;
 
-        // if the max deposit amount is less than the deposit amount,
-        // set the deposit amount to the max deposit amount and emit an event
+        // if the withdraw amount is greater than the max withdraw amount,
+        // set the withdraw amount to the max withdraw amount and emit an event
         if (withdrawAmount > maxWithdraw) {
             withdrawAmount = maxWithdraw;
 
             emit MaxWithdrawReached(maxWithdraw);
-        }
-
-        // check if the account has enough balance to deposit
-        if (IERC20(underlyingToken).balanceOf(address(this)) < depositAmount) {
-            revert InsufficientBalance();
         }
 
         // check if vault total assets is too low
@@ -94,13 +93,9 @@ contract WithdrawERC4626Action is IAction, IWithdrawERC4626Action, Interval, Oti
             revert TotalAssetsTooLow();
         }
 
-        // approve the deposit amount to the vault
+        // withdraw the deposit amount from the vault
         // slither-disable-next-line unused-return
-        IERC20(underlyingToken).approve(arguments.vault, depositAmount);
-
-        // deposit the deposit amount into the vault
-        // slither-disable-next-line unused-return
-        IERC4626(arguments.vault).deposit(depositAmount, address(this));
+        IERC4626(arguments.vault).withdraw(withdrawAmount, arguments.recipient, address(this));
 
         // charge the fee
         chargeFee(startGas - gasleft(), arguments.fee);

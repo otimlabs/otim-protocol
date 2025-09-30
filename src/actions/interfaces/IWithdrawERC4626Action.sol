@@ -5,11 +5,11 @@ import {IInterval} from "../schedules/interfaces/IInterval.sol";
 import {IOtimFee} from "../fee-models/interfaces/IOtimFee.sol";
 
 bytes32 constant INSTRUCTION_TYPEHASH = keccak256(
-    "Instruction(uint256 salt,uint256 maxExecutions,address action,WithdrawERC4626 withdrawERC4626)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)Schedule(uint256 startAt,uint256 startBy,uint256 interval,uint256 timeout)WithdrawERC4626(address vault,uint256 value,uint256 minTotalAssets,Schedule schedule,Fee fee)"
+    "Instruction(uint256 salt,uint256 maxExecutions,address action,WithdrawERC4626 withdrawERC4626)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)Schedule(uint256 startAt,uint256 startBy,uint256 interval,uint256 timeout)WithdrawERC4626(address vault,address recipient,uint256 value,uint256 minTotalAssets,Schedule schedule,Fee fee)"
 );
 
 bytes32 constant ARGUMENTS_TYPEHASH = keccak256(
-    "WithdrawERC4626(address vault,uint256 value,uint256 minTotalAssets,Schedule schedule,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)Schedule(uint256 startAt,uint256 startBy,uint256 interval,uint256 timeout)"
+    "WithdrawERC4626(address vault,address recipient,uint256 value,uint256 minTotalAssets,Schedule schedule,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)Schedule(uint256 startAt,uint256 startBy,uint256 interval,uint256 timeout)"
 );
 
 /// @title IWithdrawERC4626Action
@@ -18,12 +18,14 @@ bytes32 constant ARGUMENTS_TYPEHASH = keccak256(
 interface IWithdrawERC4626Action is IInterval, IOtimFee {
     /// @notice arguments for the WithdrawERC4626Action contract
     /// @param vault - the address of the ERC4626 vault to withdraw from
+    /// @param recipient - the address to receive shares
     /// @param value - the amount to withdraw
     /// @param minTotalAssets - the minimum total assets of the vault before the withdraw
     /// @param schedule - the schedule parameters for the withdraw
     /// @param fee - the fee Otim will charge for the transfer
     struct WithdrawERC4626 {
         address vault;
+        address recipient;
         uint256 value;
         uint256 minTotalAssets;
         Schedule schedule;
