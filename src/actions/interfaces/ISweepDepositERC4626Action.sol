@@ -21,7 +21,7 @@ interface ISweepDepositERC4626Action is IOtimFee {
     /// @param threshold - the account's balance threshold to trigger the sweep
     /// @param endBalance - the account's balance after the sweep
     /// @param minTotalAssets - the minimum total assets of the vault before the deposit
-    /// @param fee - the fee Otim will charge for the transfer
+    /// @param fee - the fee Otim will charge for the deposit
     struct SweepDepositERC4626 {
         address vault;
         address recipient;

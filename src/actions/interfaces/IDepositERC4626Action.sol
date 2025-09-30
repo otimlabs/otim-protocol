@@ -22,7 +22,7 @@ interface IDepositERC4626Action is IInterval, IOtimFee {
     /// @param value - the amount to deposit
     /// @param minTotalAssets - the minimum total assets of the vault before the deposit
     /// @param schedule - the schedule parameters for the deposit
-    /// @param fee - the fee Otim will charge for the transfer
+    /// @param fee - the fee Otim will charge for the deposit
     struct DepositERC4626 {
         address vault;
         address recipient;
