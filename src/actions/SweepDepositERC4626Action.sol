@@ -97,7 +97,7 @@ contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimF
         if (depositAmount > maxDeposit) {
             depositAmount = maxDeposit;
 
-            emit MaxDepositReached(maxDeposit);
+            emit MaxDepositReached(maxDeposit, balance - maxDeposit);
         }
 
         // check if vault total assets is too low

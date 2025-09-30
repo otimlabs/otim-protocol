@@ -87,7 +87,9 @@ contract SweepDepositERC4626Test is InstructionForkTestContext {
         IERC20(MAINNET_USDC).transfer(address(user), USER_START_BALANCE);
         vm.stopPrank();
 
-        mockVault.setMaxDeposit(USER_START_BALANCE - DEFAULT_END_BALANCE - 1);
+        uint256 maxDeposit = USER_START_BALANCE - DEFAULT_END_BALANCE - 1;
+
+        mockVault.setMaxDeposit(maxDeposit);
         mockVault.setTotalAssets(DEFAULT_MIN_TOTAL_ASSETS + 1);
 
         DEFAULT_ACTION_ARGS.vault = address(mockVault);
@@ -95,7 +97,7 @@ contract SweepDepositERC4626Test is InstructionForkTestContext {
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
         vm.expectEmit();
-        emit ISweepDepositERC4626Action.MaxDepositReached(USER_START_BALANCE - DEFAULT_END_BALANCE - 1);
+        emit ISweepDepositERC4626Action.MaxDepositReached(maxDeposit, USER_START_BALANCE - maxDeposit);
 
         // don't check number of shares emitted
         vm.expectEmit(true, true, true, false);

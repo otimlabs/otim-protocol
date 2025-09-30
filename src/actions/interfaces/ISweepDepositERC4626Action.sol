@@ -32,7 +32,7 @@ interface ISweepDepositERC4626Action is IOtimFee {
     }
 
     /// @notice emitted when the max deposit is reached
-    event MaxDepositReached(uint256 maxDeposit);
+    event MaxDepositReached(uint256 maxDeposit, uint256 newEndBalance);
 
     /// @notice calculates the EIP-712 hash of the SweepDepositERC4626 struct
     function hash(SweepDepositERC4626 memory arguments) external pure returns (bytes32);
