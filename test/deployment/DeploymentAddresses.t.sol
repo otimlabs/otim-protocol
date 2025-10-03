@@ -24,6 +24,7 @@ import {TransferCCTPAction} from "../../src/actions/TransferCCTPAction.sol";
 import {SweepUniswapV3Action} from "../../src/actions/SweepUniswapV3Action.sol";
 import {DepositERC4626Action} from "../../src/actions/DepositERC4626Action.sol";
 import {SweepDepositERC4626Action} from "../../src/actions/SweepDepositERC4626Action.sol";
+import {WithdrawERC4626Action} from "../../src/actions/WithdrawERC4626Action.sol";
 
 contract DeploymentAddressesTest is Test {
     // expected core addresses
@@ -50,6 +51,7 @@ contract DeploymentAddressesTest is Test {
     address constant EXPECTED_SWEEP_UNISWAP_V3_ACTION_ADDRESS = 0xb163911E78663533384019C93e14f5F03ACD43E5;
     address constant EXPECTED_DEPOSIT_ERC4626_ACTION_ADDRESS = 0x43c9BDe7Ab2915fD1324af2973B9e54d8B603FC7;
     address constant EXPECTED_SWEEP_DEPOSIT_ERC4626_ACTION_ADDRESS = 0x797088376d79D7a571d49ccBAb8481A242bB5CC1;
+    address constant EXPECTED_WITHDRAW_ERC4626_ACTION_ADDRESS = 0x095Cb0A888B5F5fBb39DbAB865948A06c5236D06;
 
     ////////////////////
     // Core addresses //
@@ -167,5 +169,10 @@ contract DeploymentAddressesTest is Test {
     function test_sweepDepositERC4626Action_deployedAddress() public {
         address deployed = address(new SweepDepositERC4626Action{salt: bytes32(0)}(address(0), address(0), 0));
         assertEq(deployed, EXPECTED_SWEEP_DEPOSIT_ERC4626_ACTION_ADDRESS);
+    }
+
+    function test_withdrawERC4626Action_deployedAddress() public {
+        address deployed = address(new WithdrawERC4626Action{salt: bytes32(0)}(address(0), address(0), 0));
+        assertEq(deployed, EXPECTED_WITHDRAW_ERC4626_ACTION_ADDRESS);
     }
 }
