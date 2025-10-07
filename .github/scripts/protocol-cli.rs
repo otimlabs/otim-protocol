@@ -225,6 +225,31 @@ fn get_contract_mapping() -> HashMap<String, TierConfig> {
                     expected_addr_envvar: Some("EXPECTED_SWEEP_UNISWAP_V3_ACTION_ADDRESS".to_string()),
                     chain_config_key: Some("actions.sweepUniswapV3".to_string()),
                 }),
+                ("DepositERC4626Action".to_string(), ContractDetails {
+                    script: Some("DeployDepositERC4626Action".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_DEPOSIT_ERC4626_ACTION_ADDRESS".to_string()),
+                    chain_config_key: Some("actions.depositERC4626".to_string()),
+                }),
+                ("SweepDepositERC4626Action".to_string(), ContractDetails {
+                    script: Some("DeploySweepDepositERC4626Action".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_SWEEP_DEPOSIT_ERC4626_ACTION_ADDRESS".to_string()),
+                    chain_config_key: Some("actions.sweepDepositERC4626".to_string()),
+                }),
+                ("WithdrawERC4626Action".to_string(), ContractDetails {
+                    script: Some("DeployWithdrawERC4626Action".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_WITHDRAW_ERC4626_ACTION_ADDRESS".to_string()),
+                    chain_config_key: Some("actions.withdrawERC4626".to_string()),
+                }),
+                ("SweepWithdrawERC4626Action".to_string(), ContractDetails {
+                    script: Some("DeploySweepWithdrawERC4626Action".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_SWEEP_WITHDRAW_ERC4626_ACTION_ADDRESS".to_string()),
+                    chain_config_key: Some("actions.sweepWithdrawERC4626".to_string()),
+                }),
+                ("CallOnceAction".to_string(), ContractDetails {
+                    script: Some("DeployCallOnceAction".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_CALL_ONCE_ACTION_ADDRESS".to_string()),
+                    chain_config_key: Some("actions.callOnce".to_string()),
+                }),
             ]),
         }),
     ])

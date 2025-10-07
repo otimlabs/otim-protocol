@@ -13,6 +13,11 @@ contracts:
   - SweepCCTPAction
   - TransferCCTPAction
   - SweepUniswapV3Action
+  - DepositERC4626Action
+  - SweepDepositERC4626Action
+  - WithdrawERC4626Action
+  - SweepWithdrawERC4626Action
+  - CallOnceAction
 
 networks:
   - sepolia
