@@ -18,7 +18,7 @@ import {InvalidArguments, TotalAssetsTooLow, BalanceUnderThreshold} from "./erro
 
 /// @title SweepWithdrawERC4626Action
 /// @author Otim Labs, Inc.
-/// @notice an Action that withdraws ERC20 tokens from an ERC4626 vault
+/// @notice an Action that withdraws ERC20 tokens from an ERC4626 vault to a recipient when the maxWithdraw is greater than or equal to a threshold
 contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, OtimFee {
     constructor(address feeTokenRegistryAddress, address treasuryAddress, uint256 gasConstant_)
         OtimFee(feeTokenRegistryAddress, treasuryAddress, gasConstant_)

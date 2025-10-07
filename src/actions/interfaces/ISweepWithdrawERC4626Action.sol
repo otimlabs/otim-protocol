@@ -18,10 +18,10 @@ interface ISweepWithdrawERC4626Action is IOtimFee {
     /// @notice arguments for the SweepWithdrawERC4626Action contract
     /// @param vault - the address of the ERC4626 vault to withdraw from
     /// @param recipient - the address to receive shares
-    /// @param threshold - the account's balance threshold to trigger the sweep
-    /// @param endBalance - the account's balance after the sweep
+    /// @param threshold - the account's maxWithdraw threshold to trigger the sweep
+    /// @param endBalance - the account's maxWithdraw balance after the sweep
     /// @param minTotalAssets - the minimum total assets of the vault before the withdraw
-    /// @param fee - the fee Otim will charge for the transfer
+    /// @param fee - the fee Otim will charge for the withdraw
     struct SweepWithdrawERC4626 {
         address vault;
         address recipient;
