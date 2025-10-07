@@ -75,9 +75,6 @@ contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, Oti
             revert BalanceUnderThreshold();
         }
 
-        // initialize withdraw amount
-        uint256 withdrawAmount = maxWithdraw - arguments.endBalance;
-
         // check if vault total assets is too low
         if (IERC4626(arguments.vault).totalAssets() < arguments.minTotalAssets) {
             revert TotalAssetsTooLow();
@@ -85,7 +82,7 @@ contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, Oti
 
         // withdraw from the vault
         // slither-disable-next-line unused-return
-        IERC4626(arguments.vault).withdraw(withdrawAmount, arguments.recipient, address(this));
+        IERC4626(arguments.vault).withdraw(maxWithdraw - arguments.endBalance, arguments.recipient, address(this));
 
         // charge the fee
         chargeFee(startGas - gasleft(), arguments.fee);
