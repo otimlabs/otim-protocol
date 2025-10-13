@@ -21,7 +21,7 @@ contract DeploySweepWithdrawERC4626Action is Script {
     ///     - **** dependency versions can change the creation code ****
     ///     - **** the forge version can change the creation code ****
     ///     - **** compiler flags (--via-ir, --overwrite, etc) can change the creation code ****
-    /// - the address of the deployer (this won't change because we are using the cannoical Create2 factory 0x4e59b44847b379578588920ca78fbf26c0b4956c, but good to know)
+    /// - the address of the deployer (this won't change because we are using the canonical Create2 factory 0x4e59b44847b379578588920ca78fbf26c0b4956c, but good to know)
     ///
     ///
     /// if any of these values change, the addresses will change, so we must be careful to keep these values constant.
@@ -55,7 +55,7 @@ contract DeploySweepWithdrawERC4626Action is Script {
 
         vm.startBroadcast();
 
-        // deterministically deploy WithdrawERC4626Action via canonical Create2 deployer
+        // deterministically deploy SweepWithdrawERC4626Action via canonical Create2 deployer
         SweepWithdrawERC4626Action sweepWithdrawERC4626Action =
             new SweepWithdrawERC4626Action{salt: salt}(feeTokenRegistryAddress, treasuryAddress, gasConstant);
 
