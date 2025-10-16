@@ -11,7 +11,6 @@ import {FeeTokenRegistry} from "../../../src/infrastructure/FeeTokenRegistry.sol
 contract RemoveFeeToken is Script {
     /// @dev make sure to run `cp .env_example .env` and fill in each variable
     /// then run `source .env` in your terminal before copying and pasting one of the commands below
-
     // commands to remove a fee token from FeeTokenRegistry (enter parameters interactively):
     //
     // - with private key (on Anvil): forge script RemoveFeeToken --broadcast --fork-url http://localhost:8545 --private-key $ANVIL_OWNER_PK

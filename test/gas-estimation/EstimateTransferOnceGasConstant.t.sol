@@ -49,9 +49,7 @@ contract EstimateTransferOnceGasConstant is InstructionForkTestContext {
     }
 
     // check that the TRANSFER_ONCE_GAS_CONSTANT doesn't result in an underpayment of the fee
-    function testFuzz_transferOnce_gasConstant(uint256 salt, ITransferOnceAction.TransferOnce memory arguments)
-        public
-    {
+    function testFuzz_transferOnce_gasConstant(uint256 salt, ITransferOnceAction.TransferOnce memory arguments) public {
         // disregard fuzz generated target
         arguments.target = payable(target.addr);
         // fuzz test must pass argument validation

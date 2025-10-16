@@ -41,10 +41,7 @@ contract TransferOnceTest is InstructionTestContext {
         actionManager.addAction(address(transfer));
 
         DEFAULT_ACTION_ARGS = ITransferOnceAction.TransferOnce({
-            target: DEFAULT_TARGET,
-            value: DEFAULT_VALUE,
-            gasLimit: DEFAULT_GAS_LIMIT,
-            fee: DEFAULT_FEE
+            target: DEFAULT_TARGET, value: DEFAULT_VALUE, gasLimit: DEFAULT_GAS_LIMIT, fee: DEFAULT_FEE
         });
 
         /// @notice Instruction defaults

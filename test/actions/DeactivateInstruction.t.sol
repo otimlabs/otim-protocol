@@ -49,16 +49,11 @@ contract DeactivateInstruction is InstructionTestContext {
         DEFAULT_SCHEDULE = IInterval.Schedule({startAt: 0, startBy: 0, interval: 1, timeout: 0});
 
         DEFAULT_TRANSFER_ARGS = ITransferAction.Transfer({
-            target: payable(target.addr),
-            value: 100,
-            gasLimit: 0,
-            schedule: DEFAULT_SCHEDULE,
-            fee: DEFAULT_FEE
+            target: payable(target.addr), value: 100, gasLimit: 0, schedule: DEFAULT_SCHEDULE, fee: DEFAULT_FEE
         });
 
         DEFAULT_ACTION_ARGS = IDeactivateInstructionAction.DeactivateInstruction({
-            instructionId: DEFAULT_INSTRUCTION_ID,
-            fee: DEFAULT_FEE
+            instructionId: DEFAULT_INSTRUCTION_ID, fee: DEFAULT_FEE
         });
 
         /// @notice Instruction defaults

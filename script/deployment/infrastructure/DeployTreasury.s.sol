@@ -9,7 +9,6 @@ import {Treasury} from "../../../src/infrastructure/Treasury.sol";
 contract DeployTreasury is Script {
     /// @dev make sure to run `cp .env_example .env` and fill in each variable
     /// then run `source .env` in your terminal before copying and pasting one of the commands below
-
     /// @dev this script will deploy to the same address on every chain.
     /// this deterministic address depends on a few things:
     /// - the owner address
@@ -27,7 +26,6 @@ contract DeployTreasury is Script {
     /// if any of these values change, the address will change, so we must be careful to keep these values constant.
     /// in order to help with this, a check is added here to ensure that the calculated address matches the expected address
     /// before deploying. if the addresses do not match, the script will revert.
-
     // command to generate the expected deployment address (without actually deploying):
     //
     // forge script DeployTreasury

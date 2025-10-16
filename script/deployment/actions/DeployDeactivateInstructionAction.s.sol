@@ -9,7 +9,6 @@ import {DeactivateInstructionAction} from "../../../src/actions/DeactivateInstru
 contract DeployDeactivateInstructionAction is Script {
     /// @dev make sure to run `cp .env_example .env` and fill in each variable
     /// then run `source .env` in your terminal before copying and pasting one of the commands below
-
     /// @dev this script will deploy to the same address on every chain.
     /// this deterministic address depend on a few things:
     /// - the owner address
@@ -27,7 +26,6 @@ contract DeployDeactivateInstructionAction is Script {
     /// if any of these values change, the addresses will change, so we must be careful to keep these values constant.
     /// in order to help with this, a check is added here to ensure that the calculated address matches the expected address
     /// before deploying. if the addresses do not match, the script will revert.
-
     // command to generate the expected deployment address (without actually deploying):
     //
     // forge script DeployDeactivateInstructionAction
@@ -57,9 +55,9 @@ contract DeployDeactivateInstructionAction is Script {
         vm.startBroadcast();
 
         // deterministically deploy DeactivateInstructionAction contract via canonical Create2 deployer
-        DeactivateInstructionAction deactivateAction = new DeactivateInstructionAction{salt: salt}(
-            instructionStorageAddress, feeTokenRegistryAddress, treasuryAddress, gasConstant
-        );
+        DeactivateInstructionAction deactivateAction = new DeactivateInstructionAction{
+            salt: salt
+        }(instructionStorageAddress, feeTokenRegistryAddress, treasuryAddress, gasConstant);
 
         vm.stopBroadcast();
 

@@ -25,9 +25,10 @@ contract HelloWorldAction is IAction {
     }
 
     function hash(HelloWorld memory arguments) public pure returns (bytes32) {
-        return keccak256(
-            abi.encode(ARGUMENTS_TYPEHASH, keccak256(abi.encode(arguments.message)), arguments.favoriteNumber)
-        );
+        return
+            keccak256(
+                abi.encode(ARGUMENTS_TYPEHASH, keccak256(abi.encode(arguments.message)), arguments.favoriteNumber)
+            );
     }
 
     function execute(

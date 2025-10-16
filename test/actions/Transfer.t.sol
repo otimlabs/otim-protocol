@@ -53,10 +53,7 @@ contract TransferTest is InstructionTestContext {
         DEFAULT_INTERVAL = 36000;
         DEFAULT_TIMEOUT = 36000;
         DEFAULT_SCHEDULE = IInterval.Schedule({
-            startAt: DEFAULT_START_AT,
-            startBy: DEFAULT_START_BY,
-            interval: DEFAULT_INTERVAL,
-            timeout: DEFAULT_TIMEOUT
+            startAt: DEFAULT_START_AT, startBy: DEFAULT_START_BY, interval: DEFAULT_INTERVAL, timeout: DEFAULT_TIMEOUT
         });
 
         DEFAULT_ACTION_ARGS = ITransferAction.Transfer({
