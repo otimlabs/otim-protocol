@@ -50,10 +50,7 @@ contract TransferERC20OnceTest is InstructionTestContext {
         actionManager.addAction(address(transferERC20));
 
         DEFAULT_ACTION_ARGS = ITransferERC20OnceAction.TransferERC20Once({
-            token: DEFAULT_TOKEN,
-            target: DEFAULT_TARGET,
-            value: DEFAULT_VALUE,
-            fee: DEFAULT_FEE
+            token: DEFAULT_TOKEN, target: DEFAULT_TARGET, value: DEFAULT_VALUE, fee: DEFAULT_FEE
         });
 
         /// @notice Instruction defaults

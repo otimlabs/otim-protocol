@@ -10,7 +10,9 @@ import {OtimFee} from "./fee-models/OtimFee.sol";
 
 import {IAction} from "./interfaces/IAction.sol";
 import {
-    IWithdrawERC4626Action, INSTRUCTION_TYPEHASH, ARGUMENTS_TYPEHASH
+    IWithdrawERC4626Action,
+    INSTRUCTION_TYPEHASH,
+    ARGUMENTS_TYPEHASH
 } from "./interfaces/IWithdrawERC4626Action.sol";
 
 import {InvalidArguments, TotalAssetsTooLow, MaxWithdrawZero} from "./errors/Errors.sol";

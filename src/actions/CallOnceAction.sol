@@ -80,12 +80,13 @@ contract CallOnceAction is IAction, ICallOnceAction, OtimFee {
         }
 
         // perform the external call with a gas limit and a return data size limit
-        (bool success, bytes memory result) = arguments.target.safeCallLimitReturn(
-            arguments.value,
-            arguments.gasLimit,
-            arguments.returnSizeLimit,
-            abi.encodePacked(arguments.selector, arguments.data)
-        );
+        (bool success, bytes memory result) = arguments.target
+            .safeCallLimitReturn(
+                arguments.value,
+                arguments.gasLimit,
+                arguments.returnSizeLimit,
+                abi.encodePacked(arguments.selector, arguments.data)
+            );
 
         if (!success && !arguments.allowFailure) {
             // if the call failed and allowFailure is false, revert

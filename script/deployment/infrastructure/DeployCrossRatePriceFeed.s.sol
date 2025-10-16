@@ -9,7 +9,6 @@ import {CrossRatePriceFeed} from "../../../src/infrastructure/CrossRatePriceFeed
 contract DeployCrossRatePriceFeed is Script {
     /// @dev make sure to run `cp .env_example .env` and fill in each variable
     /// then run `source .env` in your terminal before copying and pasting one of the commands below
-
     // command to run the script without actually deploying:
     //
     // forge script DeployCrossRatePriceFeed

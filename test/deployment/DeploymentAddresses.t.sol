@@ -105,9 +105,9 @@ contract DeploymentAddressesTest is Test {
 
     function test_uniswapV3ExactInputAction_deployedAddress() public {
         address deployed = address(
-            new UniswapV3ExactInputAction{salt: bytes32(0)}(
-                address(0), address(0), address(0), address(0), address(0), 0
-            )
+            new UniswapV3ExactInputAction{
+                salt: bytes32(0)
+            }(address(0), address(0), address(0), address(0), address(0), 0)
         );
 
         assertEq(deployed, EXPECTED_UNISWAP_V3_EXACT_INPUT_ACTION_ADDRESS);

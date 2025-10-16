@@ -122,9 +122,8 @@ contract OtimDelegate is IOtimDelegate, Receiver, ReentrancyGuardTransient {
         // execute the Action contract
         // slither-disable-start controlled-delegatecall
         // slither-disable-next-line reentrancy-events
-        (bool success, bytes memory executionResult) = instruction.action.delegatecall(
-            abi.encodeWithSelector(IAction.execute.selector, instruction, signature, executionState)
-        );
+        (bool success, bytes memory executionResult) = instruction.action
+            .delegatecall(abi.encodeWithSelector(IAction.execute.selector, instruction, signature, executionState));
         // slither-disable-end controlled-delegatecall
 
         // revert if the Action contract execution reverted

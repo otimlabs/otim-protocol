@@ -11,7 +11,6 @@ import {ActionManager} from "../../../src/core/ActionManager.sol";
 contract RemoveAction is Script {
     /// @dev make sure to run `cp .env_example .env` and fill in each variable
     /// then run `source .env` in your terminal before copying and pasting one of the commands below
-
     // commands to remove an Action from ActionManager (enter Action address interactively):
     //
     // - with private key (on Anvil): forge script RemoveAction --broadcast --fork-url http://localhost:8545 --private-key $ANVIL_OWNER_PK

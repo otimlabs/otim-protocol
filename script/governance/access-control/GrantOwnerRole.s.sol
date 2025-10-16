@@ -11,7 +11,6 @@ import {IAccessControl} from "@openzeppelin-contracts/access/IAccessControl.sol"
 contract GrantOwnerRole is Script {
     /// @dev make sure to run `cp .env_example .env` and fill in each variable
     /// then run `source .env` in your terminal before copying and pasting one of the commands below
-
     // commands to grant the owner role to a new address on ActionManager (enter new owner address interactively):
     //
     // - with private key (on Anvil): forge script GrantOwnerRole --broadcast --fork-url http://localhost:8545 --private-key $ANVIL_OWNER_PK

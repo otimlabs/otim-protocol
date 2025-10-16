@@ -42,8 +42,9 @@ contract OtimDelegateTest is InstructionTestContext {
         delegate = new OtimDelegate(address(this));
         vm.pauseGasMetering();
 
-        bytes32 EIP712_DOMAIN_TYPEHASH =
-            keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)");
+        bytes32 EIP712_DOMAIN_TYPEHASH = keccak256(
+            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)"
+        );
 
         bytes32 domainSeparator = keccak256(
             abi.encode(

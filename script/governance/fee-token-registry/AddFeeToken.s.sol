@@ -11,7 +11,6 @@ import {FeeTokenRegistry} from "../../../src/infrastructure/FeeTokenRegistry.sol
 contract AddFeeToken is Script {
     /// @dev make sure to run `cp .env_example .env` and fill in each variable
     /// then run `source .env` in your terminal before copying and pasting one of the commands below
-
     // commands to add a fee token to FeeTokenRegistry (enter parameters interactively):
     //
     // - with private key (on Anvil): forge script AddFeeToken --broadcast --fork-url http://localhost:8545 --private-key $ANVIL_OWNER_PK
