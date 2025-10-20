@@ -22,8 +22,8 @@ remappings = [
 ]
 
 [rpc_endpoints]
-mainnet = "https://cloudflare-eth.com/v1/mainnet"
-sepolia = "https://rpc.sepolia.org"
+mainnet = "https://eth.drpc.org"
+sepolia = "https://sepolia.drpc.org"
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
