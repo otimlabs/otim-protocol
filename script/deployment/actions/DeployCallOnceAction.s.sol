@@ -55,9 +55,9 @@ contract DeployCallOnceAction is Script {
         vm.startBroadcast();
 
         // deterministically deploy CallOnceAction contract via canonical Create2 deployer
-        CallOnceAction callOnceAction = new CallOnceAction{
-            salt: salt
-        }(instructionStorageAddress, feeTokenRegistryAddress, treasuryAddress, gasConstant);
+        CallOnceAction callOnceAction = new CallOnceAction{salt: salt}(
+            instructionStorageAddress, feeTokenRegistryAddress, treasuryAddress, gasConstant
+        );
 
         vm.stopBroadcast();
 
