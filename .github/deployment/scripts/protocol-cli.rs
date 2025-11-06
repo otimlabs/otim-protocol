@@ -110,6 +110,25 @@ enum Commands {
         #[arg(long)]
         show_diff: bool,
     },
+
+    /// Verify deployed contracts on block explorers
+    VerifyContracts {
+        /// Configuration file containing deployment details
+        #[arg(short, long, default_value = ".github/scripts/deployment-config.yaml")]
+        config_file: String,
+        /// Networks directory containing common and chain-specific environment configuration
+        #[arg(short, long, default_value = ".github/networks/")]
+        env_dir: String,
+        /// Protocol repository root path
+        #[arg(short, long, default_value = ".")]
+        protocol_root: String,
+        /// Etherscan API key for contract verification
+        #[arg(short = 'k', long)]
+        etherscan_api_key: Option<String>,
+        /// Verifier service to use (etherscan, sourcify)
+        #[arg(short, long, default_value = "etherscan", value_parser = ["etherscan", "sourcify"])]
+        verifier: String,
+    },
 }
 
 #[derive(Debug, serde::Deserialize)]
@@ -125,10 +144,21 @@ struct ChainInfo {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
+enum ConstructorType {
+    None,       // No constructor args
+    Owner,      // Single owner address
+    Action,     // (feeTokenRegistry, treasury, gasConstant)
+    Core,       // Deployed by OtimDelegate, not directly verifiable
+}
+
+#[derive(Debug, Clone)]
 struct ContractDetails {
     script: Option<String>,
-    expected_addr_envvar: Option<String>,
+    expected_addr_envvar: Option<&'static str>,
     chain_config_key: Option<String>,
+    source_path: &'static str,
+    constructor_type: ConstructorType,
 }
 
 #[derive(Debug, Clone)]
@@ -163,24 +193,32 @@ fn get_contract_mapping() -> HashMap<String, TierConfig> {
             script: Some("DeployCore".to_string()),
             contracts: HashMap::from([
                 ("OtimDelegate".to_string(), ContractDetails {
-                    script: None, // Not used - tier script handles deployment
-                    expected_addr_envvar: Some("EXPECTED_OTIM_DELEGATE_ADDRESS".to_string()),
+                    script: None,
+                    expected_addr_envvar: Some("EXPECTED_OTIM_DELEGATE_ADDRESS"),
                     chain_config_key: Some("otim_delegate_addr".to_string()),
+                    source_path: "src/OtimDelegate.sol:OtimDelegate",
+                    constructor_type: ConstructorType::Owner,
                 }),
                 ("Gateway".to_string(), ContractDetails {
-                    script: None, // Not used - tier script handles deployment
-                    expected_addr_envvar: Some("EXPECTED_GATEWAY_ADDRESS".to_string()),
+                    script: None,
+                    expected_addr_envvar: Some("EXPECTED_GATEWAY_ADDRESS"),
                     chain_config_key: Some("gateway_addr".to_string()),
+                    source_path: "src/core/Gateway.sol:Gateway",
+                    constructor_type: ConstructorType::Core,
                 }),
                 ("InstructionStorage".to_string(), ContractDetails {
-                    script: None, // Not used - tier script handles deployment
-                    expected_addr_envvar: Some("EXPECTED_INSTRUCTION_STORAGE_ADDRESS".to_string()),
+                    script: None,
+                    expected_addr_envvar: Some("EXPECTED_INSTRUCTION_STORAGE_ADDRESS"),
                     chain_config_key: Some("instruction_storage_addr".to_string()),
+                    source_path: "src/core/InstructionStorage.sol:InstructionStorage",
+                    constructor_type: ConstructorType::Core,
                 }),
                 ("ActionManager".to_string(), ContractDetails {
-                    script: None, // Not used - tier script handles deployment
-                    expected_addr_envvar: Some("ACTION_MANAGER_ADDRESS".to_string()),
+                    script: None,
+                    expected_addr_envvar: Some("ACTION_MANAGER_ADDRESS"),
                     chain_config_key: Some("action_manager_addr".to_string()),
+                    source_path: "src/core/ActionManager.sol:ActionManager",
+                    constructor_type: ConstructorType::Core,
                 }),
             ]),
         }),
@@ -190,13 +228,17 @@ fn get_contract_mapping() -> HashMap<String, TierConfig> {
             contracts: HashMap::from([
                 ("FeeTokenRegistry".to_string(), ContractDetails {
                     script: Some("DeployFeeTokenRegistry".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS"),
                     chain_config_key: Some("fee_token_registry_addr".to_string()),
+                    source_path: "src/infrastructure/FeeTokenRegistry.sol:FeeTokenRegistry",
+                    constructor_type: ConstructorType::Owner,
                 }),
                 ("Treasury".to_string(), ContractDetails {
                     script: Some("DeployTreasury".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_TREASURY_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_TREASURY_ADDRESS"),
                     chain_config_key: Some("treasury_addr".to_string()),
+                    source_path: "src/infrastructure/Treasury.sol:Treasury",
+                    constructor_type: ConstructorType::Owner,
                 }),
             ]),
         }),
@@ -206,83 +248,115 @@ fn get_contract_mapping() -> HashMap<String, TierConfig> {
             contracts: HashMap::from([
                 ("TransferAction".to_string(), ContractDetails {
                     script: Some("DeployTransferAction".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_TRANSFER_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_TRANSFER_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.transfer".to_string()),
+                    source_path: "src/actions/TransferAction.sol:TransferAction",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("TransferERC20Action".to_string(), ContractDetails {
                     script: Some("DeployTransferERC20Action".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_TRANSFER_ERC20_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_TRANSFER_ERC20_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.transferERC20".to_string()),
+                    source_path: "src/actions/TransferERC20Action.sol:TransferERC20Action",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("RefuelAction".to_string(), ContractDetails {
                     script: Some("DeployRefuelAction".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_REFUEL_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_REFUEL_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.refuel".to_string()),
+                    source_path: "src/actions/RefuelAction.sol:RefuelAction",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("RefuelERC20Action".to_string(), ContractDetails {
                     script: Some("DeployRefuelERC20Action".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_REFUEL_ERC20_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_REFUEL_ERC20_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.refuelERC20".to_string()),
+                    source_path: "src/actions/RefuelERC20Action.sol:RefuelERC20Action",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("UniswapV3ExactInputAction".to_string(), ContractDetails {
                     script: Some("DeployUniswapV3ExactInputAction".to_string()),
-                    expected_addr_envvar: Some("UNISWAP_V3_EXACT_INPUT_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("UNISWAP_V3_EXACT_INPUT_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.uniswapV3ExactInput".to_string()),
+                    source_path: "src/actions/UniswapV3ExactInputAction.sol:UniswapV3ExactInputAction",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("DeactivateInstructionAction".to_string(), ContractDetails {
                     script: Some("DeployDeactivateInstructionAction".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_DEACTIVATE_INSTRUCTION_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_DEACTIVATE_INSTRUCTION_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.deactivateInstruction".to_string()),
+                    source_path: "src/actions/DeactivateInstructionAction.sol:DeactivateInstructionAction",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("SweepAction".to_string(), ContractDetails {
                     script: Some("DeploySweepAction".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_SWEEP_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_SWEEP_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.sweep".to_string()),
+                    source_path: "src/actions/SweepAction.sol:SweepAction",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("SweepERC20Action".to_string(), ContractDetails {
                     script: Some("DeploySweepERC20Action".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_SWEEP_ERC20_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_SWEEP_ERC20_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.sweepERC20".to_string()),
+                    source_path: "src/actions/SweepERC20Action.sol:SweepERC20Action",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("SweepCCTPAction".to_string(), ContractDetails {
                     script: Some("DeploySweepCCTPAction".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_SWEEP_CCTP_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_SWEEP_CCTP_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.sweepCCTP".to_string()),
+                    source_path: "src/actions/SweepCCTPAction.sol:SweepCCTPAction",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("TransferCCTPAction".to_string(), ContractDetails {
                     script: Some("DeployTransferCCTPAction".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_TRANSFER_CCTP_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_TRANSFER_CCTP_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.transferCCTP".to_string()),
+                    source_path: "src/actions/TransferCCTPAction.sol:TransferCCTPAction",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("SweepUniswapV3Action".to_string(), ContractDetails {
                     script: Some("DeploySweepUniswapV3Action".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_SWEEP_UNISWAP_V3_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_SWEEP_UNISWAP_V3_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.sweepUniswapV3".to_string()),
+                    source_path: "src/actions/SweepUniswapV3Action.sol:SweepUniswapV3Action",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("DepositERC4626Action".to_string(), ContractDetails {
                     script: Some("DeployDepositERC4626Action".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_DEPOSIT_ERC4626_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_DEPOSIT_ERC4626_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.depositERC4626".to_string()),
+                    source_path: "src/actions/DepositERC4626Action.sol:DepositERC4626Action",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("SweepDepositERC4626Action".to_string(), ContractDetails {
                     script: Some("DeploySweepDepositERC4626Action".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_SWEEP_DEPOSIT_ERC4626_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_SWEEP_DEPOSIT_ERC4626_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.sweepDepositERC4626".to_string()),
+                    source_path: "src/actions/SweepDepositERC4626Action.sol:SweepDepositERC4626Action",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("WithdrawERC4626Action".to_string(), ContractDetails {
                     script: Some("DeployWithdrawERC4626Action".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_WITHDRAW_ERC4626_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_WITHDRAW_ERC4626_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.withdrawERC4626".to_string()),
+                    source_path: "src/actions/WithdrawERC4626Action.sol:WithdrawERC4626Action",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("SweepWithdrawERC4626Action".to_string(), ContractDetails {
                     script: Some("DeploySweepWithdrawERC4626Action".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_SWEEP_WITHDRAW_ERC4626_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_SWEEP_WITHDRAW_ERC4626_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.sweepWithdrawERC4626".to_string()),
+                    source_path: "src/actions/SweepWithdrawERC4626Action.sol:SweepWithdrawERC4626Action",
+                    constructor_type: ConstructorType::Action,
                 }),
                 ("CallOnceAction".to_string(), ContractDetails {
                     script: Some("DeployCallOnceAction".to_string()),
-                    expected_addr_envvar: Some("EXPECTED_CALL_ONCE_ACTION_ADDRESS".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_CALL_ONCE_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.callOnce".to_string()),
+                    source_path: "src/actions/CallOnceAction.sol:CallOnceAction",
+                    constructor_type: ConstructorType::Action,
                 }),
             ]),
         }),
@@ -300,6 +374,21 @@ fn info(msg: &str) {
 
 fn warn(msg: &str) {
     println!("{} {}", "[WARN]".yellow().bold(), msg);
+}
+
+/// Converts camelCase to SNAKE_CASE
+fn to_snake_case(s: &str) -> String {
+    s.chars()
+        .enumerate()
+        .flat_map(|(i, c)| {
+            if i > 0 && c.is_uppercase() && !s.chars().nth(i - 1).unwrap().is_uppercase() {
+                vec!['_', c]
+            } else {
+                vec![c]
+            }
+        })
+        .collect::<String>()
+        .to_uppercase()
 }
 
 /// Loads and parses the deployment configuration from YAML file
@@ -586,10 +675,10 @@ async fn validate_addresses(config: &DeploymentConfig, env_file: &str, update: b
     for (contract, calculated_address) in &calculated_addresses {
         if let Some(details) = find_contract_details(contract) {
             if let Some(env_var) = &details.expected_addr_envvar {
-                let current_address = original_env.get(env_var).map(String::as_str).unwrap_or("NOT_SET");
+                let current_address = original_env.get(*env_var).map(|s| s.as_str()).unwrap_or("NOT_SET");
                 if current_address != calculated_address {
                     warn(&format!("{}: {} → {}", contract, current_address, calculated_address));
-                    updates.insert(env_var.clone(), calculated_address.clone());
+                    updates.insert(env_var.to_string(), calculated_address.clone());
                 } else {
                     info(&format!("{}: {} ✓", contract, calculated_address));
                 }
@@ -928,6 +1017,166 @@ async fn update_chain_config(config: &DeploymentConfig, addresses_file: &str, ch
 }
 
 // =============================================================================
+// VERIFY CONTRACTS
+// =============================================================================
+
+struct NetworkInfo {
+    chain_id: u64,
+    network: &'static str,
+}
+
+/// Gets network information including chain ID and environment (testnet/mainnet)
+fn get_network_info(network: &str) -> Option<NetworkInfo> {
+    Some(match network {
+        "base-sepolia" => NetworkInfo { chain_id: 84532, network: "testnet" },
+        "base" => NetworkInfo { chain_id: 8453, network: "mainnet" },
+        "optimism-sepolia" => NetworkInfo { chain_id: 11155420, network: "testnet" },
+        "optimism" => NetworkInfo { chain_id: 10, network: "mainnet" },
+        "arbitrum-sepolia" => NetworkInfo { chain_id: 421614, network: "testnet" },
+        "arbitrum" => NetworkInfo { chain_id: 42161, network: "mainnet" },
+        "ethereum-sepolia" => NetworkInfo { chain_id: 11155111, network: "testnet" },
+        "ethereum-mainnet" => NetworkInfo { chain_id: 1, network: "mainnet" },
+        "pecorino-signet" => NetworkInfo { chain_id: 14174, network: "testnet" },
+        "pecorino-host" => NetworkInfo { chain_id: 3151908, network: "testnet" },
+        _ => return None,
+    })
+}
+
+/// Encodes constructor arguments based on contract type
+fn encode_constructor_args(
+    constructor_type: &ConstructorType,
+    contract_name: &str,
+    env_vars: &HashMap<String, String>,
+) -> Result<String> {
+    match constructor_type {
+        ConstructorType::None | ConstructorType::Core => Ok(String::new()),
+        ConstructorType::Owner => {
+            let owner = env_vars.get("OWNER_ADDRESS")
+                .ok_or_else(|| anyhow!("OWNER_ADDRESS not found in environment"))?;
+            Ok(format!("000000000000000000000000{}", owner.trim_start_matches("0x")))
+        }
+        ConstructorType::Action => {
+            let fee_token_registry = env_vars.get("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS")
+                .ok_or_else(|| anyhow!("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS not found"))?;
+            let treasury = env_vars.get("EXPECTED_TREASURY_ADDRESS")
+                .ok_or_else(|| anyhow!("EXPECTED_TREASURY_ADDRESS not found"))?;
+            let gas_constant_var = format!("{}_GAS_CONSTANT", to_snake_case(contract_name));
+            let gas_constant = env_vars.get(&gas_constant_var)
+                .ok_or_else(|| anyhow!("Gas constant {} not found for {}", gas_constant_var, contract_name))?;
+
+            Ok(format!(
+                "000000000000000000000000{}000000000000000000000000{}{:0>64}",
+                fee_token_registry.trim_start_matches("0x"),
+                treasury.trim_start_matches("0x"),
+                format!("{:x}", gas_constant.parse::<u64>()?)
+            ))
+        }
+    }
+}
+
+/// Verifies contracts for networks based on a deployment config
+async fn verify_contracts(
+    config_file: &str,
+    env_dir: &str,
+    protocol_root: &str,
+    etherscan_api_key: Option<&str>,
+    verifier: &str,
+) -> Result<()> {
+    let config = load_deploy_config(config_file)?;
+    let chains = config.chains.as_ref().filter(|c| !c.is_empty()).ok_or_else(|| anyhow!("No chains in config"))?;
+
+    for chain in chains {
+        info(&format!("Verifying contracts for network: {}", chain));
+        let network_info = get_network_info(chain)
+            .ok_or_else(|| anyhow!("Unknown network: {}", chain))?;
+        let env_vars = load_chain_env_files(env_dir, chain, network_info.network)?;
+
+        for (key, value) in &env_vars {
+            env::set_var(key, value);
+        }
+
+        for contract_name in &config.contracts {
+            if contract_name == "Core" {
+                let mapping = get_contract_mapping();
+                for (name, details) in &mapping.get("core").unwrap().contracts {
+                    verify_contract(protocol_root, name, details, network_info.chain_id, &env_vars, etherscan_api_key, verifier).await?;
+                }
+            } else if let Some(details) = find_contract_details(contract_name) {
+                verify_contract(protocol_root, contract_name, &details, network_info.chain_id, &env_vars, etherscan_api_key, verifier).await?;
+            } else {
+                warn(&format!("Contract {} not found in mapping, skipping", contract_name));
+            }
+        }
+
+        info(&format!("✓ Completed verification for {}", chain));
+    }
+
+    info("All contract verifications completed!");
+    Ok(())
+}
+
+/// Verifies a single contract
+async fn verify_contract(
+    protocol_root: &str,
+    contract_name: &str,
+    details: &ContractDetails,
+    chain_id: u64,
+    env_vars: &HashMap<String, String>,
+    etherscan_api_key: Option<&str>,
+    verifier: &str,
+) -> Result<()> {
+    if matches!(details.constructor_type, ConstructorType::Core) {
+        info(&format!("Skipping {} (deployed by OtimDelegate)", contract_name));
+        return Ok(());
+    }
+
+    let address_var = details.expected_addr_envvar
+        .ok_or_else(|| anyhow!("No address env var for {}", contract_name))?;
+    let address = env_vars.get(address_var)
+        .ok_or_else(|| anyhow!("{} not found in environment", address_var))?;
+
+    info(&format!("Verifying {} at {}", contract_name, address));
+
+    let constructor_args = encode_constructor_args(&details.constructor_type, contract_name, env_vars)?;
+    let chain_id_string = chain_id.to_string();
+
+    let mut args = vec![
+        "verify-contract", address, &details.source_path,
+        "--chain-id", &chain_id_string,
+        "--verifier", verifier,
+        "--watch",
+    ];
+
+    if !constructor_args.is_empty() {
+        args.extend(["--constructor-args", &constructor_args]);
+    }
+
+    let api_key_string;
+    if let Some(key) = etherscan_api_key {
+        if verifier == "etherscan" {
+            api_key_string = key.to_string();
+            args.extend(["--etherscan-api-key", &api_key_string]);
+        }
+    }
+
+    let status = tokio::process::Command::new("forge")
+        .args(&args)
+        .current_dir(protocol_root)
+        .env_clear()
+        .envs(env::vars())
+        .status()
+        .await?;
+
+    if status.success() {
+        info(&format!("✓ {} verified successfully", contract_name));
+    } else {
+        warn(&format!("Failed to verify {}", contract_name));
+    }
+
+    Ok(())
+}
+
+// =============================================================================
 // COMPARE DIRECTORIES
 // =============================================================================
 
@@ -1072,6 +1321,10 @@ async fn main() -> Result<()> {
         Commands::UpdateChainConfig { config_file, addresses_file, chain_config_file } => {
             let config = load_deploy_config(&config_file)?;
             update_chain_config(&config, &addresses_file, &chain_config_file).await
+        }
+
+        Commands::VerifyContracts { config_file, env_dir, protocol_root, etherscan_api_key, verifier } => {
+            verify_contracts(&config_file, &env_dir, &protocol_root, etherscan_api_key.as_deref(), &verifier).await
         }
 
         Commands::CompareDirectories { dir1, dir2, ignore, show_diff } => {
