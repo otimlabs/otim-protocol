@@ -4,7 +4,9 @@ WORKDIR /app
 USER root
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y curl jq build-essential && \
+RUN apt-get update && apt-get install -y software-properties-common && \
+    add-apt-repository ppa:rmescandon/yq -y && \
+    apt-get update && apt-get install -y curl jq build-essential yq && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Rust and set up toolchain

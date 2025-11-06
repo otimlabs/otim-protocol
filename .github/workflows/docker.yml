@@ -78,10 +78,3 @@ jobs:
           platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          labels: ${{ steps.meta.outputs.labels }}
-
-  deploy:
-    needs: [check-artifacts, build-and-publish]
-    if: needs.check-artifacts.outputs.artifacts_match == 'true'
-    uses: ./.github/workflows/deploy-contracts.yml
-    secrets: inherit
