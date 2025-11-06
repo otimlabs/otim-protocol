@@ -428,6 +428,7 @@ async fn run_command(command: &str, args: &[&str], max_retries: u32, retry_error
             .output()
             .await?;
 
+<<<<<<< HEAD
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
             let error = anyhow!("Command failed: {} {}\nError: {}", command, args.join(" "), stderr);
@@ -451,6 +452,40 @@ async fn run_command(command: &str, args: &[&str], max_retries: u32, retry_error
     }
     
     Err(last_error.unwrap_or_else(|| anyhow!("Max retries exceeded")))
+=======
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        bail!("Command failed: {} {}\nError: {}", command, args.join(" "), stderr);
+    }
+
+    Ok(String::from_utf8_lossy(&output.stdout).to_string())
+}
+
+/// Executes a forge dry-run command to calculate contract addresses without deployment
+async fn run_forge_dry_run(script: &str) -> Result<String> {
+    let args = vec!["script", script, "--json"];
+    run_command("forge", &args).await
+}
+
+/// Executes a forge deployment command with private key or AWS KMS signing
+async fn run_forge_deploy(script: &str, private_key: Option<&str>) -> Result<String> {
+    let rpc_url = env::var("RPC_URL").context("RPC_URL not found")?;
+
+    let mut args = vec![
+        "script", script,
+        "--broadcast",
+        "--rpc-url", &rpc_url,
+    ];
+
+    if let Some(pk) = private_key {
+        args.extend_from_slice(&["--private-key", pk]);
+    } else {
+        args.push("--aws");
+    }
+
+    args.push("--json");
+    run_command("forge", &args).await
+>>>>>>> 5650bba (refactor contract deployment setup)
 }
 
 
@@ -469,7 +504,7 @@ fn extract_address(output: &str, contract: &str) -> Result<String> {
 // VALIDATE CONTRACTS
 // =============================================================================
 
-/// Calculates expected contract addresses for a specific deployment tier
+/// Calculates contract addresses for a specific deployment tier using dry-run
 async fn calculate_addresses_by_tier(config: &DeploymentConfig, tier: &str) -> Result<HashMap<String, String>> {
     let contracts = get_tier_contracts(config, tier);
     let mut addresses = HashMap::new();
@@ -586,8 +621,13 @@ async fn validate_addresses(config: &DeploymentConfig, env_file: &str, update: b
 // DEPLOY CONTRACTS
 // =============================================================================
 
+<<<<<<< HEAD
 /// Checks if an error is a known/expected error that should not be retried
 fn is_known_error(error: &str) -> bool {
+=======
+/// Checks if a forge deployment error is a known/expected error to ignore
+fn is_known_deployment_error(error: &str) -> bool {
+>>>>>>> 5650bba (refactor contract deployment setup)
     error.contains("CreateCollision") ||
     error.contains("AlreadyAdded") ||
     error.contains("empty revert data")
@@ -649,7 +689,7 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
         let tier_config = tier_mapping.get(tier).unwrap();
 
         // Deploy each contract
-        for contract in &contracts {
+        for contract in contracts {
             if contract == "Core" && tier == "core" {
                 // Deploy all core contracts together
                 if let Some(script) = &tier_config.script {
@@ -679,12 +719,12 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
                         Err(e) => bail!("Core deployment failed with unknown error: {}", e),
                     }
                 }
-            } else if let Some(details) = tier_config.contracts.get(contract) {
+            } else if let Some(details) = tier_config.contracts.get(&contract) {
                 // Deploy individual contract
                 let script = details.script.clone().unwrap_or_else(|| format!("Deploy{}", contract));
                 match run_forge_deploy(&script, private_key, None).await {
                     Ok(output) => {
-                        if let Ok(addr) = extract_address(&output, contract) {
+                        if let Ok(addr) = extract_address(&output, &contract) {
                             info(&format!("✓ Deployed {}: {}", contract, addr));
                             all_addresses.insert(contract.clone(), addr.clone());
                             if let Some(env_var) = &details.expected_addr_envvar {
@@ -698,12 +738,13 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
                             let existing_addr = env::var(env_var)
                                 .with_context(|| format!("No existing address found for {} ({})", contract, env_var))?;
                             info(&format!("- Using existing {}: {}", contract, existing_addr));
-                            all_addresses.insert(contract.clone(), existing_addr);
+                            all_addresses.insert(contract, existing_addr);
                         }
                     }
                     Err(e) => bail!("Contract {} deployment failed with unknown error: {}", contract, e),
                 }
             }
+<<<<<<< HEAD
             
             // Add delay between deployments to prevent nonce conflicts
             // Skip delay for the last contract in the list
@@ -712,6 +753,8 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
                     tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
                 }
             }
+=======
+>>>>>>> 5650bba (refactor contract deployment setup)
         }
 
         // Update environment for next tier dependencies
@@ -753,8 +796,7 @@ async fn whitelist_actions_for_chain(chain: &str, addresses: &HashMap<String, St
 
         let mut args = vec![
             "script", "AddAction", "--sig", "run(address)", "--broadcast",
-            "--rpc-url", &rpc_url,
-            "--timeout", "30", // 30 second timeout
+            "--rpc-url", &rpc_url
         ];
 
         if use_legacy {
@@ -769,6 +811,7 @@ async fn whitelist_actions_for_chain(chain: &str, addresses: &HashMap<String, St
 
         args.push(action_address);
 
+<<<<<<< HEAD
         // Retry whitelisting with 3-second delays
         for attempt in 1..=3 {
             if attempt > 1 {
@@ -802,6 +845,14 @@ async fn whitelist_actions_for_chain(chain: &str, addresses: &HashMap<String, St
             if *contract_name != *last_contract_name {
                 tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
             }
+=======
+        match run_command("forge", &args).await {
+            Ok(_) => info(&format!("✓ {} whitelisted", contract_name)),
+            Err(e) if e.to_string().contains("AlreadyAdded") => {
+                info(&format!("- {} already whitelisted", contract_name));
+            }
+            Err(e) => bail!("Failed to whitelist {}: {}", contract_name, e),
+>>>>>>> 5650bba (refactor contract deployment setup)
         }
     }
 
@@ -839,10 +890,22 @@ async fn update_chain_config(config: &DeploymentConfig, addresses_file: &str, ch
         for (contract_name, address) in addresses {
             if let Some(key) = tier_mapping.values().find_map(|t| t.contracts.get(contract_name)?.chain_config_key.as_ref()) {
                 if let Some(action_name) = key.strip_prefix("actions.") {
+<<<<<<< HEAD
                     let actions = target.entry("actions").or_insert_with(|| json!({})).as_object_mut().unwrap();
                     if actions.get(address).and_then(|v| v.as_str()) != Some(action_name) {
                         actions.insert(address.clone(), json!(action_name));
                         updated = true;
+=======
+                    let actions_obj = target_block.entry("actions").or_insert_with(|| json!({})).as_object_mut().unwrap();
+                    if actions_obj.get(address).map(|v| v.as_str()) != Some(Some(action_name)) {
+                        actions_obj.insert(address.clone(), json!(action_name));
+                        changes = true;
+                    }
+                } else {
+                    if target_block.get(key).and_then(|v| v.as_str()) != Some(address) {
+                        target_block.insert(key.clone(), json!(address));
+                        changes = true;
+>>>>>>> 5650bba (refactor contract deployment setup)
                     }
                 } else if target.get(key).and_then(|v| v.as_str()) != Some(address) {
                     target.insert(key.clone(), json!(address));
@@ -935,9 +998,25 @@ async fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
+<<<<<<< HEAD
         Commands::ValidateContracts { config_file, env_dir, update } => {
             let config = load_deploy_config(&config_file)?;
             let chains = config.chains.as_ref().filter(|c| !c.is_empty()).ok_or_else(|| anyhow!("No chains in config"))?;
+=======
+        Commands::ValidateContracts { config_file, env_file, update } => {
+            let config = load_config(&config_file)?;
+            validate_addresses(&config, &env_file, update).await
+        }
+
+        Commands::DeployContracts { config_file, private_key } => {
+            let config = load_config(&config_file)?;
+            let addresses = deploy_contracts(&config, private_key.as_deref()).await?;
+
+            // Write addresses to file
+            let json_content = serde_json::to_string_pretty(&addresses)?;
+            std::fs::write("deployed-addresses.json", json_content)?;
+            info("Contract addresses written to deployed-addresses.json");
+>>>>>>> 5650bba (refactor contract deployment setup)
 
             for chain in chains {
                 info(&format!("Validating {} ({})", chain, get_chain_info(chain).ok_or_else(|| anyhow!("Unknown chain: {}", chain))?.network));
