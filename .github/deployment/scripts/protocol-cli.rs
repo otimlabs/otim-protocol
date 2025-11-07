@@ -47,7 +47,7 @@ enum Commands {
         /// Configuration file with lists of chains and contracts to manage
         #[arg(short, long)]
         config_file: String,
-        /// Environment directory containing env files
+        /// Directory containing network/chain environment variable configs
         #[arg(long)]
         env_dir: String,
         /// Update the environment file with newly calculated addresses
@@ -60,7 +60,7 @@ enum Commands {
         /// Configuration file with lists of chains and contracts to manage
         #[arg(short, long)]
         config_file: String,
-        /// Environment directory containing env files (chains are read from config)
+        /// Directory containing network/chain environment variable configs
         #[arg(long)]
         env_dir: Option<String>,
         /// Private key for deployment (if not provided, uses AWS KMS)
@@ -73,28 +73,28 @@ enum Commands {
         /// Configuration file with lists of chains and contracts to manage
         #[arg(short, long)]
         config_file: String,
-        /// JSON file containing contract addresses (e.g., deployed-addresses.json from deploy contracts)
+        /// JSON file containing deployed contract addresses to whitelist
         #[arg(short, long)]
         addresses_file: String,
-        /// Environment directory containing env files (chains are read from config)
+        /// Directory containing network/chain environment variable configs
         #[arg(long)]
         env_dir: Option<String>,
-        /// Private key for whitelisting (if not provided, uses AWS KMS)
+        /// Optional private key for whitelisting (if not provided, uses AWS KMS)
         #[arg(short, long)]
         private_key: Option<String>,
     },
 
-    /// Update chain configuration with deployed contract addresses for a specific chain
+    /// Update chain configuration with deployed contract addresses
     UpdateChainConfig {
+        /// Configuration file with lists of chains and contracts to manage
+        #[arg(short, long)]
+        config_file: String,
         /// JSON file containing contract addresses (e.g., deployed-addresses.json from deploys)
         #[arg(short, long)]
         addresses_file: String,
         /// Chain config file to update
-        #[arg(short, long)]
+        #[arg(long)]
         chain_config_file: String,
-        /// Chain name to update (e.g., anvil, base-sepolia)
-        #[arg(short, long)]
-        chain: String,
     },
 
     /// Compare directory contents using Merkle trees
@@ -303,7 +303,7 @@ fn warn(msg: &str) {
 }
 
 /// Loads and parses the deployment configuration from YAML file
-fn load_config(config_path: &str) -> Result<DeploymentConfig> {
+fn load_deploy_config(config_path: &str) -> Result<DeploymentConfig> {
     let content = fs::read_to_string(config_path)
         .with_context(|| format!("Failed to read config file: {}", config_path))?;
     serde_yaml::from_str(&content)
@@ -392,7 +392,7 @@ fn update_env_file(path: &str, updates: &HashMap<String, String>) -> Result<()> 
     let mut updated_content = content;
 
     for (key, new_value) in updates {
-        // Replace the value for the specific key, preserving the rest of the file
+        // Replace the value for the specific key
         let pattern = format!(r"(?m)^{}=.*$", regex::escape(key));
         let replacement = format!("{}={}", key, new_value);
 
@@ -414,57 +414,60 @@ fn update_env_file(path: &str, updates: &HashMap<String, String>) -> Result<()> 
         .with_context(|| format!("Failed to write environment file: {}", path))
 }
 
-/// Executes any command with proper environment setup
-async fn run_command(command: &str, args: &[&str]) -> Result<String> {
-    // Output the command being executed
-    info(&format!("Executing: {} {}", command, args.join(" ")));
+/// Executes any command with retry logic
+async fn run_command(command: &str, args: &[&str], max_retries: u32, retry_errors: &[&str]) -> Result<String> {
+    let mut last_error = None;
+    
+    for attempt in 1..=max_retries {
+        info(&format!("Executing: {} {}", command, args.join(" ")));
 
-    let output = tokio::process::Command::new(command)
-        .args(args)
-        .env_clear()  // Clear existing environment
-        .envs(env::vars())  // Add all current environment variables
-        .output()
-        .await?;
+        let output = tokio::process::Command::new(command)
+            .args(args)
+            .env_clear()
+            .envs(env::vars())
+            .output()
+            .await?;
 
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        bail!("Command failed: {} {}\nError: {}", command, args.join(" "), stderr);
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            let error = anyhow!("Command failed: {} {}\nError: {}", command, args.join(" "), stderr);
+            let error_msg = error.to_string();
+            
+            // Check if error matches any retry patterns (case-insensitive)
+            let error_msg_lower = error_msg.to_lowercase();
+            let should_retry = retry_errors.iter().any(|pattern| error_msg_lower.contains(&pattern.to_lowercase()));
+            
+            if should_retry && attempt < max_retries {
+                warn(&format!("Attempt {}/{} failed ({}), retrying...", attempt, max_retries, error_msg.lines().next().unwrap_or("unknown error")));
+                tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+                last_error = Some(error);
+                continue;
+            }
+            
+            return Err(error);
+        }
+
+        return Ok(String::from_utf8_lossy(&output.stdout).to_string());
     }
-
-    Ok(String::from_utf8_lossy(&output.stdout).to_string())
-}
-
-/// Executes a forge dry-run command to calculate contract addresses without deployment
-async fn run_forge_dry_run(script: &str) -> Result<String> {
-    let args = vec!["script", script, "--json"];
-    run_command("forge", &args).await
+    
+    Err(last_error.unwrap_or_else(|| anyhow!("Max retries exceeded")))
 }
 
 /// Executes a forge deployment command with private key or AWS KMS signing
 async fn run_forge_deploy(script: &str, private_key: Option<&str>) -> Result<String> {
     let rpc_url = env::var("RPC_URL").context("RPC_URL not found")?;
-    let use_legacy = env::var("FORGE_LEGACY")
-        .map(|v| v.eq_ignore_ascii_case("true") || v == "1")
-        .unwrap_or(false);
+    let use_legacy = env::var("FORGE_LEGACY").map(|v| v.eq_ignore_ascii_case("true") || v == "1").unwrap_or(false);
 
-    let mut args = vec![
-        "script", script,
-        "--broadcast",
-        "--rpc-url", &rpc_url,
-    ];
-
-    if use_legacy {
-        args.push("--legacy");
+    let mut args = vec!["script", script, "--broadcast", "--rpc-url", &rpc_url];
+    if use_legacy { args.push("--legacy"); }
+    match private_key {
+        Some(pk) => args.extend_from_slice(&["--private-key", pk]),
+        None => args.push("--aws"),
     }
-
-    if let Some(pk) = private_key {
-        args.extend_from_slice(&["--private-key", pk]);
-    } else {
-        args.push("--aws");
-    }
-
     args.push("--json");
-    run_command("forge", &args).await
+    
+    let retry_errors = &["failed to get block", "timed out", "dispatch failure", "connection", "reset by peer"];
+    run_command("forge", &args, 3, retry_errors).await
 }
 
 /// Extracts contract address from forge deployment output using regex pattern matching
@@ -520,7 +523,8 @@ async fn calculate_addresses_by_tier(config: &DeploymentConfig, tier: &str) -> R
 
         // Execute each script and extract addresses for all contracts in that script
         for (script, script_contracts) in script_groups {
-            let output = run_forge_dry_run(&script).await?;
+            let args = vec!["script", script.as_str(), "--json"];
+            let output = run_command("forge", &args, 1, &[]).await?;
             for contract in script_contracts {
                 if let Ok(address) = extract_address(&output, &contract) {
                     addresses.insert(contract, address);
@@ -728,7 +732,8 @@ async fn whitelist_actions_for_chain(chain: &str, addresses: &HashMap<String, St
 
         args.push(action_address);
 
-        match run_command("forge", &args).await {
+        let retry_errors = &["failed to get block", "timed out", "dispatch failure", "connection", "reset by peer"];
+        match run_command("forge", &args, 3, retry_errors).await {
             Ok(_) => info(&format!("✓ {} whitelisted", contract_name)),
             Err(e) if e.to_string().contains("AlreadyAdded") => {
                 info(&format!("- {} already whitelisted", contract_name));
@@ -745,48 +750,55 @@ async fn whitelist_actions_for_chain(chain: &str, addresses: &HashMap<String, St
 // UPDATE CHAIN CONFIG
 // =============================================================================
 
-/// Update chain configuration with deployed contract addresses for a specific chain
-async fn update_chain_config(addresses_file: &str, chain_config_file: &str, chain: &str) -> Result<()> {
-    let addresses: HashMap<String, String> = serde_json::from_str(&fs::read_to_string(addresses_file)?)?;
+/// Update chain configuration with deployed contract addresses
+async fn update_chain_config(config: &DeploymentConfig, addresses_file: &str, chain_config_file: &str) -> Result<()> {
+    let addresses_by_chain: HashMap<String, HashMap<String, String>> =
+        serde_json::from_str(&fs::read_to_string(addresses_file)?)?;
     let mut chain_config: serde_json::Value = serde_json::from_str(&fs::read_to_string(chain_config_file)?)?;
-
-    let target_key = chain_config.as_object()
-        .and_then(|obj| obj.iter().find(|(_, v)| v.get("name").and_then(|n| n.as_str()) == Some(chain)))
-        .map(|(k, _)| k.clone())
-        .ok_or_else(|| anyhow!("Chain '{}' not found", chain))?;
-
-    let target_block = chain_config[&target_key].as_object_mut()
-        .ok_or_else(|| anyhow!("Invalid chain block"))?;
-
+    let chains = config.chains.as_ref().filter(|c| !c.is_empty())
+        .ok_or_else(|| anyhow!("No chains in config"))?;
     let tier_mapping = get_contract_mapping();
-    let mut changes = false;
-    for (contract_name, address) in &addresses {
-        if let Some(details) = tier_mapping.values().find_map(|tier| tier.contracts.get(contract_name)) {
-            if let Some(key) = &details.chain_config_key {
+    let mut has_changes = false;
+
+    for chain in chains {
+        let chain_id = get_chain_info(chain).ok_or_else(|| anyhow!("Unknown chain: {}", chain))?.chain_id;
+        let addresses = addresses_by_chain.get(chain)
+            .ok_or_else(|| anyhow!("No addresses found for '{}'", chain))?;
+
+        let target_key = chain_config.as_object()
+            .and_then(|obj| obj.iter().find(|(k, _)| k.parse::<u64>().ok() == Some(chain_id)))
+            .map(|(k, _)| k.clone())
+            .ok_or_else(|| anyhow!("Chain '{}' (chain_id: {}) not found in config", chain, chain_id))?;
+
+        let target = chain_config[&target_key].as_object_mut().ok_or_else(|| anyhow!("Invalid chain block"))?;
+        let mut updated = false;
+
+        for (contract_name, address) in addresses {
+            if let Some(key) = tier_mapping.values().find_map(|t| t.contracts.get(contract_name)?.chain_config_key.as_ref()) {
                 if let Some(action_name) = key.strip_prefix("actions.") {
-                    let actions_obj = target_block.entry("actions").or_insert_with(|| json!({})).as_object_mut().unwrap();
-                    if actions_obj.get(address).map(|v| v.as_str()) != Some(Some(action_name)) {
-                        actions_obj.insert(address.clone(), json!(action_name));
-                        changes = true;
+                    let actions = target.entry("actions").or_insert_with(|| json!({})).as_object_mut().unwrap();
+                    if actions.get(address).and_then(|v| v.as_str()) != Some(action_name) {
+                        actions.insert(address.clone(), json!(action_name));
+                        updated = true;
                     }
-                } else {
-                    if target_block.get(key).and_then(|v| v.as_str()) != Some(address) {
-                        target_block.insert(key.clone(), json!(address));
-                        changes = true;
-                    }
+                } else if target.get(key).and_then(|v| v.as_str()) != Some(address) {
+                    target.insert(key.clone(), json!(address));
+                    updated = true;
                 }
             }
         }
+
+        info(&format!("{} {}", if updated { "✓" } else { "-" }, chain));
+        has_changes |= updated;
     }
 
-    if changes {
+    if has_changes {
         fs::write(chain_config_file, serde_json::to_string_pretty(&chain_config)?)?;
-        info(&format!("✓ Updated addresses for chain '{}'", chain));
+        info(&format!("✓ Updated {} chains", chains.len()));
         std::process::exit(2);
-    } else {
-        info(&format!("No changes needed for chain '{}'", chain));
-        std::process::exit(0);
     }
+    info("No changes needed");
+    std::process::exit(0);
 }
 
 // =============================================================================
@@ -861,7 +873,7 @@ async fn main() -> Result<()> {
 
     match cli.command {
         Commands::ValidateContracts { config_file, env_dir, update } => {
-            let config = load_config(&config_file)?;
+            let config = load_deploy_config(&config_file)?;
             let chains = config.chains.as_ref().filter(|c| !c.is_empty()).ok_or_else(|| anyhow!("No chains in config"))?;
 
             for chain in chains {
@@ -874,7 +886,7 @@ async fn main() -> Result<()> {
         }
 
         Commands::DeployContracts { config_file, env_dir, private_key } => {
-            let config = load_config(&config_file)?;
+            let config = load_deploy_config(&config_file)?;
             let chains = config.chains.as_ref().filter(|c| !c.is_empty()).ok_or_else(|| anyhow!("No chains in config"))?;
 
             let mut all_addresses = HashMap::new();
@@ -891,12 +903,12 @@ async fn main() -> Result<()> {
         }
 
         Commands::WhitelistActions { config_file, addresses_file, env_dir, private_key } => {
-            let config = load_config(&config_file)?;
+            let config = load_deploy_config(&config_file)?;
             let chains = config.chains.as_ref().filter(|c| !c.is_empty()).ok_or_else(|| anyhow!("No chains in config"))?;
             let addresses_by_chain: HashMap<String, HashMap<String, String>> =
                 serde_json::from_str(&fs::read_to_string(&addresses_file)?)?;
 
-            // Validate topology: ensure all config chains have deployed addresses
+            // Ensure all config chains have deployed addresses
             let missing: Vec<_> = chains.iter().filter(|c| !addresses_by_chain.contains_key(*c)).collect();
             if !missing.is_empty() { bail!("Topology mismatch: {:?} missing from addresses file", missing); }
 
@@ -915,8 +927,9 @@ async fn main() -> Result<()> {
             Ok(())
         }
 
-        Commands::UpdateChainConfig { addresses_file, chain_config_file, chain } => {
-            update_chain_config(&addresses_file, &chain_config_file, &chain).await
+        Commands::UpdateChainConfig { config_file, addresses_file, chain_config_file } => {
+            let config = load_deploy_config(&config_file)?;
+            update_chain_config(&config, &addresses_file, &chain_config_file).await
         }
 
         Commands::CompareDirectories { dir1, dir2, ignore, show_diff } => {
