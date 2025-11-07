@@ -397,13 +397,19 @@ async fn run_forge_dry_run(script: &str) -> Result<String> {
 /// Executes a forge deployment command with private key or AWS KMS signing
 async fn run_forge_deploy(script: &str, private_key: Option<&str>) -> Result<String> {
     let rpc_url = env::var("RPC_URL").context("RPC_URL not found")?;
+    let use_legacy = env::var("FORGE_LEGACY")
+        .map(|v| v.eq_ignore_ascii_case("true") || v == "1")
+        .unwrap_or(false);
 
     let mut args = vec![
         "script", script,
         "--broadcast",
         "--rpc-url", &rpc_url,
-        "--legacy",
     ];
+
+    if use_legacy {
+        args.push("--legacy");
+    }
 
     if let Some(pk) = private_key {
         args.extend_from_slice(&["--private-key", pk]);
@@ -657,13 +663,21 @@ async fn whitelist_actions(addresses_file: &str, private_key: Option<&str>) -> R
     }
 
     let rpc_url = env::var("RPC_URL")?;
+    let use_legacy = env::var("FORGE_LEGACY")
+        .map(|v| v.eq_ignore_ascii_case("true") || v == "1")
+        .unwrap_or(false);
+
     for (contract_name, action_address) in &action_contracts {
         info(&format!("Whitelisting {} at {}...", contract_name, action_address));
 
         let mut args = vec![
             "script", "AddAction", "--sig", "run(address)", "--broadcast",
-            "--rpc-url", &rpc_url, "--legacy"
+            "--rpc-url", &rpc_url,
         ];
+
+        if use_legacy {
+            args.push("--legacy");
+        }
 
         if let Some(pk) = private_key {
             args.extend_from_slice(&["--private-key", pk]);
