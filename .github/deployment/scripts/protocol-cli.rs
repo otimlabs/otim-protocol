@@ -402,6 +402,7 @@ async fn run_forge_deploy(script: &str, private_key: Option<&str>) -> Result<Str
         "script", script,
         "--broadcast",
         "--rpc-url", &rpc_url,
+        "--legacy",
     ];
 
     if let Some(pk) = private_key {
@@ -661,7 +662,7 @@ async fn whitelist_actions(addresses_file: &str, private_key: Option<&str>) -> R
 
         let mut args = vec![
             "script", "AddAction", "--sig", "run(address)", "--broadcast",
-            "--rpc-url", &rpc_url
+            "--rpc-url", &rpc_url, "--legacy"
         ];
 
         if let Some(pk) = private_key {
