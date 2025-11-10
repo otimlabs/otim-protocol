@@ -34,7 +34,7 @@ use std::path::Path;
 #[derive(Parser)]
 #[command(name = "protocol-cli")]
 #[command(about = "Protocol development and deployment tools")]
-#[command(long_about = "Protocol CLI for multi-chain contract deployment and management.\n\nExample config: https://github.com/otimlabs/otim-infrastructure/blob/main/environments/protocol/deployment.yaml")]
+#[command(long_about = "Protocol CLI for multi-chain contract deployment and management.")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
