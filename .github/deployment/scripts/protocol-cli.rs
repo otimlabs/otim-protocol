@@ -179,6 +179,12 @@ fn get_chain_info(chain: &str) -> Option<ChainInfo> {
         "arbitrum" => ChainInfo { chain_id: 42161, network: "mainnet" },
         "ethereum-sepolia" => ChainInfo { chain_id: 11155111, network: "testnet" },
         "ethereum" => ChainInfo { chain_id: 1, network: "mainnet" },
+        "bnb-testnet" => ChainInfo { chain_id: 97, network: "testnet" },
+        "bnb" => ChainInfo { chain_id: 56, network: "mainnet" },
+        "unichain-sepolia" => ChainInfo { chain_id: 1301, network: "testnet" },
+        "unichain" => ChainInfo { chain_id: 130, network: "mainnet" },
+        "polygon-amoy" => ChainInfo { chain_id: 80002, network: "testnet" },
+        "polygon" => ChainInfo { chain_id: 137, network: "mainnet" },
         "pecorino-signet" => ChainInfo { chain_id: 14174, network: "testnet" },
         "pecorino-host" => ChainInfo { chain_id: 3151908, network: "testnet" },
         _ => return None,
@@ -518,7 +524,6 @@ async fn run_command(command: &str, args: &[&str], max_retries: u32, retry_error
             .output()
             .await?;
 
-<<<<<<< HEAD
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
             let error = anyhow!("Command failed: {} {}\nError: {}", command, args.join(" "), stderr);
@@ -542,40 +547,6 @@ async fn run_command(command: &str, args: &[&str], max_retries: u32, retry_error
     }
     
     Err(last_error.unwrap_or_else(|| anyhow!("Max retries exceeded")))
-=======
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        bail!("Command failed: {} {}\nError: {}", command, args.join(" "), stderr);
-    }
-
-    Ok(String::from_utf8_lossy(&output.stdout).to_string())
-}
-
-/// Executes a forge dry-run command to calculate contract addresses without deployment
-async fn run_forge_dry_run(script: &str) -> Result<String> {
-    let args = vec!["script", script, "--json"];
-    run_command("forge", &args).await
-}
-
-/// Executes a forge deployment command with private key or AWS KMS signing
-async fn run_forge_deploy(script: &str, private_key: Option<&str>) -> Result<String> {
-    let rpc_url = env::var("RPC_URL").context("RPC_URL not found")?;
-
-    let mut args = vec![
-        "script", script,
-        "--broadcast",
-        "--rpc-url", &rpc_url,
-    ];
-
-    if let Some(pk) = private_key {
-        args.extend_from_slice(&["--private-key", pk]);
-    } else {
-        args.push("--aws");
-    }
-
-    args.push("--json");
-    run_command("forge", &args).await
->>>>>>> 857b4a5 (refactor contract deployment setup)
 }
 
 
@@ -728,11 +699,7 @@ async fn validate_addresses(config: &DeploymentConfig, network_env_file: &str, c
 // DEPLOY CONTRACTS
 // =============================================================================
 
-<<<<<<< HEAD
 /// Checks if a forge deployment error is a known/expected error that should not be retried
-=======
-/// Checks if a forge deployment error is a known/expected error to ignore
->>>>>>> 857b4a5 (refactor contract deployment setup)
 fn is_known_deployment_error(error: &str) -> bool {
     error.contains("CreateCollision") ||
     error.contains("AlreadyAdded") ||
@@ -829,7 +796,6 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
                     Err(e) => bail!("Contract {} deployment failed with unknown error: {}", contract, e),
                 }
             }
-<<<<<<< HEAD
             
             // Add delay between deployments to prevent nonce conflicts
             if let Some(last_contract) = contracts.last() {
@@ -837,8 +803,6 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
                     tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
                 }
             }
-=======
->>>>>>> 857b4a5 (refactor contract deployment setup)
         }
 
         // Update environment for next tier dependencies
@@ -895,7 +859,6 @@ async fn whitelist_actions_for_chain(chain: &str, addresses: &HashMap<String, St
 
         args.push(action_address);
 
-<<<<<<< HEAD
         let retry_errors = &["failed to get block", "timed out", "dispatch failure", "connection", "reset by peer"];
         match run_command("forge", &args, 3, retry_errors).await {
             Ok(_) => {
@@ -916,14 +879,6 @@ async fn whitelist_actions_for_chain(chain: &str, addresses: &HashMap<String, St
             if *contract_name != *last_contract_name {
                 tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
             }
-=======
-        match run_command("forge", &args).await {
-            Ok(_) => info(&format!("✓ {} whitelisted", contract_name)),
-            Err(e) if e.to_string().contains("AlreadyAdded") => {
-                info(&format!("- {} already whitelisted", contract_name));
-            }
-            Err(e) => bail!("Failed to whitelist {}: {}", contract_name, e),
->>>>>>> 857b4a5 (refactor contract deployment setup)
         }
     }
 
@@ -961,22 +916,10 @@ async fn update_chain_config(config: &DeploymentConfig, addresses_file: &str, ch
         for (contract_name, address) in addresses {
             if let Some(key) = tier_mapping.values().find_map(|t| t.contracts.get(contract_name)?.chain_config_key.as_ref()) {
                 if let Some(action_name) = key.strip_prefix("actions.") {
-<<<<<<< HEAD
                     let actions = target.entry("actions").or_insert_with(|| json!({})).as_object_mut().unwrap();
                     if actions.get(address).and_then(|v| v.as_str()) != Some(action_name) {
                         actions.insert(address.clone(), json!(action_name));
                         updated = true;
-=======
-                    let actions_obj = target_block.entry("actions").or_insert_with(|| json!({})).as_object_mut().unwrap();
-                    if actions_obj.get(address).map(|v| v.as_str()) != Some(Some(action_name)) {
-                        actions_obj.insert(address.clone(), json!(action_name));
-                        changes = true;
-                    }
-                } else {
-                    if target_block.get(key).and_then(|v| v.as_str()) != Some(address) {
-                        target_block.insert(key.clone(), json!(address));
-                        changes = true;
->>>>>>> 857b4a5 (refactor contract deployment setup)
                     }
                 } else if target.get(key).and_then(|v| v.as_str()) != Some(address) {
                     target.insert(key.clone(), json!(address));
@@ -1004,7 +947,6 @@ async fn update_chain_config(config: &DeploymentConfig, addresses_file: &str, ch
 
 /// Address padding for encoding constructor arguments (24 bytes = 48 hex chars)
 const ADDRESS_PADDING: &str = "000000000000000000000000";
-
 
 /// Encodes constructor arguments based on contract type
 fn encode_constructor_args(
@@ -1176,25 +1118,9 @@ async fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-<<<<<<< HEAD
         Commands::ValidateContracts { config_file, env_dir, update } => {
             let config = load_deploy_config(&config_file)?;
             let chains = config.chains.as_ref().filter(|c| !c.is_empty()).ok_or_else(|| anyhow!("No chains in config"))?;
-=======
-        Commands::ValidateContracts { config_file, env_file, update } => {
-            let config = load_config(&config_file)?;
-            validate_addresses(&config, &env_file, update).await
-        }
-
-        Commands::DeployContracts { config_file, private_key } => {
-            let config = load_config(&config_file)?;
-            let addresses = deploy_contracts(&config, private_key.as_deref()).await?;
-
-            // Write addresses to file
-            let json_content = serde_json::to_string_pretty(&addresses)?;
-            std::fs::write("deployed-addresses.json", json_content)?;
-            info("Contract addresses written to deployed-addresses.json");
->>>>>>> 857b4a5 (refactor contract deployment setup)
 
             for chain in chains {
                 let chain_info = get_chain_info(chain).ok_or_else(|| anyhow!("Unknown chain: {}", chain))?;
