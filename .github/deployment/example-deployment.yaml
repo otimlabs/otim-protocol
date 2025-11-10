@@ -1,0 +1,16 @@
+## Example deployment configuration.
+## Copy this file and adjust the chains and contracts to match the deployment you plan to manage.
+## Any chain listed should have corresponding environment files inside `.github/deployment/networks/<network>/`.
+##
+## contracts:
+##   - Core                      # Deploy all core contracts (OtimDelegate, Gateway, etc.)
+##   - FeeTokenRegistry
+##   - Treasury
+##   - TransferAction
+##   ...
+##
+## chains:
+##   - ethereum-sepolia
+##   - base (mainnet)
+##   ...
+##
