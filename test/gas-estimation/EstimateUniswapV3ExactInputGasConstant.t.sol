@@ -60,13 +60,11 @@ contract EstimateUniswapV3ExactInputGasConstant is InstructionForkTestContext {
         uint256 maxExecutions,
         IUniswapV3ExactInputAction.UniswapV3ExactInput memory arguments
     ) public {
-        // fuzz test must pass argument validation
-        vm.assume(arguments.recipient != address(0));
-
         // disregard fuzz generated values
         arguments.tokenIn = address(0);
         arguments.tokenOut = SEPOLIA_USDC;
         arguments.feeTier = 500;
+        arguments.recipient = address(user);
 
         // assume a reasonable amountIn
         vm.assume(arguments.amountIn > 0 && arguments.amountIn < 100 ether);

@@ -52,8 +52,8 @@ contract DeploymentAddressesTest is Test {
     address constant EXPECTED_SWEEP_UNISWAP_V3_ACTION_ADDRESS = 0xb163911E78663533384019C93e14f5F03ACD43E5;
     address constant EXPECTED_DEPOSIT_ERC4626_ACTION_ADDRESS = 0x708b5FBebe53323B39B551e909cC52dcF2B5712e;
     address constant EXPECTED_SWEEP_DEPOSIT_ERC4626_ACTION_ADDRESS = 0x5Eb775C6037998ad05852B5A65301863F6a6B451;
-    address constant EXPECTED_WITHDRAW_ERC4626_ACTION_ADDRESS = 0x0419945d806470dB4cd846dc2C7144eD1F78D019;
-    address constant EXPECTED_SWEEP_WITHDRAW_ERC4626_ACTION_ADDRESS = 0xA4904e5794965b8329e204eBd34CC5D7ED9e3AfA;
+    address constant EXPECTED_WITHDRAW_ERC4626_ACTION_ADDRESS = 0x0667348a6E2DF6df91a351D3FCEF7C5494ca297c;
+    address constant EXPECTED_SWEEP_WITHDRAW_ERC4626_ACTION_ADDRESS = 0xBa246DFB52b780Bb26Ab5A64b4bCCe351c7cffC8;
 
     ////////////////////
     // Core addresses //
@@ -105,9 +105,9 @@ contract DeploymentAddressesTest is Test {
 
     function test_uniswapV3ExactInputAction_deployedAddress() public {
         address deployed = address(
-            new UniswapV3ExactInputAction{salt: bytes32(0)}(
-                address(0), address(0), address(0), address(0), address(0), 0
-            )
+            new UniswapV3ExactInputAction{
+                salt: bytes32(0)
+            }(address(0), address(0), address(0), address(0), address(0), 0)
         );
 
         assertEq(deployed, EXPECTED_UNISWAP_V3_EXACT_INPUT_ACTION_ADDRESS);

@@ -14,7 +14,7 @@ import {
     ARGUMENTS_TYPEHASH
 } from "./interfaces/ISweepWithdrawERC4626Action.sol";
 
-import {InvalidArguments, TotalSharesTooLow, BalanceUnderThreshold} from "./errors/Errors.sol";
+import {InvalidArguments, BalanceUnderThreshold} from "./errors/Errors.sol";
 
 /// @title SweepWithdrawERC4626Action
 /// @author Otim Labs, Inc.
@@ -38,7 +38,6 @@ contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, Oti
                 arguments.recipient,
                 arguments.threshold,
                 arguments.endBalance,
-                arguments.minTotalShares,
                 hash(arguments.fee)
             )
         );
@@ -60,7 +59,7 @@ contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, Oti
         if (executionState.executionCount == 0) {
             if (
                 arguments.vault == address(0) || arguments.recipient == address(0)
-                    || arguments.endBalance > arguments.threshold || arguments.minTotalShares == 0
+                    || arguments.endBalance > arguments.threshold
             ) {
                 revert InvalidArguments();
             }
@@ -73,11 +72,6 @@ contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, Oti
         // slither-disable-next-line incorrect-equality
         if (maxWithdraw < arguments.threshold || maxWithdraw == arguments.endBalance) {
             revert BalanceUnderThreshold();
-        }
-
-        // check if vault total shares is too low
-        if (IERC4626(arguments.vault).totalSupply() < arguments.minTotalShares) {
-            revert TotalSharesTooLow();
         }
 
         // withdraw from the vault
