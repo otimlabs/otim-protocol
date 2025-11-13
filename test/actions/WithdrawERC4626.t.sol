@@ -32,7 +32,6 @@ contract WithdrawERC4626Test is InstructionForkTestContext {
     address public DEFAULT_VAULT = address(MAINNET_STEAKHOUSE_USDC_VAULT);
     address public DEFAULT_RECIPIENT = address(user);
     uint256 public DEFAULT_VALUE = 100e6;
-    uint256 public DEFAULT_MIN_TOTAL_ASSETS = 100e6;
 
     IInterval.Schedule public DEFAULT_SCHEDULE;
     IOtimFee.Fee public DEFAULT_FEE;
@@ -51,7 +50,6 @@ contract WithdrawERC4626Test is InstructionForkTestContext {
             recipient: DEFAULT_RECIPIENT,
             vault: DEFAULT_VAULT,
             value: DEFAULT_VALUE,
-            minTotalAssets: DEFAULT_MIN_TOTAL_ASSETS,
             schedule: DEFAULT_SCHEDULE,
             fee: DEFAULT_FEE
         });
@@ -92,7 +90,6 @@ contract WithdrawERC4626Test is InstructionForkTestContext {
         uint256 maxWithdraw = DEFAULT_VALUE - 1;
 
         mockVault.setMaxWithdraw(maxWithdraw);
-        mockVault.setTotalAssets(DEFAULT_MIN_TOTAL_ASSETS + 1);
 
         DEFAULT_ACTION_ARGS.vault = address(mockVault);
 
@@ -156,23 +153,8 @@ contract WithdrawERC4626Test is InstructionForkTestContext {
         vm.pauseGasMetering();
     }
 
-    /// @notice test that validation fails with zero min total assets
-    function test_withdrawERC4626_minTotalAssetsZero() public {
-        DEFAULT_ACTION_ARGS.minTotalAssets = 0;
-
-        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
-
-        bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
-        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
-
-        vm.resetGasMetering();
-        user.executeInstruction(instruction, instructionSig);
-        vm.pauseGasMetering();
-    }
-
     /// @notice test that execution reverts with max withdraw zero
     function test_withdrawERC4626_maxWithdrawZero() public {
-        mockVault.setTotalAssets(DEFAULT_MIN_TOTAL_ASSETS + 1);
         mockVault.setMaxWithdraw(0);
 
         DEFAULT_ACTION_ARGS.vault = address(mockVault);
@@ -180,27 +162,6 @@ contract WithdrawERC4626Test is InstructionForkTestContext {
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
         bytes memory result = abi.encodeWithSelector(MaxWithdrawZero.selector);
-        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
-
-        vm.resetGasMetering();
-        user.executeInstruction(instruction, instructionSig);
-        vm.pauseGasMetering();
-    }
-
-    /// @notice test that execution reverts with total assets too low
-    function test_withdrawERC4626_totalAssetsTooLow() public {
-        vm.startPrank(MAINNET_USDC_WHALE);
-        IERC20(MAINNET_USDC).approve(address(mockVault), USER_START_BALANCE);
-        mockVault.deposit(USER_START_BALANCE, address(user));
-        vm.stopPrank();
-
-        mockVault.setTotalAssets(DEFAULT_MIN_TOTAL_ASSETS - 1);
-
-        DEFAULT_ACTION_ARGS.vault = address(mockVault);
-
-        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
-
-        bytes memory result = abi.encodeWithSelector(TotalAssetsTooLow.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
         vm.resetGasMetering();

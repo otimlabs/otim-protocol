@@ -15,11 +15,11 @@ import {
     ARGUMENTS_TYPEHASH
 } from "./interfaces/ISweepDepositERC4626Action.sol";
 
-import {InvalidArguments, BalanceUnderThreshold, MaxDepositZero, TotalAssetsTooLow} from "./errors/Errors.sol";
+import {InvalidArguments, BalanceUnderThreshold, MaxDepositZero, TotalSharesTooLow} from "./errors/Errors.sol";
 
 /// @title SweepDepositERC4626Action
 /// @author Otim Labs, Inc.
-/// @notice an Action that deposits ERC20 tokens into an ERC4626 vault
+/// @notice an Action that deposits ERC20 tokens into an ERC4626 vault when the balance is greater than or equal to a threshold
 contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimFee {
     constructor(address feeTokenRegistryAddress, address treasuryAddress, uint256 gasConstant_)
         OtimFee(feeTokenRegistryAddress, treasuryAddress, gasConstant_)
@@ -39,7 +39,7 @@ contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimF
                 arguments.recipient,
                 arguments.threshold,
                 arguments.endBalance,
-                arguments.minTotalAssets,
+                arguments.minTotalShares,
                 hash(arguments.fee)
             )
         );
@@ -61,7 +61,7 @@ contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimF
         if (executionState.executionCount == 0) {
             if (
                 arguments.vault == address(0) || arguments.recipient == address(0)
-                    || arguments.endBalance > arguments.threshold || arguments.minTotalAssets == 0
+                    || arguments.endBalance > arguments.threshold || arguments.minTotalShares == 0
             ) {
                 revert InvalidArguments();
             }
@@ -100,9 +100,9 @@ contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimF
             emit MaxDepositReached(maxDeposit, balance - maxDeposit);
         }
 
-        // check if vault total assets is too low
-        if (IERC4626(arguments.vault).totalAssets() < arguments.minTotalAssets) {
-            revert TotalAssetsTooLow();
+        // check if vault total shares is too low
+        if (IERC4626(arguments.vault).totalSupply() < arguments.minTotalShares) {
+            revert TotalSharesTooLow();
         }
 
         // approve the deposit amount to the vault

@@ -18,4 +18,4 @@ error CCTPTokenNotSupported();
 
 error MaxDepositZero();
 error MaxWithdrawZero();
-error TotalAssetsTooLow();
+error TotalSharesTooLow();

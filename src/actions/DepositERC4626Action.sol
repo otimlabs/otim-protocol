@@ -12,7 +12,7 @@ import {OtimFee} from "./fee-models/OtimFee.sol";
 import {IAction} from "./interfaces/IAction.sol";
 import {IDepositERC4626Action, INSTRUCTION_TYPEHASH, ARGUMENTS_TYPEHASH} from "./interfaces/IDepositERC4626Action.sol";
 
-import {InvalidArguments, MaxDepositZero, InsufficientBalance, TotalAssetsTooLow} from "./errors/Errors.sol";
+import {InvalidArguments, MaxDepositZero, InsufficientBalance, TotalSharesTooLow} from "./errors/Errors.sol";
 
 /// @title DepositERC4626Action
 /// @author Otim Labs, Inc.
@@ -35,7 +35,7 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
                 arguments.vault,
                 arguments.recipient,
                 arguments.value,
-                arguments.minTotalAssets,
+                arguments.minTotalShares,
                 hash(arguments.schedule),
                 hash(arguments.fee)
             )
@@ -58,7 +58,7 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
         if (executionState.executionCount == 0) {
             if (
                 arguments.recipient == address(0) || arguments.vault == address(0) || arguments.value == 0
-                    || arguments.minTotalAssets == 0
+                    || arguments.minTotalShares == 0
             ) {
                 revert InvalidArguments();
             }
@@ -95,9 +95,9 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
             revert InsufficientBalance();
         }
 
-        // check if vault total assets is too low
-        if (IERC4626(arguments.vault).totalAssets() < arguments.minTotalAssets) {
-            revert TotalAssetsTooLow();
+        // check if vault total shares is too low
+        if (IERC4626(arguments.vault).totalSupply() < arguments.minTotalShares) {
+            revert TotalSharesTooLow();
         }
 
         // approve the deposit amount to the vault
