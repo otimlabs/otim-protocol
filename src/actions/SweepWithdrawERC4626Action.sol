@@ -65,7 +65,7 @@ contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, Oti
             }
         }
 
-        // get the user's asset balance in the vault
+        // get the user's vault asset balance
         uint256 assetBalance =
             IERC4626(arguments.vault).convertToAssets(IERC4626(arguments.vault).balanceOf(address(this)));
 
