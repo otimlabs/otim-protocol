@@ -9,7 +9,6 @@ import {IERC4626} from "@openzeppelin-contracts/interfaces/IERC4626.sol";
 import {IERC20} from "@openzeppelin-contracts/token/ERC20/IERC20.sol";
 
 import {ERC4626Mock} from "../mocks/ERC4626Mock.sol";
-import {ERC20MockWithDecimals} from "../mocks/ERC20MockWithDecimals.sol";
 
 import {InstructionLib} from "../../src/libraries/Instruction.sol";
 
@@ -99,7 +98,7 @@ contract SweepWithdrawERC4626Test is InstructionForkTestContext {
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
-        vm.expectEmit(false, false, false, true);
+        vm.expectEmit();
         emit ISweepWithdrawERC4626Action.MaxWithdrawReached(maxWithdraw, USER_START_BALANCE - maxWithdraw);
 
         vm.expectEmit(true, true, true, false);
