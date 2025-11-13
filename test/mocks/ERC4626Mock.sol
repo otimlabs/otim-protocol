@@ -11,12 +11,12 @@ contract ERC4626Mock is ERC4626 {
         _maxWithdraw = type(uint256).max;
     }
 
-    uint256 private _totalAssets;
+    uint256 private _totalSupply;
     uint256 private _maxDeposit;
     uint256 private _maxWithdraw;
 
-    function totalAssets() public view override returns (uint256) {
-        return _totalAssets;
+    function totalSupply() public view override(ERC20, IERC20) returns (uint256) {
+        return _totalSupply;
     }
 
     function maxDeposit(address) public view override returns (uint256) {
@@ -27,8 +27,8 @@ contract ERC4626Mock is ERC4626 {
         return _maxWithdraw;
     }
 
-    function setTotalAssets(uint256 totalAssets_) public {
-        _totalAssets = totalAssets_;
+    function setTotalSupply(uint256 totalSupply_) public {
+        _totalSupply = totalSupply_;
     }
 
     function setMaxDeposit(uint256 maxDeposit_) public {

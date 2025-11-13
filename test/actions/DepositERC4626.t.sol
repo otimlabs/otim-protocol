@@ -32,7 +32,7 @@ contract DepositERC4626Test is InstructionForkTestContext {
     address public DEFAULT_RECIPIENT = address(user);
     address public DEFAULT_VAULT = address(MAINNET_STEAKHOUSE_USDC_VAULT);
     uint256 public DEFAULT_VALUE = 100e6;
-    uint256 public DEFAULT_MIN_TOTAL_ASSETS = 100e6;
+    uint256 public DEFAULT_MIN_TOTAL_SHARES = 100e6;
 
     IInterval.Schedule public DEFAULT_SCHEDULE;
     IOtimFee.Fee public DEFAULT_FEE;
@@ -51,7 +51,7 @@ contract DepositERC4626Test is InstructionForkTestContext {
             recipient: DEFAULT_RECIPIENT,
             vault: DEFAULT_VAULT,
             value: DEFAULT_VALUE,
-            minTotalAssets: DEFAULT_MIN_TOTAL_ASSETS,
+            minTotalShares: DEFAULT_MIN_TOTAL_SHARES,
             schedule: DEFAULT_SCHEDULE,
             fee: DEFAULT_FEE
         });
@@ -88,7 +88,7 @@ contract DepositERC4626Test is InstructionForkTestContext {
         vm.stopPrank();
 
         mockVault.setMaxDeposit(DEFAULT_VALUE - 1);
-        mockVault.setTotalAssets(DEFAULT_MIN_TOTAL_ASSETS + 1);
+        mockVault.setTotalSupply(DEFAULT_MIN_TOTAL_SHARES + 1);
 
         DEFAULT_ACTION_ARGS.vault = address(mockVault);
 
@@ -153,8 +153,8 @@ contract DepositERC4626Test is InstructionForkTestContext {
     }
 
     /// @notice test that validation fails with zero min total assets
-    function test_depositERC4626_minTotalAssetsZero() public {
-        DEFAULT_ACTION_ARGS.minTotalAssets = 0;
+    function test_depositERC4626_minTotalSharesZero() public {
+        DEFAULT_ACTION_ARGS.minTotalShares = 0;
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
@@ -166,20 +166,20 @@ contract DepositERC4626Test is InstructionForkTestContext {
         vm.pauseGasMetering();
     }
 
-    /// @notice test that execution reverts with total assets too low
-    function test_depositERC4626_totalAssetsTooLow() public {
+    /// @notice test that execution reverts with total shares too low
+    function test_depositERC4626_totalSharesTooLow() public {
         vm.startPrank(MAINNET_USDC_WHALE);
         IERC20(MAINNET_USDC).transfer(address(user), USER_START_BALANCE);
         vm.stopPrank();
 
-        mockVault.setTotalAssets(DEFAULT_MIN_TOTAL_ASSETS - 1);
+        mockVault.setTotalSupply(DEFAULT_MIN_TOTAL_SHARES - 1);
         mockVault.setMaxDeposit(DEFAULT_VALUE + 1);
 
         DEFAULT_ACTION_ARGS.vault = address(mockVault);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
-        bytes memory result = abi.encodeWithSelector(TotalAssetsTooLow.selector);
+        bytes memory result = abi.encodeWithSelector(TotalSharesTooLow.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
         vm.resetGasMetering();
@@ -189,7 +189,7 @@ contract DepositERC4626Test is InstructionForkTestContext {
 
     /// @notice test that execution reverts with max deposit zero
     function test_depositERC4626_maxDepositZero() public {
-        mockVault.setTotalAssets(DEFAULT_MIN_TOTAL_ASSETS + 1);
+        mockVault.setTotalSupply(DEFAULT_MIN_TOTAL_SHARES + 1);
         mockVault.setMaxDeposit(0);
 
         DEFAULT_ACTION_ARGS.vault = address(mockVault);

@@ -14,11 +14,11 @@ import {
     ARGUMENTS_TYPEHASH
 } from "./interfaces/ISweepWithdrawERC4626Action.sol";
 
-import {InvalidArguments, TotalAssetsTooLow, BalanceUnderThreshold} from "./errors/Errors.sol";
+import {InvalidArguments, TotalSharesTooLow, BalanceUnderThreshold} from "./errors/Errors.sol";
 
 /// @title SweepWithdrawERC4626Action
 /// @author Otim Labs, Inc.
-/// @notice an Action that withdraws ERC20 tokens from an ERC4626 vault to a recipient when the maxWithdraw is greater than or equal to a threshold
+/// @notice an Action that withdraws ERC20 tokens from an ERC4626 vault to a recipient when the maxWithdraw balance is greater than or equal to a threshold
 contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, OtimFee {
     constructor(address feeTokenRegistryAddress, address treasuryAddress, uint256 gasConstant_)
         OtimFee(feeTokenRegistryAddress, treasuryAddress, gasConstant_)
@@ -38,7 +38,7 @@ contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, Oti
                 arguments.recipient,
                 arguments.threshold,
                 arguments.endBalance,
-                arguments.minTotalAssets,
+                arguments.minTotalShares,
                 hash(arguments.fee)
             )
         );
@@ -60,7 +60,7 @@ contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, Oti
         if (executionState.executionCount == 0) {
             if (
                 arguments.vault == address(0) || arguments.recipient == address(0)
-                    || arguments.endBalance > arguments.threshold || arguments.minTotalAssets == 0
+                    || arguments.endBalance > arguments.threshold || arguments.minTotalShares == 0
             ) {
                 revert InvalidArguments();
             }
@@ -75,9 +75,9 @@ contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, Oti
             revert BalanceUnderThreshold();
         }
 
-        // check if vault total assets is too low
-        if (IERC4626(arguments.vault).totalAssets() < arguments.minTotalAssets) {
-            revert TotalAssetsTooLow();
+        // check if vault total shares is too low
+        if (IERC4626(arguments.vault).totalSupply() < arguments.minTotalShares) {
+            revert TotalSharesTooLow();
         }
 
         // withdraw from the vault

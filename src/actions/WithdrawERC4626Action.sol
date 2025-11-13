@@ -15,7 +15,7 @@ import {
     ARGUMENTS_TYPEHASH
 } from "./interfaces/IWithdrawERC4626Action.sol";
 
-import {InvalidArguments, TotalAssetsTooLow, MaxWithdrawZero} from "./errors/Errors.sol";
+import {InvalidArguments, TotalSharesTooLow, MaxWithdrawZero} from "./errors/Errors.sol";
 
 /// @title WithdrawERC4626Action
 /// @author Otim Labs, Inc.
@@ -38,7 +38,7 @@ contract WithdrawERC4626Action is IAction, IWithdrawERC4626Action, Interval, Oti
                 arguments.vault,
                 arguments.recipient,
                 arguments.value,
-                arguments.minTotalAssets,
+                arguments.minTotalShares,
                 hash(arguments.schedule),
                 hash(arguments.fee)
             )
@@ -61,7 +61,7 @@ contract WithdrawERC4626Action is IAction, IWithdrawERC4626Action, Interval, Oti
         if (executionState.executionCount == 0) {
             if (
                 arguments.vault == address(0) || arguments.recipient == address(0) || arguments.value == 0
-                    || arguments.minTotalAssets == 0
+                    || arguments.minTotalShares == 0
             ) {
                 revert InvalidArguments();
             }
@@ -90,9 +90,9 @@ contract WithdrawERC4626Action is IAction, IWithdrawERC4626Action, Interval, Oti
             emit MaxWithdrawReached(maxWithdraw);
         }
 
-        // check if vault total assets is too low
-        if (IERC4626(arguments.vault).totalAssets() < arguments.minTotalAssets) {
-            revert TotalAssetsTooLow();
+        // check if vault total shares is too low
+        if (IERC4626(arguments.vault).totalSupply() < arguments.minTotalShares) {
+            revert TotalSharesTooLow();
         }
 
         // withdraw from the vault

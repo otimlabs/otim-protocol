@@ -56,7 +56,7 @@ contract EstimateWithdrawERC4626GasConstant is InstructionForkTestContext {
     ) public {
         // disregard fuzz generated values for token and target
         arguments.vault = MAINNET_STEAKHOUSE_USDC_VAULT;
-        arguments.minTotalAssets = 1;
+        arguments.minTotalShares = 1;
 
         uint256 whaleBalance = IERC20(MAINNET_USDC).balanceOf(MAINNET_USDC_WHALE);
 

@@ -32,7 +32,7 @@ contract SweepWithdrawERC4626Test is InstructionForkTestContext {
     address public DEFAULT_RECIPIENT = address(user);
     uint256 public DEFAULT_THRESHOLD = 50e6;
     uint256 public DEFAULT_END_BALANCE = 20e6;
-    uint256 public DEFAULT_MIN_TOTAL_ASSETS = 100e6;
+    uint256 public DEFAULT_MIN_TOTAL_SHARES = 100e6;
 
     IOtimFee.Fee public DEFAULT_FEE;
 
@@ -51,7 +51,7 @@ contract SweepWithdrawERC4626Test is InstructionForkTestContext {
             recipient: DEFAULT_RECIPIENT,
             threshold: DEFAULT_THRESHOLD,
             endBalance: DEFAULT_END_BALANCE,
-            minTotalAssets: DEFAULT_MIN_TOTAL_ASSETS,
+            minTotalShares: DEFAULT_MIN_TOTAL_SHARES,
             fee: DEFAULT_FEE
         });
 
@@ -125,9 +125,9 @@ contract SweepWithdrawERC4626Test is InstructionForkTestContext {
         vm.pauseGasMetering();
     }
 
-    /// @notice test that validation fails with zero min total assets
-    function test_sweepWithdrawERC4626_minTotalAssetsZero() public {
-        DEFAULT_ACTION_ARGS.minTotalAssets = 0;
+    /// @notice test that validation fails with zero min total shares
+    function test_sweepWithdrawERC4626_minTotalSharesZero() public {
+        DEFAULT_ACTION_ARGS.minTotalShares = 0;
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
@@ -141,7 +141,7 @@ contract SweepWithdrawERC4626Test is InstructionForkTestContext {
 
     /// @notice test that execution reverts with balance under threshold
     function test_sweepWithdrawERC4626_balanceUnderThreshold() public {
-        mockVault.setTotalAssets(DEFAULT_MIN_TOTAL_ASSETS + 1);
+        mockVault.setTotalSupply(DEFAULT_MIN_TOTAL_SHARES + 1);
         mockVault.setMaxWithdraw(DEFAULT_THRESHOLD - 1);
 
         DEFAULT_ACTION_ARGS.vault = address(mockVault);
@@ -156,20 +156,20 @@ contract SweepWithdrawERC4626Test is InstructionForkTestContext {
         vm.pauseGasMetering();
     }
 
-    /// @notice test that execution reverts with total assets too low
-    function test_sweepWithdrawERC4626_totalAssetsTooLow() public {
+    /// @notice test that execution reverts with total shares too low
+    function test_sweepWithdrawERC4626_totalSharesTooLow() public {
         vm.startPrank(MAINNET_USDC_WHALE);
         IERC20(MAINNET_USDC).approve(address(mockVault), USER_START_BALANCE);
         mockVault.deposit(USER_START_BALANCE, address(user));
         vm.stopPrank();
 
-        mockVault.setTotalAssets(DEFAULT_MIN_TOTAL_ASSETS - 1);
+        mockVault.setTotalSupply(DEFAULT_MIN_TOTAL_SHARES - 1);
 
         DEFAULT_ACTION_ARGS.vault = address(mockVault);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
-        bytes memory result = abi.encodeWithSelector(TotalAssetsTooLow.selector);
+        bytes memory result = abi.encodeWithSelector(TotalSharesTooLow.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
         vm.resetGasMetering();
