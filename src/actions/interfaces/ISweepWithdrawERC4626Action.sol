@@ -29,6 +29,9 @@ interface ISweepWithdrawERC4626Action is IOtimFee {
         Fee fee;
     }
 
+    /// @notice emitted when the max deposit is reached
+    event MaxWithdrawReached(uint256 maxWithdraw, uint256 newEndBalance);
+
     /// @notice calculates the EIP-712 hash of the SweepWithdrawERC4626 struct
     function hash(SweepWithdrawERC4626 memory arguments) external pure returns (bytes32);
 }
