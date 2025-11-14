@@ -14,7 +14,7 @@ import {
     ARGUMENTS_TYPEHASH
 } from "./interfaces/ISweepWithdrawERC4626Action.sol";
 
-import {InvalidArguments, BalanceUnderThreshold} from "./errors/Errors.sol";
+import {InvalidArguments, BalanceUnderThreshold, MaxWithdrawZero} from "./errors/Errors.sol";
 
 /// @title SweepWithdrawERC4626Action
 /// @author Otim Labs, Inc.
@@ -65,18 +65,38 @@ contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, Oti
             }
         }
 
+        // get the user's vault asset balance
+        uint256 assetBalance =
+            IERC4626(arguments.vault).convertToAssets(IERC4626(arguments.vault).balanceOf(address(this)));
+
+        // if the asset balance is under the threshold or equal to the endBalance, revert
+        // slither-disable-next-line incorrect-equality
+        if (assetBalance < arguments.threshold || assetBalance == arguments.endBalance) {
+            revert BalanceUnderThreshold();
+        }
+
         // get the max withdraw amount
         uint256 maxWithdraw = IERC4626(arguments.vault).maxWithdraw(address(this));
 
-        // if the max withdraw amount is under the threshold or equal to the endBalance, revert
-        // slither-disable-next-line incorrect-equality
-        if (maxWithdraw < arguments.threshold || maxWithdraw == arguments.endBalance) {
-            revert BalanceUnderThreshold();
+        // if the max withdraw amount is zero, revert
+        if (maxWithdraw == 0) {
+            revert MaxWithdrawZero();
+        }
+
+        // calculate the amount to withdraw
+        uint256 withdrawAmount = assetBalance - arguments.endBalance;
+
+        // if the withdraw amount is greater than the max withdraw amount,
+        // set the withdraw amount to the max withdraw amount and emit an event
+        if (withdrawAmount > maxWithdraw) {
+            withdrawAmount = maxWithdraw;
+
+            emit MaxWithdrawReached(maxWithdraw, assetBalance - maxWithdraw);
         }
 
         // withdraw from the vault
         // slither-disable-next-line unused-return
-        IERC4626(arguments.vault).withdraw(maxWithdraw - arguments.endBalance, arguments.recipient, address(this));
+        IERC4626(arguments.vault).withdraw(withdrawAmount, arguments.recipient, address(this));
 
         // charge the fee
         chargeFee(startGas - gasleft(), arguments.fee);

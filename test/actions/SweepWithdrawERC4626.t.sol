@@ -81,6 +81,37 @@ contract SweepWithdrawERC4626Test is InstructionForkTestContext {
         assertEq(IERC4626(DEFAULT_VAULT).maxWithdraw(address(user)), DEFAULT_END_BALANCE);
     }
 
+    /// @notice SweepWithdrawERC4626 flow when max withdraw is reached
+    function test_sweepWithdrawERC4626_maxWithdrawReached() public {
+        vm.startPrank(MAINNET_USDC_WHALE);
+        IERC20(MAINNET_USDC).approve(address(mockVault), USER_START_BALANCE);
+        mockVault.deposit(USER_START_BALANCE, address(user));
+        vm.stopPrank();
+
+        uint256 maxWithdraw = USER_START_BALANCE - DEFAULT_END_BALANCE - 1;
+
+        mockVault.setMaxWithdraw(maxWithdraw);
+        /// @dev we have to manually set this because the mock contract has an overridden totalSupply function which is used to calculate convertToAssets
+        mockVault.setTotalSupply(USER_START_BALANCE);
+
+        DEFAULT_ACTION_ARGS.vault = address(mockVault);
+
+        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
+
+        vm.expectEmit();
+        emit ISweepWithdrawERC4626Action.MaxWithdrawReached(maxWithdraw, USER_START_BALANCE - maxWithdraw);
+
+        vm.expectEmit(true, true, true, false);
+        emit IERC4626.Withdraw(address(user), DEFAULT_RECIPIENT, address(user), maxWithdraw, 0);
+
+        vm.expectEmit();
+        emit IOtimDelegate.InstructionExecuted(instructionId, 1);
+
+        vm.resetGasMetering();
+        user.executeInstruction(instruction, instructionSig);
+        vm.pauseGasMetering();
+    }
+
     /// @notice test that validation fails with vault == address(0)
     function test_sweepWithdrawERC4626_vaultZero() public {
         DEFAULT_ACTION_ARGS.vault = address(0);
@@ -125,8 +156,6 @@ contract SweepWithdrawERC4626Test is InstructionForkTestContext {
 
     /// @notice test that execution reverts with balance under threshold
     function test_sweepWithdrawERC4626_balanceUnderThreshold() public {
-        mockVault.setMaxWithdraw(DEFAULT_THRESHOLD - 1);
-
         DEFAULT_ACTION_ARGS.vault = address(mockVault);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
