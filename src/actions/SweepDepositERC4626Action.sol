@@ -15,7 +15,7 @@ import {
     ARGUMENTS_TYPEHASH
 } from "./interfaces/ISweepDepositERC4626Action.sol";
 
-import {InvalidArguments, BalanceUnderThreshold, MaxDepositZero, TotalSharesTooLow} from "./errors/Errors.sol";
+import {InvalidArguments, BalanceUnderThreshold, MaxDepositTooLow, TotalSharesTooLow} from "./errors/Errors.sol";
 
 /// @title SweepDepositERC4626Action
 /// @author Otim Labs, Inc.
@@ -39,6 +39,7 @@ contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimF
                 arguments.recipient,
                 arguments.threshold,
                 arguments.endBalance,
+                arguments.minDeposit,
                 arguments.minTotalShares,
                 hash(arguments.fee)
             )
@@ -61,7 +62,8 @@ contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimF
         if (executionState.executionCount == 0) {
             if (
                 arguments.vault == address(0) || arguments.recipient == address(0)
-                    || arguments.endBalance > arguments.threshold || arguments.minTotalShares == 0
+                    || arguments.endBalance > arguments.threshold || arguments.minDeposit == 0
+                    || arguments.minTotalShares == 0
             ) {
                 revert InvalidArguments();
             }
@@ -84,9 +86,9 @@ contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimF
         // get the max deposit amount
         uint256 maxDeposit = IERC4626(arguments.vault).maxDeposit(arguments.recipient);
 
-        // if the max deposit amount is zero, revert
-        if (maxDeposit == 0) {
-            revert MaxDepositZero();
+        // if the max deposit amount is less than the minimum deposit amount, revert
+        if (maxDeposit < arguments.minDeposit) {
+            revert MaxDepositTooLow();
         }
 
         // initialize deposit amount

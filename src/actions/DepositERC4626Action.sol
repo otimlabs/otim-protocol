@@ -12,7 +12,7 @@ import {OtimFee} from "./fee-models/OtimFee.sol";
 import {IAction} from "./interfaces/IAction.sol";
 import {IDepositERC4626Action, INSTRUCTION_TYPEHASH, ARGUMENTS_TYPEHASH} from "./interfaces/IDepositERC4626Action.sol";
 
-import {InvalidArguments, MaxDepositZero, InsufficientBalance, TotalSharesTooLow} from "./errors/Errors.sol";
+import {InvalidArguments, MaxDepositTooLow, InsufficientBalance, TotalSharesTooLow} from "./errors/Errors.sol";
 
 /// @title DepositERC4626Action
 /// @author Otim Labs, Inc.
@@ -35,6 +35,7 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
                 arguments.vault,
                 arguments.recipient,
                 arguments.value,
+                arguments.minDeposit,
                 arguments.minTotalShares,
                 hash(arguments.schedule),
                 hash(arguments.fee)
@@ -58,7 +59,7 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
         if (executionState.executionCount == 0) {
             if (
                 arguments.recipient == address(0) || arguments.vault == address(0) || arguments.value == 0
-                    || arguments.minTotalShares == 0
+                    || arguments.minDeposit == 0 || arguments.minTotalShares == 0
             ) {
                 revert InvalidArguments();
             }
@@ -74,9 +75,9 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
         // get the max deposit amount
         uint256 maxDeposit = IERC4626(arguments.vault).maxDeposit(arguments.recipient);
 
-        // if the max deposit amount is zero, revert
-        if (maxDeposit == 0) {
-            revert MaxDepositZero();
+        // if the max deposit amount is less than the minimum deposit amount, revert
+        if (maxDeposit < arguments.minDeposit) {
+            revert MaxDepositTooLow();
         }
 
         // initialize deposit amount

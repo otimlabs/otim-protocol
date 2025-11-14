@@ -25,7 +25,7 @@ contract EstimateDepositERC4626GasConstant is InstructionForkTestContext {
 
     DepositERC4626Action depositERC4626Action;
 
-    uint256 public constant DEPOSIT_ERC4626_GAS_CONSTANT = 105_500;
+    uint256 public constant DEPOSIT_ERC4626_GAS_CONSTANT = 106_000;
 
     constructor() {
         string memory rpcUrl = vm.envOr("MAINNET_RPC_URL", vm.rpcUrl("mainnet"));
@@ -55,6 +55,7 @@ contract EstimateDepositERC4626GasConstant is InstructionForkTestContext {
     ) public {
         // disregard fuzz generated values for token and target
         arguments.vault = address(MAINNET_STEAKHOUSE_USDC_VAULT);
+        arguments.minDeposit = 1;
         arguments.minTotalShares = 1;
 
         uint256 whaleBalance = IERC20(MAINNET_USDC).balanceOf(MAINNET_USDC_WHALE);

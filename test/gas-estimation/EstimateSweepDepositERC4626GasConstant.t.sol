@@ -25,7 +25,7 @@ contract EstimateSweepDepositERC4626GasConstant is InstructionForkTestContext {
 
     SweepDepositERC4626Action sweepDepositERC4626Action;
 
-    uint256 public constant SWEEP_DEPOSIT_ERC4626_GAS_CONSTANT = 104_000;
+    uint256 public constant SWEEP_DEPOSIT_ERC4626_GAS_CONSTANT = 104_500;
 
     constructor() {
         string memory rpcUrl = vm.envOr("MAINNET_RPC_URL", vm.rpcUrl("mainnet"));
@@ -57,6 +57,7 @@ contract EstimateSweepDepositERC4626GasConstant is InstructionForkTestContext {
         // disregard fuzz generated values for token and target
         arguments.vault = address(MAINNET_STEAKHOUSE_USDC_VAULT);
         arguments.recipient = address(user);
+        arguments.minDeposit = 1;
         arguments.minTotalShares = 1;
 
         // fuzz test must pass argument validation

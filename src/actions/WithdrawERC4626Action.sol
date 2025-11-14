@@ -15,7 +15,7 @@ import {
     ARGUMENTS_TYPEHASH
 } from "./interfaces/IWithdrawERC4626Action.sol";
 
-import {InvalidArguments, MaxWithdrawZero} from "./errors/Errors.sol";
+import {InvalidArguments, MaxWithdrawTooLow} from "./errors/Errors.sol";
 
 /// @title WithdrawERC4626Action
 /// @author Otim Labs, Inc.
@@ -38,6 +38,7 @@ contract WithdrawERC4626Action is IAction, IWithdrawERC4626Action, Interval, Oti
                 arguments.vault,
                 arguments.recipient,
                 arguments.value,
+                arguments.minWithdraw,
                 hash(arguments.schedule),
                 hash(arguments.fee)
             )
@@ -58,7 +59,10 @@ contract WithdrawERC4626Action is IAction, IWithdrawERC4626Action, Interval, Oti
 
         // if first execution, validate the input
         if (executionState.executionCount == 0) {
-            if (arguments.vault == address(0) || arguments.recipient == address(0) || arguments.value == 0) {
+            if (
+                arguments.vault == address(0) || arguments.recipient == address(0) || arguments.value == 0
+                    || arguments.minWithdraw == 0
+            ) {
                 revert InvalidArguments();
             }
 
@@ -70,9 +74,9 @@ contract WithdrawERC4626Action is IAction, IWithdrawERC4626Action, Interval, Oti
         // get the max withdraw amount
         uint256 maxWithdraw = IERC4626(arguments.vault).maxWithdraw(address(this));
 
-        // if the max withdraw amount is zero, revert
-        if (maxWithdraw == 0) {
-            revert MaxWithdrawZero();
+        // if the max withdraw amount is less than the minimum withdraw amount, revert
+        if (maxWithdraw < arguments.minWithdraw) {
+            revert MaxWithdrawTooLow();
         }
 
         // initialize withdraw amount

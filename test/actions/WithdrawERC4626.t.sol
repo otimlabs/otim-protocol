@@ -32,6 +32,7 @@ contract WithdrawERC4626Test is InstructionForkTestContext {
     address public DEFAULT_VAULT = address(MAINNET_STEAKHOUSE_USDC_VAULT);
     address public DEFAULT_RECIPIENT = address(user);
     uint256 public DEFAULT_VALUE = 100e6;
+    uint256 public DEFAULT_MIN_WITHDRAW = 1;
 
     IInterval.Schedule public DEFAULT_SCHEDULE;
     IOtimFee.Fee public DEFAULT_FEE;
@@ -50,6 +51,7 @@ contract WithdrawERC4626Test is InstructionForkTestContext {
             recipient: DEFAULT_RECIPIENT,
             vault: DEFAULT_VAULT,
             value: DEFAULT_VALUE,
+            minWithdraw: DEFAULT_MIN_WITHDRAW,
             schedule: DEFAULT_SCHEDULE,
             fee: DEFAULT_FEE
         });
@@ -153,15 +155,29 @@ contract WithdrawERC4626Test is InstructionForkTestContext {
         vm.pauseGasMetering();
     }
 
-    /// @notice test that execution reverts with max withdraw zero
-    function test_withdrawERC4626_maxWithdrawZero() public {
-        mockVault.setMaxWithdraw(0);
+    /// @notice test that validation fails with zero min withdraw
+    function test_withdrawERC4626_minWithdrawZero() public {
+        DEFAULT_ACTION_ARGS.minWithdraw = 0;
+
+        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
+
+        bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
+        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
+
+        vm.resetGasMetering();
+        user.executeInstruction(instruction, instructionSig);
+        vm.pauseGasMetering();
+    }
+
+    /// @notice test that execution reverts with max withdraw too low
+    function test_withdrawERC4626_maxWithdrawTooLow() public {
+        mockVault.setMaxWithdraw(DEFAULT_MIN_WITHDRAW - 1);
 
         DEFAULT_ACTION_ARGS.vault = address(mockVault);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
-        bytes memory result = abi.encodeWithSelector(MaxWithdrawZero.selector);
+        bytes memory result = abi.encodeWithSelector(MaxWithdrawTooLow.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
         vm.resetGasMetering();

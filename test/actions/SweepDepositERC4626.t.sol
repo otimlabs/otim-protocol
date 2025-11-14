@@ -32,6 +32,7 @@ contract SweepDepositERC4626Test is InstructionForkTestContext {
     address public DEFAULT_RECIPIENT = address(user);
     uint256 public DEFAULT_THRESHOLD = 100e6;
     uint256 public DEFAULT_END_BALANCE = 0;
+    uint256 public DEFAULT_MIN_DEPOSIT = 1;
     uint256 public DEFAULT_MIN_TOTAL_SHARES = 100e6;
 
     IOtimFee.Fee public DEFAULT_FEE;
@@ -51,6 +52,7 @@ contract SweepDepositERC4626Test is InstructionForkTestContext {
             recipient: DEFAULT_RECIPIENT,
             threshold: DEFAULT_THRESHOLD,
             endBalance: DEFAULT_END_BALANCE,
+            minDeposit: DEFAULT_MIN_DEPOSIT,
             minTotalShares: DEFAULT_MIN_TOTAL_SHARES,
             fee: DEFAULT_FEE
         });
@@ -177,6 +179,20 @@ contract SweepDepositERC4626Test is InstructionForkTestContext {
         vm.pauseGasMetering();
     }
 
+    /// @notice test that validation fails with zero min deposit
+    function test_sweepDepositERC4626_minDepositZero() public {
+        DEFAULT_ACTION_ARGS.minDeposit = 0;
+
+        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
+
+        bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
+        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
+
+        vm.resetGasMetering();
+        user.executeInstruction(instruction, instructionSig);
+        vm.pauseGasMetering();
+    }
+
     /// @notice test that validation fails with zero min total shares
     function test_sweepDepositERC4626_minTotalSharesZero() public {
         DEFAULT_ACTION_ARGS.minTotalShares = 0;
@@ -192,19 +208,19 @@ contract SweepDepositERC4626Test is InstructionForkTestContext {
     }
 
     /// @notice test that execution reverts with max deposit zero
-    function test_sweepDepositERC4626_maxDepositZero() public {
+    function test_sweepDepositERC4626_maxDepositTooLow() public {
         vm.startPrank(MAINNET_USDC_WHALE);
         IERC20(MAINNET_USDC).transfer(address(user), USER_START_BALANCE);
         vm.stopPrank();
 
         mockVault.setTotalSupply(DEFAULT_MIN_TOTAL_SHARES + 1);
-        mockVault.setMaxDeposit(0);
+        mockVault.setMaxDeposit(DEFAULT_MIN_DEPOSIT - 1);
 
         DEFAULT_ACTION_ARGS.vault = address(mockVault);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
-        bytes memory result = abi.encodeWithSelector(MaxDepositZero.selector);
+        bytes memory result = abi.encodeWithSelector(MaxDepositTooLow.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
         vm.resetGasMetering();
