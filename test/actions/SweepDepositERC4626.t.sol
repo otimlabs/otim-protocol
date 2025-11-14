@@ -179,20 +179,6 @@ contract SweepDepositERC4626Test is InstructionForkTestContext {
         vm.pauseGasMetering();
     }
 
-    /// @notice test that validation fails with zero min deposit
-    function test_sweepDepositERC4626_minDepositZero() public {
-        DEFAULT_ACTION_ARGS.minDeposit = 0;
-
-        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
-
-        bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
-        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
-
-        vm.resetGasMetering();
-        user.executeInstruction(instruction, instructionSig);
-        vm.pauseGasMetering();
-    }
-
     /// @notice test that validation fails with zero min total shares
     function test_sweepDepositERC4626_minTotalSharesZero() public {
         DEFAULT_ACTION_ARGS.minTotalShares = 0;

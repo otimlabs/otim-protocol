@@ -155,20 +155,6 @@ contract WithdrawERC4626Test is InstructionForkTestContext {
         vm.pauseGasMetering();
     }
 
-    /// @notice test that validation fails with zero min withdraw
-    function test_withdrawERC4626_minWithdrawZero() public {
-        DEFAULT_ACTION_ARGS.minWithdraw = 0;
-
-        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
-
-        bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
-        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
-
-        vm.resetGasMetering();
-        user.executeInstruction(instruction, instructionSig);
-        vm.pauseGasMetering();
-    }
-
     /// @notice test that execution reverts with max withdraw too low
     function test_withdrawERC4626_maxWithdrawTooLow() public {
         mockVault.setMaxWithdraw(DEFAULT_MIN_WITHDRAW - 1);

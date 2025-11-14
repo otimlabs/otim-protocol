@@ -59,7 +59,7 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
         if (executionState.executionCount == 0) {
             if (
                 arguments.recipient == address(0) || arguments.vault == address(0) || arguments.value == 0
-                    || arguments.minDeposit == 0 || arguments.minTotalShares == 0
+                    || arguments.minTotalShares == 0
             ) {
                 revert InvalidArguments();
             }
@@ -75,8 +75,8 @@ contract DepositERC4626Action is IAction, IDepositERC4626Action, Interval, OtimF
         // get the max deposit amount
         uint256 maxDeposit = IERC4626(arguments.vault).maxDeposit(arguments.recipient);
 
-        // if the max deposit amount is less than the minimum deposit amount, revert
-        if (maxDeposit < arguments.minDeposit) {
+        // if the max deposit is zero or less than the minimum deposit amount, revert
+        if (maxDeposit == 0 || maxDeposit < arguments.minDeposit) {
             revert MaxDepositTooLow();
         }
 

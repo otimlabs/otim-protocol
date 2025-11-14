@@ -59,10 +59,7 @@ contract WithdrawERC4626Action is IAction, IWithdrawERC4626Action, Interval, Oti
 
         // if first execution, validate the input
         if (executionState.executionCount == 0) {
-            if (
-                arguments.vault == address(0) || arguments.recipient == address(0) || arguments.value == 0
-                    || arguments.minWithdraw == 0
-            ) {
+            if (arguments.vault == address(0) || arguments.recipient == address(0) || arguments.value == 0) {
                 revert InvalidArguments();
             }
 
@@ -74,8 +71,8 @@ contract WithdrawERC4626Action is IAction, IWithdrawERC4626Action, Interval, Oti
         // get the max withdraw amount
         uint256 maxWithdraw = IERC4626(arguments.vault).maxWithdraw(address(this));
 
-        // if the max withdraw amount is less than the minimum withdraw amount, revert
-        if (maxWithdraw < arguments.minWithdraw) {
+        // if the max withdraw is zero or less than the minimum withdraw amount, revert
+        if (maxWithdraw == 0 || maxWithdraw < arguments.minWithdraw) {
             revert MaxWithdrawTooLow();
         }
 

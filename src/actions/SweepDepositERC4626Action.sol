@@ -62,8 +62,7 @@ contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimF
         if (executionState.executionCount == 0) {
             if (
                 arguments.vault == address(0) || arguments.recipient == address(0)
-                    || arguments.endBalance > arguments.threshold || arguments.minDeposit == 0
-                    || arguments.minTotalShares == 0
+                    || arguments.endBalance > arguments.threshold || arguments.minTotalShares == 0
             ) {
                 revert InvalidArguments();
             }
@@ -86,8 +85,8 @@ contract SweepDepositERC4626Action is IAction, ISweepDepositERC4626Action, OtimF
         // get the max deposit amount
         uint256 maxDeposit = IERC4626(arguments.vault).maxDeposit(arguments.recipient);
 
-        // if the max deposit amount is less than the minimum deposit amount, revert
-        if (maxDeposit < arguments.minDeposit) {
+        // if the max deposit is zero or less than the minimum deposit amount, revert
+        if (maxDeposit == 0 || maxDeposit < arguments.minDeposit) {
             revert MaxDepositTooLow();
         }
 

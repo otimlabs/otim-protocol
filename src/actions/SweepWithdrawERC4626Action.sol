@@ -60,7 +60,7 @@ contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, Oti
         if (executionState.executionCount == 0) {
             if (
                 arguments.vault == address(0) || arguments.recipient == address(0)
-                    || arguments.endBalance > arguments.threshold || arguments.minWithdraw == 0
+                    || arguments.endBalance > arguments.threshold
             ) {
                 revert InvalidArguments();
             }
@@ -79,8 +79,8 @@ contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, Oti
         // get the max withdraw amount
         uint256 maxWithdraw = IERC4626(arguments.vault).maxWithdraw(address(this));
 
-        // if the max withdraw amount is less than the minimum withdraw amount, revert
-        if (maxWithdraw < arguments.minWithdraw) {
+        // if the max withdraw is zero or less than the minimum withdraw amount, revert
+        if (maxWithdraw == 0 || maxWithdraw < arguments.minWithdraw) {
             revert MaxWithdrawTooLow();
         }
 
