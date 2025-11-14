@@ -14,7 +14,7 @@ import {
     ARGUMENTS_TYPEHASH
 } from "./interfaces/ISweepWithdrawERC4626Action.sol";
 
-import {InvalidArguments, BalanceUnderThreshold, MaxWithdrawZero} from "./errors/Errors.sol";
+import {InvalidArguments, BalanceUnderThreshold, MaxWithdrawTooLow} from "./errors/Errors.sol";
 
 /// @title SweepWithdrawERC4626Action
 /// @author Otim Labs, Inc.
@@ -38,6 +38,7 @@ contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, Oti
                 arguments.recipient,
                 arguments.threshold,
                 arguments.endBalance,
+                arguments.minWithdraw,
                 hash(arguments.fee)
             )
         );
@@ -78,9 +79,9 @@ contract SweepWithdrawERC4626Action is IAction, ISweepWithdrawERC4626Action, Oti
         // get the max withdraw amount
         uint256 maxWithdraw = IERC4626(arguments.vault).maxWithdraw(address(this));
 
-        // if the max withdraw amount is zero, revert
-        if (maxWithdraw == 0) {
-            revert MaxWithdrawZero();
+        // if the max withdraw is zero or less than the minimum withdraw amount, revert
+        if (maxWithdraw == 0 || maxWithdraw < arguments.minWithdraw) {
+            revert MaxWithdrawTooLow();
         }
 
         // calculate the amount to withdraw

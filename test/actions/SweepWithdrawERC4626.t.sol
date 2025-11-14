@@ -32,6 +32,7 @@ contract SweepWithdrawERC4626Test is InstructionForkTestContext {
     address public DEFAULT_RECIPIENT = address(user);
     uint256 public DEFAULT_THRESHOLD = 50e6;
     uint256 public DEFAULT_END_BALANCE = 20e6;
+    uint256 public DEFAULT_MIN_WITHDRAW = 1;
 
     IOtimFee.Fee public DEFAULT_FEE;
 
@@ -50,6 +51,7 @@ contract SweepWithdrawERC4626Test is InstructionForkTestContext {
             recipient: DEFAULT_RECIPIENT,
             threshold: DEFAULT_THRESHOLD,
             endBalance: DEFAULT_END_BALANCE,
+            minWithdraw: DEFAULT_MIN_WITHDRAW,
             fee: DEFAULT_FEE
         });
 
@@ -147,6 +149,27 @@ contract SweepWithdrawERC4626Test is InstructionForkTestContext {
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
         bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
+        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
+
+        vm.resetGasMetering();
+        user.executeInstruction(instruction, instructionSig);
+        vm.pauseGasMetering();
+    }
+
+    /// @notice test that validation fails with max withdraw too low
+    function test_sweepWithdrawERC4626_maxWithdrawTooLow() public {
+        vm.startPrank(MAINNET_USDC_WHALE);
+        IERC20(MAINNET_USDC).approve(address(mockVault), USER_START_BALANCE);
+        mockVault.deposit(USER_START_BALANCE, address(user));
+        vm.stopPrank();
+
+        mockVault.setMaxWithdraw(DEFAULT_MIN_WITHDRAW - 1);
+
+        DEFAULT_ACTION_ARGS.vault = address(mockVault);
+
+        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
+
+        bytes memory result = abi.encodeWithSelector(MaxWithdrawTooLow.selector);
         vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
 
         vm.resetGasMetering();

@@ -4,11 +4,11 @@ pragma solidity ^0.8.26;
 import {IOtimFee} from "../fee-models/interfaces/IOtimFee.sol";
 
 bytes32 constant INSTRUCTION_TYPEHASH = keccak256(
-    "Instruction(uint256 salt,uint256 maxExecutions,address action,SweepDepositERC4626 sweepDepositERC4626)SweepDepositERC4626(address vault,address recipient,uint256 threshold,uint256 endBalance,uint256 minTotalShares,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)"
+    "Instruction(uint256 salt,uint256 maxExecutions,address action,SweepDepositERC4626 sweepDepositERC4626)SweepDepositERC4626(address vault,address recipient,uint256 threshold,uint256 endBalance,uint256 minDeposit,uint256 minTotalShares,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)"
 );
 
 bytes32 constant ARGUMENTS_TYPEHASH = keccak256(
-    "SweepDepositERC4626(address vault,address recipient,uint256 threshold,uint256 endBalance,uint256 minTotalShares,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)"
+    "SweepDepositERC4626(address vault,address recipient,uint256 threshold,uint256 endBalance,uint256 minDeposit,uint256 minTotalShares,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)"
 );
 
 /// @title ISweepDepositERC4626Action
@@ -20,6 +20,7 @@ interface ISweepDepositERC4626Action is IOtimFee {
     /// @param recipient - the address to receive shares
     /// @param threshold - the account's balance threshold to trigger the sweep
     /// @param endBalance - the account's balance after the sweep
+    /// @param minDeposit - the minimum deposit amount to trigger the sweep
     /// @param minTotalShares - the minimum total shares of the vault before the deposit
     /// @param fee - the fee Otim will charge for the deposit
     struct SweepDepositERC4626 {
@@ -27,6 +28,7 @@ interface ISweepDepositERC4626Action is IOtimFee {
         address recipient;
         uint256 threshold;
         uint256 endBalance;
+        uint256 minDeposit;
         uint256 minTotalShares;
         Fee fee;
     }
