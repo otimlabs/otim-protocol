@@ -619,7 +619,8 @@ async fn calculate_addresses_by_tier(config: &DeploymentConfig, tier: &str) -> R
 }
 
 /// Validates calculated contract addresses against environment file values
-async fn validate_addresses(config: &DeploymentConfig, network_env_file: &str, chain_env_file: &str, update: bool) -> Result<()> {
+async fn validate_addresses(config: &DeploymentConfig, network_env_file: &str, chain_env_file: &str, update: bool) -> Result<bool> {
+    info(&format!("Validating addresses against: {} and {}", network_env_file, chain_env_file));
     let network_env = load_env_file(network_env_file)?;
     let chain_env = load_env_file(chain_env_file)?;
     let mut calculated_addresses = HashMap::new();
@@ -687,12 +688,11 @@ async fn validate_addresses(config: &DeploymentConfig, network_env_file: &str, c
         } else {
             info("Address differences detected. Use --update to apply changes.");
         }
-        std::process::exit(2);
+        Ok(false) // Return false to indicate validation failed (differences found)
     } else {
         info("All addresses match");
+        Ok(true) // Return true to indicate validation passed (no differences)
     }
-
-    Ok(())
 }
 
 // =============================================================================
@@ -1122,18 +1122,26 @@ async fn main() -> Result<()> {
             let config = load_deploy_config(&config_file)?;
             let chains = config.chains.as_ref().filter(|c| !c.is_empty()).ok_or_else(|| anyhow!("No chains in config"))?;
 
+            let mut all_valid = true;
             for chain in chains {
                 let chain_info = get_chain_info(chain).ok_or_else(|| anyhow!("Unknown chain: {}", chain))?;
                 info(&format!("Validating {} ({})", chain, chain_info.network));
                 load_chain_env_files(&env_dir, chain, chain_info.network)?;
-                validate_addresses(
+                let is_valid = validate_addresses(
                     &config,
                     &format!("{}/{}/.env-otim-{}", env_dir, chain_info.network, chain_info.network),
                     &format!("{}/{}/.env-{}", env_dir, chain_info.network, chain),
                     update
                 ).await?;
+                if !is_valid {
+                    all_valid = false;
+                }
             }
             info(&format!("✓ Validated {} chains", chains.len()));
+
+            if !all_valid {
+                std::process::exit(2);
+            }
             Ok(())
         }
 
