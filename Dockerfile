@@ -4,13 +4,11 @@ WORKDIR /app
 USER root
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y software-properties-common && \
-    add-apt-repository ppa:rmescandon/yq -y && \
-    apt-get update && apt-get install -y curl jq build-essential yq && \
+RUN apt-get update && apt-get install -y curl jq build-essential && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Rust and set up toolchain
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+RUN curl -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}" RUSTUP_HOME="/root/.rustup" CARGO_HOME="/root/.cargo"
 RUN . ~/.cargo/env && rustup default stable && cargo install rust-script
 
