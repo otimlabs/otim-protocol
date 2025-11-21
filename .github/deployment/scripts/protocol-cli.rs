@@ -170,6 +170,7 @@ struct TierConfig {
 /// Gets chain information including chain ID and network
 fn get_chain_info(chain: &str) -> Option<ChainInfo> {
     Some(match chain {
+        "anvil" => ChainInfo { chain_id: 31337, network: "testnet" },
         "base-sepolia" => ChainInfo { chain_id: 84532, network: "testnet" },
         "base" => ChainInfo { chain_id: 8453, network: "mainnet" },
         "optimism-sepolia" => ChainInfo { chain_id: 11155420, network: "testnet" },
@@ -683,47 +684,26 @@ fn is_known_error(error: &str) -> bool {
 }
 
 
-/// Executes a forge deployment command with optional retry logic
-async fn run_forge_deploy(script: &str, private_key: Option<&str>, retries: Option<usize>) -> Result<String> {
-    let retries = retries.unwrap_or(3);
-    
-    for attempt in 1..=retries {
-        if attempt > 1 {
-            warn(&format!("Retrying deployment (attempt {}/{}): {}", attempt, retries, script));
-            tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-        }
-        
-        let rpc_url = env::var("RPC_URL").context("RPC_URL not found")?;
-        let mut args: Vec<&str> = vec![
-            "script", script,
-            "--broadcast",
-            "--rpc-url", rpc_url.as_str(),
-            "--timeout", "30", // 30 second timeout
-        ];
+/// Executes a forge deployment command with retry logic
+async fn run_forge_deploy(script: &str, private_key: Option<&str>) -> Result<String> {
+    let rpc_url = env::var("RPC_URL").context("RPC_URL not found")?;
+    let mut args: Vec<&str> = vec![
+        "script", script,
+        "--broadcast",
+        "--rpc-url", rpc_url.as_str(),
+        "--timeout", "30", // 30 second timeout
+    ];
 
-        if let Some(pk) = private_key {
-            args.extend_from_slice(&["--private-key", pk]);
-        } else {
-            args.push("--aws");
-        }
-
-        args.push("--json");
-        
-        match run_command("forge", &args, 1, &[]).await {
-            Ok(output) => return Ok(output),
-            Err(e) => {
-                let error_str = e.to_string();
-                if is_known_error(&error_str) {
-                    return Err(e); // Known error, don't retry
-                } else if attempt < retries {
-                    continue; // Unknown error, retry
-                } else {
-                    return Err(e); // Max retries reached
-                }
-            }
-        }
+    if let Some(pk) = private_key {
+        args.extend_from_slice(&["--private-key", pk]);
+    } else {
+        args.push("--aws");
     }
-    unreachable!()
+
+    args.push("--json");
+    
+    let retry_errors = &["failed to get block", "timed out", "dispatch failure", "connection", "reset by peer"];
+    run_command("forge", &args, 3, retry_errors).await
 }
 
 /// Deploys all contracts in tier order
@@ -742,7 +722,7 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
             if contract == "Core" && tier == "core" {
                 // Deploy all core contracts together
                 if let Some(script) = &tier_config.script {
-                    match run_forge_deploy(script, private_key, None).await {
+                    match run_forge_deploy(script, private_key).await {
                         Ok(output) => {
                             for (core_contract, details) in &tier_config.contracts {
                                 if let Ok(addr) = extract_address(&output, core_contract) {
@@ -771,7 +751,7 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
             } else if let Some(details) = tier_config.contracts.get(contract) {
                 // Deploy individual contract
                 let script = details.script.clone().unwrap_or_else(|| format!("Deploy{}", contract));
-                match run_forge_deploy(&script, private_key, None).await {
+                match run_forge_deploy(&script, private_key).await {
                     Ok(output) => {
                         if let Ok(addr) = extract_address(&output, contract) {
                             info(&format!("✓ Deployed {}: {}", contract, addr));
@@ -795,7 +775,6 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
             }
             
             // Add delay between deployments to prevent nonce conflicts
-            // Skip delay for the last contract in the list
             if let Some(last_contract) = contracts.last() {
                 if contract != last_contract {
                     tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
@@ -857,35 +836,22 @@ async fn whitelist_actions_for_chain(chain: &str, addresses: &HashMap<String, St
 
         args.push(action_address);
 
-        // Retry whitelisting with 3-second delays
-        for attempt in 1..=3 {
-            if attempt > 1 {
-                warn(&format!("Retrying whitelist (attempt {}/3): {}", attempt, contract_name));
-                tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+        let retry_errors = &["failed to get block", "timed out", "dispatch failure", "connection", "reset by peer"];
+        match run_command("forge", &args, 3, retry_errors).await {
+            Ok(_) => {
+                info(&format!("✓ {} whitelisted", contract_name));
             }
-            
-            let retry_errors = &["failed to get block", "timed out", "dispatch failure", "connection", "reset by peer"];
-            match run_command("forge", &args, 3, retry_errors).await {
-                Ok(_) => {
-                    info(&format!("✓ {} whitelisted", contract_name));
-                    break;
-                }
-                Err(e) => {
-                    let error_str = e.to_string();
-                    if is_known_error(&error_str) {
-                        info(&format!("- {} already whitelisted", contract_name));
-                        break;
-                    } else if attempt < 3 {
-                        continue; // Unknown error, retry
-                    } else {
-                        bail!("Failed to whitelist {}: {}", contract_name, e);
-                    }
+            Err(e) => {
+                let error_str = e.to_string();
+                if is_known_error(&error_str) {
+                    info(&format!("- {} already whitelisted", contract_name));
+                } else {
+                    bail!("Failed to whitelist {}: {}", contract_name, e);
                 }
             }
         }
         
         // Add delay between whitelisting operations to prevent nonce conflicts
-        // Skip delay for the last contract in the list
         if let Some((last_contract_name, _)) = action_contracts.last() {
             if *contract_name != *last_contract_name {
                 tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
@@ -956,27 +922,9 @@ async fn update_chain_config(config: &DeploymentConfig, addresses_file: &str, ch
 // VERIFY CONTRACTS
 // =============================================================================
 
-struct NetworkInfo {
-    chain_id: u64,
-    network: &'static str,
-}
+/// Address padding for encoding constructor arguments (24 bytes = 48 hex chars)
+const ADDRESS_PADDING: &str = "000000000000000000000000";
 
-/// Gets network information including chain ID and environment (testnet/mainnet)
-fn get_network_info(network: &str) -> Option<NetworkInfo> {
-    Some(match network {
-        "base-sepolia" => NetworkInfo { chain_id: 84532, network: "testnet" },
-        "base" => NetworkInfo { chain_id: 8453, network: "mainnet" },
-        "optimism-sepolia" => NetworkInfo { chain_id: 11155420, network: "testnet" },
-        "optimism" => NetworkInfo { chain_id: 10, network: "mainnet" },
-        "arbitrum-sepolia" => NetworkInfo { chain_id: 421614, network: "testnet" },
-        "arbitrum" => NetworkInfo { chain_id: 42161, network: "mainnet" },
-        "ethereum-sepolia" => NetworkInfo { chain_id: 11155111, network: "testnet" },
-        "ethereum-mainnet" => NetworkInfo { chain_id: 1, network: "mainnet" },
-        "pecorino-signet" => NetworkInfo { chain_id: 14174, network: "testnet" },
-        "pecorino-host" => NetworkInfo { chain_id: 3151908, network: "testnet" },
-        _ => return None,
-    })
-}
 
 /// Encodes constructor arguments based on contract type
 fn encode_constructor_args(
@@ -986,26 +934,15 @@ fn encode_constructor_args(
 ) -> Result<String> {
     match constructor_type {
         ConstructorType::None | ConstructorType::Core => Ok(String::new()),
-        ConstructorType::Owner => {
-            let owner = env_vars.get("OWNER_ADDRESS")
-                .ok_or_else(|| anyhow!("OWNER_ADDRESS not found in environment"))?;
-            Ok(format!("000000000000000000000000{}", owner.trim_start_matches("0x")))
-        }
+        ConstructorType::Owner => Ok(format!("{}{}", ADDRESS_PADDING, 
+            env_vars.get("OWNER_ADDRESS").expect("OWNER_ADDRESS not found").trim_start_matches("0x"))),
         ConstructorType::Action => {
-            let fee_token_registry = env_vars.get("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS")
-                .ok_or_else(|| anyhow!("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS not found"))?;
-            let treasury = env_vars.get("EXPECTED_TREASURY_ADDRESS")
-                .ok_or_else(|| anyhow!("EXPECTED_TREASURY_ADDRESS not found"))?;
-            let gas_constant_var = format!("{}_GAS_CONSTANT", to_snake_case(contract_name));
-            let gas_constant = env_vars.get(&gas_constant_var)
-                .ok_or_else(|| anyhow!("Gas constant {} not found for {}", gas_constant_var, contract_name))?;
-
-            Ok(format!(
-                "000000000000000000000000{}000000000000000000000000{}{:0>64}",
-                fee_token_registry.trim_start_matches("0x"),
-                treasury.trim_start_matches("0x"),
-                format!("{:x}", gas_constant.parse::<u64>()?)
-            ))
+            let fee = env_vars.get("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS").expect("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS not found");
+            let treasury = env_vars.get("EXPECTED_TREASURY_ADDRESS").expect("EXPECTED_TREASURY_ADDRESS not found");
+            let gas = env_vars.get(&format!("{}_GAS_CONSTANT", to_snake_case(contract_name)))
+                .unwrap_or_else(|| panic!("Gas constant not found for {}", contract_name));
+            Ok(format!("{}{}{}{}{:0>64x}", ADDRESS_PADDING, fee.trim_start_matches("0x"),
+                ADDRESS_PADDING, treasury.trim_start_matches("0x"), gas.parse::<u64>()?))
         }
     }
 }
@@ -1023,27 +960,23 @@ async fn verify_contracts(
 
     for chain in chains {
         info(&format!("Verifying contracts for network: {}", chain));
-        let network_info = get_network_info(chain)
-            .ok_or_else(|| anyhow!("Unknown network: {}", chain))?;
-        let env_vars = load_chain_env_files(env_dir, chain, network_info.network)?;
-
-        for (key, value) in &env_vars {
-            env::set_var(key, value);
-        }
+        let chain_info = get_chain_info(chain).ok_or_else(|| anyhow!("Unknown chain: {}", chain))?;
+        let env_vars = load_chain_env_files(env_dir, chain, chain_info.network)?;
+        env_vars.iter().for_each(|(k, v)| env::set_var(k, v));
 
         for contract_name in &config.contracts {
             if contract_name == "Core" {
-                let mapping = get_contract_mapping();
-                for (name, details) in &mapping.get("core").unwrap().contracts {
-                    verify_contract(protocol_root, name, details, network_info.chain_id, &env_vars, etherscan_api_key, verifier).await?;
+                for (name, details) in &get_contract_mapping().get("core").unwrap().contracts {
+                    verify_contract(protocol_root, name, details, chain_info.chain_id, &env_vars, etherscan_api_key, verifier).await?;
                 }
-            } else if let Some(details) = find_contract_details(contract_name) {
-                verify_contract(protocol_root, contract_name, &details, network_info.chain_id, &env_vars, etherscan_api_key, verifier).await?;
-            } else {
-                warn(&format!("Contract {} not found in mapping, skipping", contract_name));
+                continue;
             }
+            let Some(details) = find_contract_details(contract_name) else {
+                warn(&format!("Contract {} not found in mapping, skipping", contract_name));
+                continue;
+            };
+            verify_contract(protocol_root, contract_name, &details, chain_info.chain_id, &env_vars, etherscan_api_key, verifier).await?;
         }
-
         info(&format!("✓ Completed verification for {}", chain));
     }
 
@@ -1066,49 +999,29 @@ async fn verify_contract(
         return Ok(());
     }
 
-    let address_var = details.expected_addr_envvar
-        .ok_or_else(|| anyhow!("No address env var for {}", contract_name))?;
-    let address = env_vars.get(address_var)
-        .ok_or_else(|| anyhow!("{} not found in environment", address_var))?;
-
+    let address = env_vars.get(details.expected_addr_envvar
+        .unwrap_or_else(|| panic!("No address env var for {}", contract_name)))
+        .unwrap_or_else(|| panic!("Address not found in environment"));
     info(&format!("Verifying {} at {}", contract_name, address));
 
     let constructor_args = encode_constructor_args(&details.constructor_type, contract_name, env_vars)?;
-    let chain_id_string = chain_id.to_string();
-
-    let mut args = vec![
-        "verify-contract", address, &details.source_path,
-        "--chain-id", &chain_id_string,
-        "--verifier", verifier,
-        "--watch",
-    ];
-
+    let chain_id_str = chain_id.to_string();
+    let mut args = vec!["verify-contract", address, &details.source_path, "--chain-id", &chain_id_str, "--verifier", verifier, "--watch"];
     if !constructor_args.is_empty() {
         args.extend(["--constructor-args", &constructor_args]);
     }
-
-    let api_key_string;
-    if let Some(key) = etherscan_api_key {
-        if verifier == "etherscan" {
-            api_key_string = key.to_string();
-            args.extend(["--etherscan-api-key", &api_key_string]);
-        }
+    if let Some(key) = etherscan_api_key.filter(|_| verifier == "etherscan") {
+        args.extend(["--etherscan-api-key", key]);
     }
 
-    let status = tokio::process::Command::new("forge")
-        .args(&args)
-        .current_dir(protocol_root)
-        .env_clear()
-        .envs(env::vars())
-        .status()
-        .await?;
-
+    let status = tokio::process::Command::new("forge").args(&args).current_dir(protocol_root)
+        .env_clear().envs(env::vars()).status().await?;
+    
     if status.success() {
         info(&format!("✓ {} verified successfully", contract_name));
     } else {
         warn(&format!("Failed to verify {}", contract_name));
     }
-
     Ok(())
 }
 
