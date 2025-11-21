@@ -170,7 +170,7 @@ struct TierConfig {
 /// Gets chain information including chain ID and network
 fn get_chain_info(chain: &str) -> Option<ChainInfo> {
     Some(match chain {
-        "anvil" => ChainInfo { chain_id: 31337, network: "testnet" },
+        "anvil" => ChainInfo { chain_id: 31337, network: "devnet" },
         "base-sepolia" => ChainInfo { chain_id: 84532, network: "testnet" },
         "base" => ChainInfo { chain_id: 8453, network: "mainnet" },
         "optimism-sepolia" => ChainInfo { chain_id: 11155420, network: "testnet" },
