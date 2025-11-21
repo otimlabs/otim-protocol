@@ -3,18 +3,21 @@ FROM ghcr.io/foundry-rs/foundry:stable
 WORKDIR /app
 USER root
 
-# Install system dependencies and Rust toolchain
-RUN apt-get update && apt-get install -y curl build-essential && rm -rf /var/lib/apt/lists/* && \
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    . ~/.cargo/env && cargo install rust-script
+# Install system dependencies
+RUN apt-get update && apt-get install -y software-properties-common && \
+    add-apt-repository ppa:rmescandon/yq -y && \
+    apt-get update && apt-get install -y curl jq build-essential yq && \
+    rm -rf /var/lib/apt/lists/*
 
-ENV PATH="/root/.cargo/bin:${PATH}"
+# Install Rust and set up toolchain
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}" RUSTUP_HOME="/root/.rustup" CARGO_HOME="/root/.cargo"
+RUN . ~/.cargo/env && rustup default stable && cargo install rust-script
 
 COPY . .
 
-# Setup scripts and configs
-RUN mkdir /scripts && \
-    cp .github/scripts/protocol-cli.rs .github/scripts/deployment-config.yaml /scripts/ && \
+# Setup deployment scripts
+RUN mkdir /scripts && cp .github/deployment/scripts/protocol-cli.rs /scripts/ && \
     chmod +x /scripts/protocol-cli.rs
 
 # Precompile rust-script to cache in image

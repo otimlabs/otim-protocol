@@ -1,0 +1,15 @@
+## Example deployment configuration
+##
+## Copy this file and adjust the chains and contracts to match the deployment plan.
+
+## contracts:
+##   - Core                      # Deploy all core contracts (OtimDelegate, Gateway, etc.)
+##   - FeeTokenRegistry
+##   - Treasury
+##   - TransferAction
+##   ...
+##
+## chains:
+##   - ethereum-sepolia
+##   - base (mainnet)
+##   ...

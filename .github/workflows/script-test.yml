@@ -5,8 +5,7 @@ on:
     branches:
       - main
     paths:
-      - '.github/scripts/protocol-cli.rs'
-      - '.github/deployment-config.yaml'
+      - '.github/deployment/scripts/protocol-cli.rs'
   workflow_dispatch:
 
 jobs:
@@ -33,4 +32,4 @@ jobs:
       - name: Run tests
         run: |
           echo "Running tests for protocol CLI script..."
-          rust-script --test .github/scripts/protocol-cli.rs
+          rust-script --test .github/deployment/scripts/protocol-cli.rs
