@@ -277,7 +277,7 @@ fn get_contract_mapping() -> HashMap<String, TierConfig> {
                 }),
                 ("UniswapV3ExactInputAction".to_string(), ContractDetails {
                     script: Some("DeployUniswapV3ExactInputAction".to_string()),
-                    expected_addr_envvar: Some("UNISWAP_V3_EXACT_INPUT_ACTION_ADDRESS"),
+                    expected_addr_envvar: Some("EXPECTED_UNISWAP_V3_EXACT_INPUT_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.uniswapV3ExactInput".to_string()),
                     source_path: "src/actions/UniswapV3ExactInputAction.sol:UniswapV3ExactInputAction",
                     constructor_type: ConstructorType::Action,
@@ -613,12 +613,12 @@ async fn calculate_addresses_by_tier(config: &DeploymentConfig, tier: &str) -> R
 }
 
 /// Validates calculated contract addresses against environment file values
-async fn validate_addresses(config: &DeploymentConfig, env_file: &str, update: bool) -> Result<()> {
-    info(&format!("Validating addresses against: {}", env_file));
-
-    let original_env = load_env_file(env_file)?;
+async fn validate_addresses(config: &DeploymentConfig, network_env_file: &str, chain_env_file: &str, update: bool) -> Result<()> {
+    let network_env = load_env_file(network_env_file)?;
+    let chain_env = load_env_file(chain_env_file)?;
     let mut calculated_addresses = HashMap::new();
-    let mut updates = HashMap::new();
+    let mut network_updates = HashMap::new();
+    let mut chain_updates = HashMap::new();
 
     // Calculate addresses for all tiers
     for tier in ["core", "infrastructure", "actions"] {
@@ -637,14 +637,24 @@ async fn validate_addresses(config: &DeploymentConfig, env_file: &str, update: b
         calculated_addresses.extend(addresses);
     }
 
-    // Compare addresses and collect updates
+    // Compare addresses and collect updates (route to chain or network env file)
     for (contract, calculated_address) in &calculated_addresses {
         if let Some(details) = find_contract_details(contract) {
             if let Some(env_var) = &details.expected_addr_envvar {
-                let current_address = original_env.get(*env_var).map(|s| s.as_str()).unwrap_or("NOT_SET");
+                let is_non_create2 = matches!(*env_var,
+                    "EXPECTED_UNISWAP_V3_EXACT_INPUT_ACTION_ADDRESS" | "EXPECTED_SWEEP_CCTP_ACTION_ADDRESS" |
+                    "EXPECTED_TRANSFER_CCTP_ACTION_ADDRESS" | "EXPECTED_SWEEP_UNISWAP_V3_ACTION_ADDRESS"
+                );
+                let (env, updates_map) = if is_non_create2 {
+                    (&chain_env, &mut chain_updates)
+                } else {
+                    (&network_env, &mut network_updates)
+                };
+                let env_file_path = if is_non_create2 { chain_env_file } else { network_env_file };
+                let current_address = env.get(*env_var).map(|s| s.as_str()).unwrap_or("NOT_SET");
                 if current_address != calculated_address {
-                    warn(&format!("{}: {} → {}", contract, current_address, calculated_address));
-                    updates.insert(env_var.to_string(), calculated_address.clone());
+                    warn(&format!("{}: {} → {} ({})", contract, current_address, calculated_address, env_file_path));
+                    updates_map.insert(env_var.to_string(), calculated_address.clone());
                 } else {
                     info(&format!("{}: {} ✓", contract, calculated_address));
                 }
@@ -657,10 +667,17 @@ async fn validate_addresses(config: &DeploymentConfig, env_file: &str, update: b
     }
 
     // Apply updates and/or report differences
-    if !updates.is_empty() {
+    let has_updates = !network_updates.is_empty() || !chain_updates.is_empty();
+    if has_updates {
         if update {
-            update_env_file(env_file, &updates)?;
-            info(&format!("Updated {}", env_file));
+            if !network_updates.is_empty() {
+                update_env_file(network_env_file, &network_updates)?;
+                info(&format!("Updated {}", network_env_file));
+            }
+            if !chain_updates.is_empty() {
+                update_env_file(chain_env_file, &chain_updates)?;
+                info(&format!("Updated {}", chain_env_file));
+            }
         } else {
             info("Address differences detected. Use --update to apply changes.");
         }
@@ -1101,9 +1118,15 @@ async fn main() -> Result<()> {
             let chains = config.chains.as_ref().filter(|c| !c.is_empty()).ok_or_else(|| anyhow!("No chains in config"))?;
 
             for chain in chains {
-                info(&format!("Validating {} ({})", chain, get_chain_info(chain).ok_or_else(|| anyhow!("Unknown chain: {}", chain))?.network));
-                load_chain_env_files(&env_dir, chain, get_chain_info(chain).unwrap().network)?;
-                validate_addresses(&config, &format!("{}/{}/.env-otim-{}", env_dir, get_chain_info(chain).unwrap().network, get_chain_info(chain).unwrap().network), update).await?;
+                let chain_info = get_chain_info(chain).ok_or_else(|| anyhow!("Unknown chain: {}", chain))?;
+                info(&format!("Validating {} ({})", chain, chain_info.network));
+                load_chain_env_files(&env_dir, chain, chain_info.network)?;
+                validate_addresses(
+                    &config,
+                    &format!("{}/{}/.env-otim-{}", env_dir, chain_info.network, chain_info.network),
+                    &format!("{}/{}/.env-{}", env_dir, chain_info.network, chain),
+                    update
+                ).await?;
             }
             info(&format!("✓ Validated {} chains", chains.len()));
             Ok(())
