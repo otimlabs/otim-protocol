@@ -22,9 +22,6 @@ jobs:
     needs: [check-artifacts]
     if: always()
     runs-on: ubuntu-latest
-    env:
-      MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
-      SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
 
     steps:
       - name: Checkout repository

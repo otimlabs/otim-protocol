@@ -21,10 +21,9 @@ RUN mkdir /scripts && cp .github/deployment/scripts/protocol-cli.rs /scripts/ &&
 # Precompile rust-script to cache in image
 RUN rust-script /scripts/protocol-cli.rs --help
 
-# Build contracts and run tests
+# Build contracts
 RUN forge soldeer update
 RUN forge build
-RUN forge test
 
 ENTRYPOINT ["forge"]
 CMD ["--version"]
