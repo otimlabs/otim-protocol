@@ -179,12 +179,6 @@ fn get_chain_info(chain: &str) -> Option<ChainInfo> {
         "arbitrum" => ChainInfo { chain_id: 42161, network: "mainnet" },
         "ethereum-sepolia" => ChainInfo { chain_id: 11155111, network: "testnet" },
         "ethereum" => ChainInfo { chain_id: 1, network: "mainnet" },
-        "bnb-testnet" => ChainInfo { chain_id: 97, network: "testnet" },
-        "bnb" => ChainInfo { chain_id: 56, network: "mainnet" },
-        "unichain-sepolia" => ChainInfo { chain_id: 1301, network: "testnet" },
-        "unichain" => ChainInfo { chain_id: 130, network: "mainnet" },
-        "polygon-amoy" => ChainInfo { chain_id: 80002, network: "testnet" },
-        "polygon" => ChainInfo { chain_id: 137, network: "mainnet" },
         "pecorino-signet" => ChainInfo { chain_id: 14174, network: "testnet" },
         "pecorino-host" => ChainInfo { chain_id: 3151908, network: "testnet" },
         _ => return None,
@@ -619,8 +613,7 @@ async fn calculate_addresses_by_tier(config: &DeploymentConfig, tier: &str) -> R
 }
 
 /// Validates calculated contract addresses against environment file values
-async fn validate_addresses(config: &DeploymentConfig, network_env_file: &str, chain_env_file: &str, update: bool) -> Result<bool> {
-    info(&format!("Validating addresses against: {} and {}", network_env_file, chain_env_file));
+async fn validate_addresses(config: &DeploymentConfig, network_env_file: &str, chain_env_file: &str, update: bool) -> Result<()> {
     let network_env = load_env_file(network_env_file)?;
     let chain_env = load_env_file(chain_env_file)?;
     let mut calculated_addresses = HashMap::new();
@@ -688,19 +681,20 @@ async fn validate_addresses(config: &DeploymentConfig, network_env_file: &str, c
         } else {
             info("Address differences detected. Use --update to apply changes.");
         }
-        Ok(false) // Return false to indicate validation failed (differences found)
+        std::process::exit(2);
     } else {
         info("All addresses match");
-        Ok(true) // Return true to indicate validation passed (no differences)
     }
+
+    Ok(())
 }
 
 // =============================================================================
 // DEPLOY CONTRACTS
 // =============================================================================
 
-/// Checks if a forge deployment error is a known/expected error that should not be retried
-fn is_known_deployment_error(error: &str) -> bool {
+/// Checks if an error is a known/expected error that should not be retried
+fn is_known_error(error: &str) -> bool {
     error.contains("CreateCollision") ||
     error.contains("AlreadyAdded") ||
     error.contains("empty revert data")
@@ -741,7 +735,7 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
         let tier_config = tier_mapping.get(tier).unwrap();
 
         // Deploy each contract
-        for contract in contracts {
+        for contract in &contracts {
             if contract == "Core" && tier == "core" {
                 // Deploy all core contracts together
                 if let Some(script) = &tier_config.script {
@@ -757,7 +751,7 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
                                 }
                             }
                         }
-                        Err(e) if is_known_deployment_error(&e.to_string()) => {
+                        Err(e) if is_known_error(&e.to_string()) => {
                             info("Core already deployed, collecting existing addresses");
                             for (core_contract, details) in &tier_config.contracts {
                                 if let Some(env_var) = &details.expected_addr_envvar {
@@ -771,12 +765,12 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
                         Err(e) => bail!("Core deployment failed with unknown error: {}", e),
                     }
                 }
-            } else if let Some(details) = tier_config.contracts.get(&contract) {
+            } else if let Some(details) = tier_config.contracts.get(contract) {
                 // Deploy individual contract
                 let script = details.script.clone().unwrap_or_else(|| format!("Deploy{}", contract));
                 match run_forge_deploy(&script, private_key).await {
                     Ok(output) => {
-                        if let Ok(addr) = extract_address(&output, &contract) {
+                        if let Ok(addr) = extract_address(&output, contract) {
                             info(&format!("✓ Deployed {}: {}", contract, addr));
                             all_addresses.insert(contract.clone(), addr.clone());
                             if let Some(env_var) = &details.expected_addr_envvar {
@@ -784,13 +778,13 @@ async fn deploy_contracts(config: &DeploymentConfig, private_key: Option<&str>) 
                             }
                         }
                     }
-                    Err(e) if is_known_deployment_error(&e.to_string()) => {
+                    Err(e) if is_known_error(&e.to_string()) => {
                         info(&format!("Contract {} already deployed", contract));
                         if let Some(env_var) = &details.expected_addr_envvar {
                             let existing_addr = env::var(env_var)
                                 .with_context(|| format!("No existing address found for {} ({})", contract, env_var))?;
                             info(&format!("- Using existing {}: {}", contract, existing_addr));
-                            all_addresses.insert(contract, existing_addr);
+                            all_addresses.insert(contract.clone(), existing_addr);
                         }
                     }
                     Err(e) => bail!("Contract {} deployment failed with unknown error: {}", contract, e),
@@ -866,7 +860,7 @@ async fn whitelist_actions_for_chain(chain: &str, addresses: &HashMap<String, St
             }
             Err(e) => {
                 let error_str = e.to_string();
-                if is_known_deployment_error(&error_str) {
+                if is_known_error(&error_str) {
                     info(&format!("- {} already whitelisted", contract_name));
                 } else {
                     bail!("Failed to whitelist {}: {}", contract_name, e);
@@ -947,6 +941,7 @@ async fn update_chain_config(config: &DeploymentConfig, addresses_file: &str, ch
 
 /// Address padding for encoding constructor arguments (24 bytes = 48 hex chars)
 const ADDRESS_PADDING: &str = "000000000000000000000000";
+
 
 /// Encodes constructor arguments based on contract type
 fn encode_constructor_args(
@@ -1122,26 +1117,18 @@ async fn main() -> Result<()> {
             let config = load_deploy_config(&config_file)?;
             let chains = config.chains.as_ref().filter(|c| !c.is_empty()).ok_or_else(|| anyhow!("No chains in config"))?;
 
-            let mut all_valid = true;
             for chain in chains {
                 let chain_info = get_chain_info(chain).ok_or_else(|| anyhow!("Unknown chain: {}", chain))?;
                 info(&format!("Validating {} ({})", chain, chain_info.network));
                 load_chain_env_files(&env_dir, chain, chain_info.network)?;
-                let is_valid = validate_addresses(
+                validate_addresses(
                     &config,
                     &format!("{}/{}/.env-otim-{}", env_dir, chain_info.network, chain_info.network),
                     &format!("{}/{}/.env-{}", env_dir, chain_info.network, chain),
                     update
                 ).await?;
-                if !is_valid {
-                    all_valid = false;
-                }
             }
             info(&format!("✓ Validated {} chains", chains.len()));
-
-            if !all_valid {
-                std::process::exit(2);
-            }
             Ok(())
         }
 
