@@ -11,6 +11,9 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    env:
+      MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
+      SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
 
     steps:
       - name: Checkout code
