@@ -28,6 +28,8 @@ contract EstimateWithdrawERC4626GasConstant is InstructionForkTestContext {
 
     uint256 public constant WITHDRAW_ERC4626_GAS_CONSTANT = 105_500;
 
+    address public DEFAULT_RECIPIENT = makeAddr("recipient");
+
     constructor() {
         string memory rpcUrl = vm.envOr("MAINNET_RPC_URL", vm.rpcUrl("mainnet"));
         vm.createSelectFork(rpcUrl);
@@ -67,7 +69,7 @@ contract EstimateWithdrawERC4626GasConstant is InstructionForkTestContext {
         vm.stopPrank();
 
         // fuzz test must pass argument validation
-        vm.assume(arguments.recipient != address(0));
+        arguments.recipient = DEFAULT_RECIPIENT;
 
         // fuzz test must pass argument validation
         vm.assume(arguments.value > 0 && arguments.value < whaleBalance);

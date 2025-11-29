@@ -27,6 +27,8 @@ contract EstimateSweepUniswapV3GasConstant is InstructionForkTestContext {
 
     uint256 public constant SWEEP_UNISWAP_V3_GAS_CONSTANT = 106_000;
 
+    address public DEFAULT_RECIPIENT = makeAddr("recipient");
+
     constructor() {
         setUpFork();
 
@@ -59,7 +61,7 @@ contract EstimateSweepUniswapV3GasConstant is InstructionForkTestContext {
         ISweepUniswapV3Action.SweepUniswapV3 memory arguments
     ) public {
         // fuzz test must pass argument validation
-        vm.assume(arguments.recipient != address(0));
+        arguments.recipient = DEFAULT_RECIPIENT;
 
         // disregard fuzz generated values
         arguments.tokenIn = address(0);
