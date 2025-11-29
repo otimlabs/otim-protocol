@@ -4,7 +4,7 @@ pragma solidity ^0.8.26;
 import {IOtimFee} from "../fee-models/interfaces/IOtimFee.sol";
 
 bytes32 constant INSTRUCTION_TYPEHASH = keccak256(
-    "Instruction(uint256 salt,uint256 maxExecutions,address action,SweepDepositERC4626 sweepDepositERC4626)SweepDepositERC4626(address vault,address recipient,uint256 threshold,uint256 endBalance,uint256 minDeposit,uint256 minTotalShares,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)"
+    "Instruction(uint256 salt,uint256 maxExecutions,address action,SweepDepositERC4626 sweepDepositERC4626)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)SweepDepositERC4626(address vault,address recipient,uint256 threshold,uint256 endBalance,uint256 minDeposit,uint256 minTotalShares,Fee fee)"
 );
 
 bytes32 constant ARGUMENTS_TYPEHASH = keccak256(
