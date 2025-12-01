@@ -943,23 +943,26 @@ async fn update_chain_config(config: &DeploymentConfig, addresses_file: &str, ch
 const ADDRESS_PADDING: &str = "000000000000000000000000";
 
 
-/// Encodes constructor arguments based on contract type
-fn encode_constructor_args(
-    constructor_type: &ConstructorType,
-    contract_name: &str,
-    env_vars: &HashMap<String, String>,
-) -> Result<String> {
+/// Encodes constructor arguments based on contract type and specific action patterns
+fn encode_constructor_args(constructor_type: &ConstructorType, contract_name: &str, env_vars: &HashMap<String, String>) -> Result<String> {
+    let get = |key: &str| env_vars.get(key).unwrap_or_else(|| panic!("{} not found", key)).trim_start_matches("0x").to_lowercase();
+    let enc = |addrs: &[&str], gas: u64| addrs.iter().map(|a| format!("{}{}", ADDRESS_PADDING, a)).collect::<String>() + &format!("{:0>64x}", gas);
+    
     match constructor_type {
         ConstructorType::None | ConstructorType::Core => Ok(String::new()),
-        ConstructorType::Owner => Ok(format!("{}{}", ADDRESS_PADDING, 
-            env_vars.get("OWNER_ADDRESS").expect("OWNER_ADDRESS not found").trim_start_matches("0x"))),
+        ConstructorType::Owner => Ok(format!("{}{}", ADDRESS_PADDING, get("OWNER_ADDRESS"))),
         ConstructorType::Action => {
-            let fee = env_vars.get("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS").expect("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS not found");
-            let treasury = env_vars.get("EXPECTED_TREASURY_ADDRESS").expect("EXPECTED_TREASURY_ADDRESS not found");
-            let gas = env_vars.get(&format!("{}_GAS_CONSTANT", to_snake_case(contract_name)))
-                .unwrap_or_else(|| panic!("Gas constant not found for {}", contract_name));
-            Ok(format!("{}{}{}{}{:0>64x}", ADDRESS_PADDING, fee.trim_start_matches("0x"),
-                ADDRESS_PADDING, treasury.trim_start_matches("0x"), gas.parse::<u64>()?))
+            let (fee, treasury) = (get("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS"), get("EXPECTED_TREASURY_ADDRESS"));
+            let gas = get(&format!("{}_GAS_CONSTANT", to_snake_case(contract_name))).parse::<u64>()?;
+            Ok(match contract_name {
+                "CallOnceAction" | "DeactivateInstructionAction" => 
+                    enc(&[&get("EXPECTED_INSTRUCTION_STORAGE_ADDRESS"), &fee, &treasury], gas),
+                "SweepUniswapV3Action" | "UniswapV3ExactInputAction" => 
+                    enc(&[&get("UNIVERSAL_ROUTER_ADDRESS"), &get("UNISWAP_V3_FACTORY_ADDRESS"), &get("WETH9_ADDRESS"), &fee, &treasury], gas),
+                "SweepCCTPAction" | "TransferCCTPAction" => 
+                    enc(&[&get("CCTP_TOKEN_MESSENGER_ADDRESS"), &get("CCTP_TOKEN_MINTER_ADDRESS"), &fee, &treasury], gas),
+                _ => enc(&[&fee, &treasury], gas),
+            })
         }
     }
 }
