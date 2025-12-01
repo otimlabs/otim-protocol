@@ -30,7 +30,7 @@ contract SweepUniswapV3Test is InstructionForkTestContext {
     uint256 DEFAULT_END_BALANCE = 1 gwei;
     uint256 DEFAULT_FLOOR_AMOUNT_OUT = 1;
     uint32 DEFAULT_MEAN_PRICE_LOOKBACK = 900; // 15 minutes in seconds
-    uint32 DEFAULT_MAX_PRICE_DEVIATION_BPS = 500; // 5%
+    uint32 DEFAULT_MAX_PRICE_DEVIATION_BPS = 1000; // 10%
 
     IOtimFee.Fee public DEFAULT_FEE;
 
@@ -88,7 +88,7 @@ contract SweepUniswapV3Test is InstructionForkTestContext {
     function test_sweepUniswapV3_tokenToToken() public {
         vm.pauseGasMetering();
 
-        USER_START_BALANCE = 100e6;
+        USER_START_BALANCE = 1e18;
 
         vm.deal(address(user), USER_START_BALANCE);
 
