@@ -63,6 +63,9 @@ contract EstimateCallOnceGasConstant is InstructionForkTestContext {
         // assume gasLimit is not ridiculously high
         vm.assume(arguments.gasLimit < 30_000_000);
 
+        // assume data length is not very high
+        vm.assume(arguments.data.length < 450);
+
         // disregard fuzz generated fee token
         arguments.fee.token = SEPOLIA_WETH9;
         // assume maxBaseFeePerGas and maxPriorityFeePerGas are non-zero and not ridiculously high
