@@ -460,7 +460,8 @@ fn load_env_file(path: &str) -> Result<HashMap<String, String>> {
 
 /// Loads environment files for a chain (auto-detects network from chain name)
 fn load_chain_env_files(env_dir: &str, chain: &str, network: &str) -> Result<HashMap<String, String>> {
-    [(format!("{}/{}/.env-otim-{}", env_dir, network, network), "shared"),
+    [(format!("{}/.env-gas-constants", env_dir), "gas constants"),
+     (format!("{}/{}/.env-otim-{}", env_dir, network, network), "shared"),
      (format!("{}/{}/.env-{}", env_dir, network, chain), "chain")]
         .iter()
         .try_fold(HashMap::new(), |mut env_vars, (path, env_type)| {
