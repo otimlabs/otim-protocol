@@ -956,7 +956,14 @@ fn encode_constructor_args(constructor_type: &ConstructorType, contract_name: &s
         ConstructorType::Owner => Ok(hex::encode_prefixed(get("OWNER_ADDRESS")?.abi_encode())),
         ConstructorType::Action => {
             let (fee, treasury) = (get("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS")?, get("EXPECTED_TREASURY_ADDRESS")?);
-            let gas = env_vars.get(&format!("{}_GAS_CONSTANT", to_snake_case(contract_name)))
+            let gas_key = match contract_name {
+                "SweepCCTPAction" => "SWEEP_CCTP_ACTION".to_string(),
+                "TransferCCTPAction" => "TRANSFER_CCTP_ACTION".to_string(),
+                "SweepUniswapV3Action" => "SWEEP_UNISWAP_V3_ACTION".to_string(),
+                "UniswapV3ExactInputAction" => "UNISWAP_V3_EXACT_INPUT_ACTION".to_string(),
+                _ => to_snake_case(contract_name),
+            };
+            let gas = env_vars.get(&format!("{}_GAS_CONSTANT", gas_key))
                 .ok_or_else(|| anyhow!("Gas constant not found for {}", contract_name))?
                 .parse::<u64>().map(U256::from)
                 .with_context(|| format!("Failed to parse gas constant for {}", contract_name))?;
