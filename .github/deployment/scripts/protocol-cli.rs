@@ -188,7 +188,7 @@ fn get_chain_info(chain: &str) -> Option<ChainInfo> {
         "bnb-testnet" => ChainInfo { chain_id: 97, network: "testnet" },
         "bnb" => ChainInfo { chain_id: 56, network: "mainnet" },
         "unichain-sepolia" => ChainInfo { chain_id: 1301, network: "testnet" },
-        "unichain" => ChainInfo { chain_id: 1301, network: "mainnet" },
+        "unichain" => ChainInfo { chain_id: 130, network: "mainnet" },
         "pecorino-signet" => ChainInfo { chain_id: 14174, network: "testnet" },
         "pecorino-host" => ChainInfo { chain_id: 3151908, network: "testnet" },
         _ => return None,
@@ -715,12 +715,20 @@ fn is_known_error(error: &str) -> bool {
 /// Executes a forge deployment command with retry logic
 async fn run_forge_deploy(script: &str, private_key: Option<&str>) -> Result<String> {
     let rpc_url = env::var("RPC_URL").context("RPC_URL not found")?;
+    let use_legacy = env::var("FORGE_LEGACY")
+        .map(|v| v.eq_ignore_ascii_case("true") || v == "1")
+        .unwrap_or(false);
+
     let mut args: Vec<&str> = vec![
         "script", script,
         "--broadcast",
         "--rpc-url", rpc_url.as_str(),
         "--timeout", "30", // 30 second timeout
     ];
+
+    if use_legacy {
+        args.push("--legacy");
+    }
 
     if let Some(pk) = private_key {
         args.extend_from_slice(&["--private-key", pk]);
@@ -952,16 +960,16 @@ async fn update_chain_config(config: &DeploymentConfig, addresses_file: &str, ch
 
 /// Encodes constructor arguments based on contract type and specific action patterns
 fn encode_constructor_args(constructor_type: &ConstructorType, contract_name: &str, env_vars: &HashMap<String, String>) -> Result<String> {
-    let get = |key: &str| -> Result<Address> {
+    let get_envvar = |key: &str| -> Result<Address> {
         env_vars.get(key).ok_or_else(|| anyhow!("{} not found", key))?
             .parse().with_context(|| format!("Failed to parse address: {}", key))
     };
     
     match constructor_type {
         ConstructorType::None | ConstructorType::Core => Ok(String::new()),
-        ConstructorType::Owner => Ok(hex::encode_prefixed(get("OWNER_ADDRESS")?.abi_encode())),
+        ConstructorType::Owner => Ok(hex::encode_prefixed(get_envvar("OWNER_ADDRESS")?.abi_encode())),
         ConstructorType::Action => {
-            let (fee, treasury) = (get("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS")?, get("EXPECTED_TREASURY_ADDRESS")?);
+            let (fee, treasury) = (get_envvar("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS")?, get_envvar("EXPECTED_TREASURY_ADDRESS")?);
             let gas_key = match contract_name {
                 "SweepCCTPAction" => "SWEEP_CCTP_ACTION".to_string(),
                 "TransferCCTPAction" => "TRANSFER_CCTP_ACTION".to_string(),
@@ -976,11 +984,11 @@ fn encode_constructor_args(constructor_type: &ConstructorType, contract_name: &s
             
             Ok(hex::encode_prefixed(match contract_name {
                 "CallOnceAction" | "DeactivateInstructionAction" => 
-                    (get("EXPECTED_INSTRUCTION_STORAGE_ADDRESS")?, fee, treasury, gas).abi_encode(),
+                    (get_envvar("EXPECTED_INSTRUCTION_STORAGE_ADDRESS")?, fee, treasury, gas).abi_encode(),
                 "SweepUniswapV3Action" | "UniswapV3ExactInputAction" => 
-                    (get("UNIVERSAL_ROUTER_ADDRESS")?, get("UNISWAP_V3_FACTORY_ADDRESS")?, get("WETH9_ADDRESS")?, fee, treasury, gas).abi_encode(),
+                    (get_envvar("UNIVERSAL_ROUTER_ADDRESS")?, get_envvar("UNISWAP_V3_FACTORY_ADDRESS")?, get_envvar("WETH9_ADDRESS")?, fee, treasury, gas).abi_encode(),
                 "SweepCCTPAction" | "TransferCCTPAction" => 
-                    (get("CCTP_TOKEN_MESSENGER_ADDRESS")?, get("CCTP_TOKEN_MINTER_ADDRESS")?, fee, treasury, gas).abi_encode(),
+                    (get_envvar("CCTP_TOKEN_MESSENGER_ADDRESS")?, get_envvar("CCTP_TOKEN_MINTER_ADDRESS")?, fee, treasury, gas).abi_encode(),
                 _ => (fee, treasury, gas).abi_encode(),
             }))
         }
