@@ -19,6 +19,8 @@
 //! tempfile = "3.8"
 //! merkle_hash = "3.8"
 //! camino = "1.0"
+//! alloy-primitives = "1.4"
+//! alloy-sol-types = "1.4"
 //! ```
 
 use anyhow::{anyhow, Context, Result, bail};
@@ -30,6 +32,8 @@ use std::collections::HashMap;
 use std::env;
 use std::fs;
 use std::path::Path;
+use alloy_primitives::{Address, U256, hex};
+use alloy_sol_types::SolValue;
 
 #[derive(Parser)]
 #[command(name = "protocol-cli")]
@@ -940,30 +944,32 @@ async fn update_chain_config(config: &DeploymentConfig, addresses_file: &str, ch
 // VERIFY CONTRACTS
 // =============================================================================
 
-/// Address padding for encoding constructor arguments (24 bytes = 48 hex chars)
-const ADDRESS_PADDING: &str = "000000000000000000000000";
-
-
 /// Encodes constructor arguments based on contract type and specific action patterns
 fn encode_constructor_args(constructor_type: &ConstructorType, contract_name: &str, env_vars: &HashMap<String, String>) -> Result<String> {
-    let get = |key: &str| env_vars.get(key).unwrap_or_else(|| panic!("{} not found", key)).trim_start_matches("0x").to_lowercase();
-    let enc = |addrs: &[&str], gas: u64| addrs.iter().map(|a| format!("{}{}", ADDRESS_PADDING, a)).collect::<String>() + &format!("{:0>64x}", gas);
+    let get = |key: &str| -> Result<Address> {
+        env_vars.get(key).ok_or_else(|| anyhow!("{} not found", key))?
+            .parse().with_context(|| format!("Failed to parse address: {}", key))
+    };
     
     match constructor_type {
         ConstructorType::None | ConstructorType::Core => Ok(String::new()),
-        ConstructorType::Owner => Ok(format!("{}{}", ADDRESS_PADDING, get("OWNER_ADDRESS"))),
+        ConstructorType::Owner => Ok(hex::encode_prefixed(get("OWNER_ADDRESS")?.abi_encode())),
         ConstructorType::Action => {
-            let (fee, treasury) = (get("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS"), get("EXPECTED_TREASURY_ADDRESS"));
-            let gas = get(&format!("{}_GAS_CONSTANT", to_snake_case(contract_name))).parse::<u64>()?;
-            Ok(match contract_name {
+            let (fee, treasury) = (get("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS")?, get("EXPECTED_TREASURY_ADDRESS")?);
+            let gas = env_vars.get(&format!("{}_GAS_CONSTANT", to_snake_case(contract_name)))
+                .ok_or_else(|| anyhow!("Gas constant not found for {}", contract_name))?
+                .parse::<u64>().map(U256::from)
+                .with_context(|| format!("Failed to parse gas constant for {}", contract_name))?;
+            
+            Ok(hex::encode_prefixed(match contract_name {
                 "CallOnceAction" | "DeactivateInstructionAction" => 
-                    enc(&[&get("EXPECTED_INSTRUCTION_STORAGE_ADDRESS"), &fee, &treasury], gas),
+                    (get("EXPECTED_INSTRUCTION_STORAGE_ADDRESS")?, fee, treasury, gas).abi_encode(),
                 "SweepUniswapV3Action" | "UniswapV3ExactInputAction" => 
-                    enc(&[&get("UNIVERSAL_ROUTER_ADDRESS"), &get("UNISWAP_V3_FACTORY_ADDRESS"), &get("WETH9_ADDRESS"), &fee, &treasury], gas),
+                    (get("UNIVERSAL_ROUTER_ADDRESS")?, get("UNISWAP_V3_FACTORY_ADDRESS")?, get("WETH9_ADDRESS")?, fee, treasury, gas).abi_encode(),
                 "SweepCCTPAction" | "TransferCCTPAction" => 
-                    enc(&[&get("CCTP_TOKEN_MESSENGER_ADDRESS"), &get("CCTP_TOKEN_MINTER_ADDRESS"), &fee, &treasury], gas),
-                _ => enc(&[&fee, &treasury], gas),
-            })
+                    (get("CCTP_TOKEN_MESSENGER_ADDRESS")?, get("CCTP_TOKEN_MINTER_ADDRESS")?, fee, treasury, gas).abi_encode(),
+                _ => (fee, treasury, gas).abi_encode(),
+            }))
         }
     }
 }
