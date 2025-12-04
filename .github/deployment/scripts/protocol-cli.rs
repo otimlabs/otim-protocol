@@ -19,6 +19,8 @@
 //! tempfile = "3.8"
 //! merkle_hash = "3.8"
 //! camino = "1.0"
+//! alloy-primitives = "1.4"
+//! alloy-sol-types = "1.4"
 //! ```
 
 use anyhow::{anyhow, Context, Result, bail};
@@ -30,6 +32,8 @@ use std::collections::HashMap;
 use std::env;
 use std::fs;
 use std::path::Path;
+use alloy_primitives::{Address, U256, hex};
+use alloy_sol_types::SolValue;
 
 #[derive(Parser)]
 #[command(name = "protocol-cli")]
@@ -179,6 +183,12 @@ fn get_chain_info(chain: &str) -> Option<ChainInfo> {
         "arbitrum" => ChainInfo { chain_id: 42161, network: "mainnet" },
         "ethereum-sepolia" => ChainInfo { chain_id: 11155111, network: "testnet" },
         "ethereum" => ChainInfo { chain_id: 1, network: "mainnet" },
+        "polygon-amoy" => ChainInfo { chain_id: 80002, network: "testnet" },
+        "polygon" => ChainInfo { chain_id: 137, network: "mainnet" },
+        "bnb-testnet" => ChainInfo { chain_id: 97, network: "testnet" },
+        "bnb" => ChainInfo { chain_id: 56, network: "mainnet" },
+        "unichain-sepolia" => ChainInfo { chain_id: 1301, network: "testnet" },
+        "unichain" => ChainInfo { chain_id: 130, network: "mainnet" },
         "pecorino-signet" => ChainInfo { chain_id: 14174, network: "testnet" },
         "pecorino-host" => ChainInfo { chain_id: 3151908, network: "testnet" },
         _ => return None,
@@ -460,7 +470,8 @@ fn load_env_file(path: &str) -> Result<HashMap<String, String>> {
 
 /// Loads environment files for a chain (auto-detects network from chain name)
 fn load_chain_env_files(env_dir: &str, chain: &str, network: &str) -> Result<HashMap<String, String>> {
-    [(format!("{}/{}/.env-otim-{}", env_dir, network, network), "shared"),
+    [(format!("{}/.env-gas-constants", env_dir), "gas constants"),
+     (format!("{}/{}/.env-otim-{}", env_dir, network, network), "shared"),
      (format!("{}/{}/.env-{}", env_dir, network, chain), "chain")]
         .iter()
         .try_fold(HashMap::new(), |mut env_vars, (path, env_type)| {
@@ -704,12 +715,20 @@ fn is_known_error(error: &str) -> bool {
 /// Executes a forge deployment command with retry logic
 async fn run_forge_deploy(script: &str, private_key: Option<&str>) -> Result<String> {
     let rpc_url = env::var("RPC_URL").context("RPC_URL not found")?;
+    let use_legacy = env::var("FORGE_LEGACY")
+        .map(|v| v.eq_ignore_ascii_case("true") || v == "1")
+        .unwrap_or(false);
+
     let mut args: Vec<&str> = vec![
         "script", script,
         "--broadcast",
         "--rpc-url", rpc_url.as_str(),
         "--timeout", "30", // 30 second timeout
     ];
+
+    if use_legacy {
+        args.push("--legacy");
+    }
 
     if let Some(pk) = private_key {
         args.extend_from_slice(&["--private-key", pk]);
@@ -939,27 +958,39 @@ async fn update_chain_config(config: &DeploymentConfig, addresses_file: &str, ch
 // VERIFY CONTRACTS
 // =============================================================================
 
-/// Address padding for encoding constructor arguments (24 bytes = 48 hex chars)
-const ADDRESS_PADDING: &str = "000000000000000000000000";
-
-
-/// Encodes constructor arguments based on contract type
-fn encode_constructor_args(
-    constructor_type: &ConstructorType,
-    contract_name: &str,
-    env_vars: &HashMap<String, String>,
-) -> Result<String> {
+/// Encodes constructor arguments based on contract type and specific action patterns
+fn encode_constructor_args(constructor_type: &ConstructorType, contract_name: &str, env_vars: &HashMap<String, String>) -> Result<String> {
+    let get_envvar = |key: &str| -> Result<Address> {
+        env_vars.get(key).ok_or_else(|| anyhow!("{} not found", key))?
+            .parse().with_context(|| format!("Failed to parse address: {}", key))
+    };
+    
     match constructor_type {
         ConstructorType::None | ConstructorType::Core => Ok(String::new()),
-        ConstructorType::Owner => Ok(format!("{}{}", ADDRESS_PADDING, 
-            env_vars.get("OWNER_ADDRESS").expect("OWNER_ADDRESS not found").trim_start_matches("0x"))),
+        ConstructorType::Owner => Ok(hex::encode_prefixed(get_envvar("OWNER_ADDRESS")?.abi_encode())),
         ConstructorType::Action => {
-            let fee = env_vars.get("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS").expect("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS not found");
-            let treasury = env_vars.get("EXPECTED_TREASURY_ADDRESS").expect("EXPECTED_TREASURY_ADDRESS not found");
-            let gas = env_vars.get(&format!("{}_GAS_CONSTANT", to_snake_case(contract_name)))
-                .unwrap_or_else(|| panic!("Gas constant not found for {}", contract_name));
-            Ok(format!("{}{}{}{}{:0>64x}", ADDRESS_PADDING, fee.trim_start_matches("0x"),
-                ADDRESS_PADDING, treasury.trim_start_matches("0x"), gas.parse::<u64>()?))
+            let (fee, treasury) = (get_envvar("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS")?, get_envvar("EXPECTED_TREASURY_ADDRESS")?);
+            let gas_key = match contract_name {
+                "SweepCCTPAction" => "SWEEP_CCTP_ACTION".to_string(),
+                "TransferCCTPAction" => "TRANSFER_CCTP_ACTION".to_string(),
+                "SweepUniswapV3Action" => "SWEEP_UNISWAP_V3_ACTION".to_string(),
+                "UniswapV3ExactInputAction" => "UNISWAP_V3_EXACT_INPUT_ACTION".to_string(),
+                _ => to_snake_case(contract_name),
+            };
+            let gas = env_vars.get(&format!("{}_GAS_CONSTANT", gas_key))
+                .ok_or_else(|| anyhow!("Gas constant not found for {}", contract_name))?
+                .parse::<u64>().map(U256::from)
+                .with_context(|| format!("Failed to parse gas constant for {}", contract_name))?;
+            
+            Ok(hex::encode_prefixed(match contract_name {
+                "CallOnceAction" | "DeactivateInstructionAction" => 
+                    (get_envvar("EXPECTED_INSTRUCTION_STORAGE_ADDRESS")?, fee, treasury, gas).abi_encode(),
+                "SweepUniswapV3Action" | "UniswapV3ExactInputAction" => 
+                    (get_envvar("UNIVERSAL_ROUTER_ADDRESS")?, get_envvar("UNISWAP_V3_FACTORY_ADDRESS")?, get_envvar("WETH9_ADDRESS")?, fee, treasury, gas).abi_encode(),
+                "SweepCCTPAction" | "TransferCCTPAction" => 
+                    (get_envvar("CCTP_TOKEN_MESSENGER_ADDRESS")?, get_envvar("CCTP_TOKEN_MINTER_ADDRESS")?, fee, treasury, gas).abi_encode(),
+                _ => (fee, treasury, gas).abi_encode(),
+            }))
         }
     }
 }
