@@ -24,7 +24,7 @@ jobs:
       ENV_FILE: ${{ inputs.env_file || '.github/networks/testnet/.env-otim-testnet' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Validate contract addresses
         id: validate
@@ -42,7 +42,7 @@ jobs:
     if: needs.validate-contracts.outputs.exit_code == '2'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Create contract update PR
         uses: peter-evans/create-pull-request@84ae59a2cdc2258d6fa0732dd66352dddae2a412 # v7.0.9
