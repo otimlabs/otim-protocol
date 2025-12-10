@@ -77,6 +77,8 @@ contract EstimateSweepCCTPV2GasConstant is InstructionForkTestContext {
         vm.assume(endBalance <= threshold);
         // assume threshold is greater than maxFee for CCTP V2 validation
         vm.assume(threshold > arguments.maxFee);
+        // assume transfer amount (threshold - endBalance) is greater than maxFee for CCTP V2 validation
+        vm.assume(threshold - endBalance > arguments.maxFee);
         // assume a reasonable threshold (less than whale balance)
         vm.assume(threshold < IERC20(SEPOLIA_USDC).balanceOf(SEPOLIA_USDC_WHALE));
         // assume threshold is at least 2 USDC to have meaningful transfer amounts
