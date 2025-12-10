@@ -40,9 +40,14 @@ abstract contract InstructionForkTestContext is Test {
     address public constant SEPOLIA_UNIVERSAL_ROUTER = address(0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD);
     address public constant SEPOLIA_V3_FACTORY = address(0x0227628f3F023bb0B980b67D528571c95c6DaC1c);
 
-    /// @notice Sepolia CCTP addresses
+    /// @notice Sepolia CCTP V1 addresses
     address public constant SEPOLIA_TOKEN_MESSENGER = address(0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5);
     address public constant SEPOLIA_TOKEN_MINTER = address(0xE997d7d2F6E065a9A93Fa2175E878Fb9081F1f0A);
+
+    /// @notice Sepolia CCTP V2 addresses
+    address public constant SEPOLIA_TOKEN_MESSENGER_V2 = address(0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA);
+    address public constant SEPOLIA_MESSAGE_TRANSMITTER_V2 = address(0xE737e5cEBEEBa77EFE34D4aa090756590b1CE275);
+    address public constant SEPOLIA_TOKEN_MINTER_V2 = address(0xE997d7d2F6E065a9A93Fa2175E878Fb9081F1f0A);
 
     /// @notice test Core contracts
     OtimDelegate public delegate = new OtimDelegate(address(this));
