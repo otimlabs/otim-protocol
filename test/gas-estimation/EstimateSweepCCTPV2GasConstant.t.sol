@@ -64,9 +64,9 @@ contract EstimateSweepCCTPV2GasConstant is InstructionForkTestContext {
         uint256 executionFee
     ) public {
         ISweepCCTPV2Action.SweepCCTPV2 memory arguments;
-        
+
         arguments.token = SEPOLIA_USDC;
-        arguments.destinationDomain = 2;  // OP Sepolia
+        arguments.destinationDomain = 2; // OP Sepolia
         arguments.destinationMintRecipient = bytes32(uint256(1));
         arguments.destinationCaller = bytes32(0);
         arguments.maxFee = 1e6;
@@ -91,7 +91,7 @@ contract EstimateSweepCCTPV2GasConstant is InstructionForkTestContext {
         vm.assume(maxBaseFeePerGas + maxPriorityFeePerGas < type(uint64).max);
         // assume executionFee is non-zero (to enable fee calculation) and not ridiculously high
         vm.assume(executionFee > 0 && executionFee < 100 ether);
-        
+
         arguments.fee.maxBaseFeePerGas = maxBaseFeePerGas;
         arguments.fee.maxPriorityFeePerGas = maxPriorityFeePerGas;
         arguments.fee.executionFee = executionFee;

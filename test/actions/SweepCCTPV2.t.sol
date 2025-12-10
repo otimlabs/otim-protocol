@@ -30,7 +30,7 @@ contract SweepCCTPV2Test is InstructionForkTestContext {
 
     SweepCCTPV2Action public sweepCCTPV2Action;
 
-    uint32 public DEFAULT_DESTINATION_DOMAIN = 2;  // OP Sepolia
+    uint32 public DEFAULT_DESTINATION_DOMAIN = 2; // OP Sepolia
 
     bytes32 public DEFAULT_DESTINATION_TOKEN_MESSENGER;
 
@@ -70,9 +70,8 @@ contract SweepCCTPV2Test is InstructionForkTestContext {
     constructor() {
         setUpFork();
 
-        sweepCCTPV2Action = new SweepCCTPV2Action(
-            SEPOLIA_TOKEN_MESSENGER_V2, SEPOLIA_TOKEN_MINTER_V2, address(0), address(0), 0
-        );
+        sweepCCTPV2Action =
+            new SweepCCTPV2Action(SEPOLIA_TOKEN_MESSENGER_V2, SEPOLIA_TOKEN_MINTER_V2, address(0), address(0), 0);
 
         actionManager.addAction(address(sweepCCTPV2Action));
 
