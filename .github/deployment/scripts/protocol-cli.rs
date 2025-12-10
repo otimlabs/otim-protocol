@@ -320,11 +320,25 @@ fn get_contract_mapping() -> HashMap<String, TierConfig> {
                     source_path: "src/actions/SweepCCTPAction.sol:SweepCCTPAction",
                     constructor_type: ConstructorType::Action,
                 }),
+                ("SweepCCTPV2Action".to_string(), ContractDetails {
+                    script: Some("DeploySweepCCTPV2Action".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_SWEEP_CCTP_V2_ACTION_ADDRESS"),
+                    chain_config_key: Some("actions.sweepCCTPV2".to_string()),
+                    source_path: "src/actions/SweepCCTPV2Action.sol:SweepCCTPV2Action",
+                    constructor_type: ConstructorType::Action,
+                }),
                 ("TransferCCTPAction".to_string(), ContractDetails {
                     script: Some("DeployTransferCCTPAction".to_string()),
                     expected_addr_envvar: Some("EXPECTED_TRANSFER_CCTP_ACTION_ADDRESS"),
                     chain_config_key: Some("actions.transferCCTP".to_string()),
                     source_path: "src/actions/TransferCCTPAction.sol:TransferCCTPAction",
+                    constructor_type: ConstructorType::Action,
+                }),
+                ("TransferCCTPV2Action".to_string(), ContractDetails {
+                    script: Some("DeployTransferCCTPV2Action".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_TRANSFER_CCTP_V2_ACTION_ADDRESS"),
+                    chain_config_key: Some("actions.transferCCTPV2".to_string()),
+                    source_path: "src/actions/TransferCCTPV2Action.sol:TransferCCTPV2Action",
                     constructor_type: ConstructorType::Action,
                 }),
                 ("SweepUniswapV3Action".to_string(), ContractDetails {
@@ -654,7 +668,8 @@ async fn validate_addresses(config: &DeploymentConfig, network_env_file: &str, c
             if let Some(env_var) = &details.expected_addr_envvar {
                 let is_non_create2 = matches!(*env_var,
                     "EXPECTED_UNISWAP_V3_EXACT_INPUT_ACTION_ADDRESS" | "EXPECTED_SWEEP_CCTP_ACTION_ADDRESS" |
-                    "EXPECTED_TRANSFER_CCTP_ACTION_ADDRESS" | "EXPECTED_SWEEP_UNISWAP_V3_ACTION_ADDRESS"
+                    "EXPECTED_TRANSFER_CCTP_ACTION_ADDRESS" | "EXPECTED_SWEEP_UNISWAP_V3_ACTION_ADDRESS" |
+                    "EXPECTED_SWEEP_CCTP_V2_ACTION_ADDRESS" | "EXPECTED_TRANSFER_CCTP_V2_ACTION_ADDRESS"
                 );
                 let (env, updates_map) = if is_non_create2 {
                     (&chain_env, &mut chain_updates)
@@ -972,7 +987,9 @@ fn encode_constructor_args(constructor_type: &ConstructorType, contract_name: &s
             let (fee, treasury) = (get_envvar("EXPECTED_FEE_TOKEN_REGISTRY_ADDRESS")?, get_envvar("EXPECTED_TREASURY_ADDRESS")?);
             let gas_key = match contract_name {
                 "SweepCCTPAction" => "SWEEP_CCTP_ACTION".to_string(),
+                "SweepCCTPV2Action" => "SWEEP_CCTP_V2_ACTION".to_string(),
                 "TransferCCTPAction" => "TRANSFER_CCTP_ACTION".to_string(),
+                "TransferCCTPV2Action" => "TRANSFER_CCTP_V2_ACTION".to_string(),
                 "SweepUniswapV3Action" => "SWEEP_UNISWAP_V3_ACTION".to_string(),
                 "UniswapV3ExactInputAction" => "UNISWAP_V3_EXACT_INPUT_ACTION".to_string(),
                 _ => to_snake_case(contract_name),
@@ -989,6 +1006,8 @@ fn encode_constructor_args(constructor_type: &ConstructorType, contract_name: &s
                     (get_envvar("UNIVERSAL_ROUTER_ADDRESS")?, get_envvar("UNISWAP_V3_FACTORY_ADDRESS")?, get_envvar("WETH9_ADDRESS")?, fee, treasury, gas).abi_encode(),
                 "SweepCCTPAction" | "TransferCCTPAction" => 
                     (get_envvar("CCTP_TOKEN_MESSENGER_ADDRESS")?, get_envvar("CCTP_TOKEN_MINTER_ADDRESS")?, fee, treasury, gas).abi_encode(),
+                "SweepCCTPV2Action" | "TransferCCTPV2Action" => 
+                    (get_envvar("CCTP_V2_TOKEN_MESSENGER_ADDRESS")?, get_envvar("CCTP_V2_TOKEN_MINTER_ADDRESS")?, fee, treasury, gas).abi_encode(),
                 _ => (fee, treasury, gas).abi_encode(),
             }))
         }
