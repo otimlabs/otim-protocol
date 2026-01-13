@@ -4,11 +4,11 @@ pragma solidity ^0.8.26;
 import {IOtimFee} from "../fee-models/interfaces/IOtimFee.sol";
 
 bytes32 constant INSTRUCTION_TYPEHASH = keccak256(
-    "Instruction(uint256 salt,uint256 maxExecutions,address action,SweepCCTPV2 sweepCCTPV2)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)SweepCCTPV2(address token,uint32 destinationDomain,bytes32 destinationMintRecipient,uint256 threshold,uint256 endBalance,bytes32 destinationCaller,uint256 maxFee,uint32 minFinalityThreshold,Fee fee)"
+    "Instruction(uint256 salt,uint256 maxExecutions,address action,SweepCCTPV2 sweepCCTPV2)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)SweepCCTPV2(address token,uint32 destinationDomain,bytes32 destinationMintRecipient,uint256 threshold,uint256 endBalance,bytes32 destinationCaller,uint32 maxFeeThouBPS,uint32 minFinalityThreshold,Fee fee)"
 );
 
 bytes32 constant ARGUMENTS_TYPEHASH = keccak256(
-    "SweepCCTPV2(address token,uint32 destinationDomain,bytes32 destinationMintRecipient,uint256 threshold,uint256 endBalance,bytes32 destinationCaller,uint256 maxFee,uint32 minFinalityThreshold,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)"
+    "SweepCCTPV2(address token,uint32 destinationDomain,bytes32 destinationMintRecipient,uint256 threshold,uint256 endBalance,bytes32 destinationCaller,uint32 maxFeeThouBPS,uint32 minFinalityThreshold,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)"
 );
 
 /// @title ISweepCCTPV2Action
@@ -22,7 +22,7 @@ interface ISweepCCTPV2Action is IOtimFee {
     /// @param threshold - the sweep threshold
     /// @param endBalance - the account's balance after the sweep
     /// @param destinationCaller - the address allowed to call receiveMessage on destination (bytes32(0) for anyone)
-    /// @param maxFee - the maximum fee for the transfer in burn token units
+    /// @param maxFeeThouBPS - max fee in 1/1000 BPS (e.g., 10 = 0.01%, 100 = 0.1%)
     /// @param minFinalityThreshold - minimum finality threshold (e.g., 1000=fast, 2000=standard)
     /// @param fee - the fee to be paid
     struct SweepCCTPV2 {
@@ -32,7 +32,7 @@ interface ISweepCCTPV2Action is IOtimFee {
         uint256 threshold;
         uint256 endBalance;
         bytes32 destinationCaller;
-        uint256 maxFee;
+        uint32 maxFeeThouBPS;
         uint32 minFinalityThreshold;
         Fee fee;
     }

@@ -15,6 +15,7 @@ error InstructionAlreadyDeactivated();
 error CallOnceFailed(address target, bytes4 selector, bytes result);
 
 error CCTPTokenNotSupported();
+error CCTPMaxFeeTooLow(uint32 userMaxFeeThouBPS, uint256 cctpMinFee);
 
 error MaxDepositTooLow();
 error MaxWithdrawTooLow();

@@ -51,6 +51,18 @@ contract EstimateTransferCCTPV2GasConstant is InstructionForkTestContext {
         );
 
         actionManager.addAction(address(transferCCTPV2Action));
+
+        // mock CCTP V2 fee functions
+        vm.mockCall(
+            SEPOLIA_TOKEN_MESSENGER_V2,
+            abi.encodeWithSignature("minFee()"),
+            abi.encode(10) // 0.01% in 1/1000 BPS
+        );
+        vm.mockCall(
+            SEPOLIA_TOKEN_MESSENGER_V2,
+            abi.encodeWithSelector(bytes4(keccak256("getMinFeeAmount(uint256)"))),
+            abi.encode(uint256(0)) // return 0 to avoid CCTP "maxFee < amount" validation
+        );
     }
 
     // check that the TRANSFER_CCTP_V2_ACTION_GAS_CONSTANT doesn't result in an underpayment of the fee
@@ -72,11 +84,9 @@ contract EstimateTransferCCTPV2GasConstant is InstructionForkTestContext {
         arguments.destinationDomain = 2; // OP Sepolia
         arguments.destinationMintRecipient = bytes32(uint256(1));
         arguments.destinationCaller = bytes32(0);
-        arguments.maxFee = 1e6;
+        arguments.maxFeeThouBPS = 10;
         arguments.minFinalityThreshold = 1000;
 
-        // assume amount is greater than maxFee for CCTP V2 validation
-        vm.assume(amount > arguments.maxFee);
         // assume a reasonable amount (less than whale balance, at least 2 USDC)
         vm.assume(amount >= 2e6 && amount < IERC20(SEPOLIA_USDC).balanceOf(SEPOLIA_USDC_WHALE));
         arguments.amount = amount;

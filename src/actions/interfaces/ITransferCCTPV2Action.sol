@@ -5,11 +5,11 @@ import {IInterval} from "../schedules/interfaces/IInterval.sol";
 import {IOtimFee} from "../fee-models/interfaces/IOtimFee.sol";
 
 bytes32 constant INSTRUCTION_TYPEHASH = keccak256(
-    "Instruction(uint256 salt,uint256 maxExecutions,address action,TransferCCTPV2 transferCCTPV2)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)Schedule(uint256 startAt,uint256 startBy,uint256 interval,uint256 timeout)TransferCCTPV2(address token,uint256 amount,uint32 destinationDomain,bytes32 destinationMintRecipient,bytes32 destinationCaller,uint256 maxFee,uint32 minFinalityThreshold,Schedule schedule,Fee fee)"
+    "Instruction(uint256 salt,uint256 maxExecutions,address action,TransferCCTPV2 transferCCTPV2)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)Schedule(uint256 startAt,uint256 startBy,uint256 interval,uint256 timeout)TransferCCTPV2(address token,uint256 amount,uint32 destinationDomain,bytes32 destinationMintRecipient,bytes32 destinationCaller,uint32 maxFeeThouBPS,uint32 minFinalityThreshold,Schedule schedule,Fee fee)"
 );
 
 bytes32 constant ARGUMENTS_TYPEHASH = keccak256(
-    "TransferCCTPV2(address token,uint256 amount,uint32 destinationDomain,bytes32 destinationMintRecipient,bytes32 destinationCaller,uint256 maxFee,uint32 minFinalityThreshold,Schedule schedule,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)Schedule(uint256 startAt,uint256 startBy,uint256 interval,uint256 timeout)"
+    "TransferCCTPV2(address token,uint256 amount,uint32 destinationDomain,bytes32 destinationMintRecipient,bytes32 destinationCaller,uint32 maxFeeThouBPS,uint32 minFinalityThreshold,Schedule schedule,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)Schedule(uint256 startAt,uint256 startBy,uint256 interval,uint256 timeout)"
 );
 
 /// @title ITransferCCTPV2Action
@@ -22,7 +22,7 @@ interface ITransferCCTPV2Action is IInterval, IOtimFee {
     /// @param destinationDomain - the destination domain for the CCTP transfer
     /// @param destinationMintRecipient - the address of the mint recipient for the CCTP transfer (in bytes32 format)
     /// @param destinationCaller - the address allowed to call receiveMessage on destination (bytes32(0) for anyone)
-    /// @param maxFee - the maximum fee for the transfer in burn token units
+    /// @param maxFeeThouBPS - max fee in 1/1000 BPS (e.g., 10 = 0.01%, 100 = 0.1%)
     /// @param minFinalityThreshold - minimum finality threshold (e.g., 1000=fast, 2000=standard)
     /// @param schedule - the schedule parameters for the transfer
     /// @param fee - the fee to be paid
@@ -32,7 +32,7 @@ interface ITransferCCTPV2Action is IInterval, IOtimFee {
         uint32 destinationDomain;
         bytes32 destinationMintRecipient;
         bytes32 destinationCaller;
-        uint256 maxFee;
+        uint32 maxFeeThouBPS;
         uint32 minFinalityThreshold;
         Schedule schedule;
         Fee fee;

@@ -13,7 +13,7 @@ import {OtimFee} from "./fee-models/OtimFee.sol";
 import {IAction} from "./interfaces/IAction.sol";
 import {ISweepCCTPV2Action, INSTRUCTION_TYPEHASH, ARGUMENTS_TYPEHASH} from "./interfaces/ISweepCCTPV2Action.sol";
 
-import {InvalidArguments, BalanceUnderThreshold, CCTPTokenNotSupported} from "./errors/Errors.sol";
+import {InvalidArguments, BalanceUnderThreshold, CCTPTokenNotSupported, CCTPMaxFeeTooLow} from "./errors/Errors.sol";
 
 /// @title SweepCCTPV2Action
 /// @author Otim Labs, Inc.
@@ -54,7 +54,7 @@ contract SweepCCTPV2Action is IAction, ISweepCCTPV2Action, OtimFee {
                 arguments.threshold,
                 arguments.endBalance,
                 arguments.destinationCaller,
-                arguments.maxFee,
+                arguments.maxFeeThouBPS,
                 arguments.minFinalityThreshold,
                 hash(arguments.fee)
             )
@@ -112,6 +112,20 @@ contract SweepCCTPV2Action is IAction, ISweepCCTPV2Action, OtimFee {
             emit CCTPBurnLimitReached(arguments.token, burnLimitPerMessage);
         }
 
+        // validate maxFeeThouBPS against CCTP's minFee
+        uint256 calculatedMaxFee;
+        if (arguments.minFinalityThreshold < 2000) {
+            uint256 cctpMinFee = tokenMessengerV2.minFee();
+            if (arguments.maxFeeThouBPS < cctpMinFee) {
+                revert CCTPMaxFeeTooLow(arguments.maxFeeThouBPS, cctpMinFee);
+            }
+            // calculate actual fee based on transfer amount
+            calculatedMaxFee = tokenMessengerV2.getMinFeeAmount(transferAmount);
+        } else {
+            // standard transfers (minFinalityThreshold >= 2000) have no cost
+            calculatedMaxFee = 0;
+        }
+
         // approve the transferAmount to the CCTP TokenMessenger contract
         // slither-disable-next-line unused-return
         IERC20(arguments.token).approve(address(tokenMessengerV2), transferAmount);
@@ -123,7 +137,7 @@ contract SweepCCTPV2Action is IAction, ISweepCCTPV2Action, OtimFee {
             arguments.destinationMintRecipient,
             arguments.token,
             arguments.destinationCaller,
-            arguments.maxFee,
+            calculatedMaxFee,
             arguments.minFinalityThreshold
         );
 

@@ -14,7 +14,7 @@ import {OtimFee} from "./fee-models/OtimFee.sol";
 import {IAction} from "./interfaces/IAction.sol";
 import {ITransferCCTPV2Action, INSTRUCTION_TYPEHASH, ARGUMENTS_TYPEHASH} from "./interfaces/ITransferCCTPV2Action.sol";
 
-import {InvalidArguments, InsufficientBalance, CCTPTokenNotSupported} from "./errors/Errors.sol";
+import {InvalidArguments, InsufficientBalance, CCTPTokenNotSupported, CCTPMaxFeeTooLow} from "./errors/Errors.sol";
 
 /// @title TransferCCTPV2Action
 /// @author Otim Labs, Inc.
@@ -54,7 +54,7 @@ contract TransferCCTPV2Action is IAction, ITransferCCTPV2Action, Interval, OtimF
                 arguments.destinationDomain,
                 arguments.destinationMintRecipient,
                 arguments.destinationCaller,
-                arguments.maxFee,
+                arguments.maxFeeThouBPS,
                 arguments.minFinalityThreshold,
                 hash(arguments.schedule),
                 hash(arguments.fee)
@@ -114,6 +114,20 @@ contract TransferCCTPV2Action is IAction, ITransferCCTPV2Action, Interval, OtimF
             emit CCTPBurnLimitReached(arguments.token, burnLimitPerMessage);
         }
 
+        // validate maxFeeThouBPS against CCTP's minFee (only for fast transfers)
+        uint256 calculatedMaxFee;
+        if (arguments.minFinalityThreshold < 2000) {
+            uint256 cctpMinFee = tokenMessengerV2.minFee();
+            if (arguments.maxFeeThouBPS < cctpMinFee) {
+                revert CCTPMaxFeeTooLow(arguments.maxFeeThouBPS, cctpMinFee);
+            }
+            // calculate actual fee based on transfer amount
+            calculatedMaxFee = tokenMessengerV2.getMinFeeAmount(transferAmount);
+        } else {
+            // standard transfers (minFinalityThreshold >= 2000) have no cost
+            calculatedMaxFee = 0;
+        }
+
         // approve the transferAmount to the CCTP TokenMessenger contract
         // slither-disable-next-line unused-return
         IERC20(arguments.token).approve(address(tokenMessengerV2), transferAmount);
@@ -125,7 +139,7 @@ contract TransferCCTPV2Action is IAction, ITransferCCTPV2Action, Interval, OtimF
             arguments.destinationMintRecipient,
             arguments.token,
             arguments.destinationCaller,
-            arguments.maxFee,
+            calculatedMaxFee,
             arguments.minFinalityThreshold
         );
 

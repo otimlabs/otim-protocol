@@ -46,7 +46,7 @@ contract TransferCCTPV2Test is InstructionForkTestContext {
         destinationDomain: DEFAULT_DESTINATION_DOMAIN,
         destinationMintRecipient: bytes32(uint256(1)),
         destinationCaller: bytes32(0),
-        maxFee: 1e6,
+        maxFeeThouBPS: 10,
         minFinalityThreshold: 1000,
         schedule: DEFAULT_SCHEDULE,
         fee: DEFAULT_FEE
@@ -80,6 +80,23 @@ contract TransferCCTPV2Test is InstructionForkTestContext {
         // Note: In V2, this returns the TokenMessenger address, not a separate remote address
         DEFAULT_DESTINATION_TOKEN_MESSENGER = bytes32(uint256(uint160(SEPOLIA_TOKEN_MESSENGER_V2)));
 
+        // mock CCTP V2 fee functions
+        vm.mockCall(
+            SEPOLIA_TOKEN_MESSENGER_V2,
+            abi.encodeWithSignature("minFee()"),
+            abi.encode(10) // 0.01% in 1/1000 BPS
+        );
+        vm.mockCall(
+            SEPOLIA_TOKEN_MESSENGER_V2,
+            abi.encodeWithSelector(bytes4(keccak256("getMinFeeAmount(uint256)"))),
+            abi.encode(uint256(0)) // default: no fee
+        );
+        vm.mockCall(
+            SEPOLIA_TOKEN_MESSENGER_V2,
+            abi.encodeWithSignature("getMinFeeAmount(uint256)", 100e6),
+            abi.encode(uint256(10000))
+        );
+
         USER_START_BALANCE = 5_000_000e6;
 
         DEFAULT_ACTION = address(transferCCTPV2Action);
@@ -105,7 +122,7 @@ contract TransferCCTPV2Test is InstructionForkTestContext {
     /// @notice test that transferring USDC via CCTP V2 with standard transfer works as expected
     function test_transferCCTPV2_standardTransfer() public {
         DEFAULT_ACTION_ARGS.minFinalityThreshold = 2000;
-        DEFAULT_ACTION_ARGS.maxFee = 0;
+        DEFAULT_ACTION_ARGS.maxFeeThouBPS = 0;
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 

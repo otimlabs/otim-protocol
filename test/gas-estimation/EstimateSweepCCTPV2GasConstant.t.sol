@@ -51,6 +51,18 @@ contract EstimateSweepCCTPV2GasConstant is InstructionForkTestContext {
         );
 
         actionManager.addAction(address(sweepCCTPV2Action));
+
+        // mock CCTP V2 fee functions
+        vm.mockCall(
+            SEPOLIA_TOKEN_MESSENGER_V2,
+            abi.encodeWithSignature("minFee()"),
+            abi.encode(10) // 0.01% in 1/1000 BPS
+        );
+        vm.mockCall(
+            SEPOLIA_TOKEN_MESSENGER_V2,
+            abi.encodeWithSelector(bytes4(keccak256("getMinFeeAmount(uint256)"))),
+            abi.encode(uint256(0)) // return 0 to avoid CCTP "maxFee < amount" validation
+        );
     }
 
     // check that the SWEEP_CCTP_V2_ACTION_GAS_CONSTANT doesn't result in an underpayment of the fee
@@ -69,16 +81,12 @@ contract EstimateSweepCCTPV2GasConstant is InstructionForkTestContext {
         arguments.destinationDomain = 2; // OP Sepolia
         arguments.destinationMintRecipient = bytes32(uint256(1));
         arguments.destinationCaller = bytes32(0);
-        arguments.maxFee = 1e6;
+        arguments.maxFeeThouBPS = 10;
         arguments.minFinalityThreshold = 1000;
         arguments.threshold = threshold;
         arguments.endBalance = endBalance;
         // fuzz test must pass argument validation
         vm.assume(endBalance <= threshold);
-        // assume threshold is greater than maxFee for CCTP V2 validation
-        vm.assume(threshold > arguments.maxFee);
-        // assume transfer amount (threshold - endBalance) is greater than maxFee for CCTP V2 validation
-        vm.assume(threshold - endBalance > arguments.maxFee);
         // assume a reasonable threshold (less than whale balance)
         vm.assume(threshold < IERC20(SEPOLIA_USDC).balanceOf(SEPOLIA_USDC_WHALE));
         // assume threshold is at least 2 USDC to have meaningful transfer amounts

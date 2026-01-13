@@ -43,5 +43,14 @@ interface ITokenMessengerV2 {
         uint32 minFinalityThreshold,
         bytes calldata hookData
     ) external;
+
+    /// @notice Returns the minimum fee for a given amount
+    /// @param amount The amount for which to calculate the minimum fee
+    /// @return The minimum fee for the given amount
+    function getMinFeeAmount(uint256 amount) external view returns (uint256);
+
+    /// @notice Minimum fee for all transfers in 1/1000 basis points
+    /// @return The minimum fee in thousandth basis points (e.g., 10 = 0.01%)
+    function minFee() external view returns (uint256);
 }
 

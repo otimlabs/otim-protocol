@@ -46,7 +46,7 @@ contract SweepCCTPV2Test is InstructionForkTestContext {
         threshold: DEFAULT_THRESHOLD,
         endBalance: DEFAULT_END_BALANCE,
         destinationCaller: bytes32(0),
-        maxFee: 1e6,
+        maxFeeThouBPS: 10,
         minFinalityThreshold: 1000,
         fee: DEFAULT_FEE
     });
@@ -79,6 +79,28 @@ contract SweepCCTPV2Test is InstructionForkTestContext {
         // Note: In V2, this returns the TokenMessenger address, not a separate remote address
         DEFAULT_DESTINATION_TOKEN_MESSENGER = bytes32(uint256(uint160(SEPOLIA_TOKEN_MESSENGER_V2)));
 
+        // mock CCTP V2 fee functions
+        vm.mockCall(
+            SEPOLIA_TOKEN_MESSENGER_V2,
+            abi.encodeWithSignature("minFee()"),
+            abi.encode(10) // 0.01% in 1/1000 BPS
+        );
+        vm.mockCall(
+            SEPOLIA_TOKEN_MESSENGER_V2,
+            abi.encodeWithSelector(bytes4(keccak256("getMinFeeAmount(uint256)"))),
+            abi.encode(uint256(0)) // default: no fee
+        );
+        vm.mockCall(
+            SEPOLIA_TOKEN_MESSENGER_V2,
+            abi.encodeWithSignature("getMinFeeAmount(uint256)", 50000001),
+            abi.encode(uint256(5000))
+        );
+        vm.mockCall(
+            SEPOLIA_TOKEN_MESSENGER_V2,
+            abi.encodeWithSignature("getMinFeeAmount(uint256)", 100000001),
+            abi.encode(uint256(10000))
+        );
+
         DEFAULT_ACTION = address(sweepCCTPV2Action);
         DEFAULT_ARGS = abi.encode(DEFAULT_ACTION_ARGS);
     }
@@ -102,7 +124,7 @@ contract SweepCCTPV2Test is InstructionForkTestContext {
     /// @notice test that sweeping USDC via CCTP V2 with standard transfer works as expected
     function test_sweepCCTPV2_standardTransfer() public {
         DEFAULT_ACTION_ARGS.minFinalityThreshold = 2000;
-        DEFAULT_ACTION_ARGS.maxFee = 0;
+        DEFAULT_ACTION_ARGS.maxFeeThouBPS = 0;
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 
