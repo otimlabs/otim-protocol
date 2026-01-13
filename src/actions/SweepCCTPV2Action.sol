@@ -23,9 +23,9 @@ contract SweepCCTPV2Action is IAction, ISweepCCTPV2Action, OtimFee {
 
     /// @notice the CCTP V2 TokenMessenger contract
     ITokenMessengerV2 public immutable tokenMessengerV2;
-    /// @notice the CCTP TokenMinter contract
+    /// @notice the CCTP V2 TokenMinter contract
     /// @dev the TokenMinter contract implements the ITokenController interface
-    ITokenController public immutable tokenMinter;
+    ITokenController public immutable tokenMinterV2;
 
     constructor(
         address tokenMessengerV2Address,
@@ -35,7 +35,7 @@ contract SweepCCTPV2Action is IAction, ISweepCCTPV2Action, OtimFee {
         uint256 gasConstant_
     ) OtimFee(feeTokenRegistryAddress, treasuryAddress, gasConstant_) {
         tokenMessengerV2 = ITokenMessengerV2(tokenMessengerV2Address);
-        tokenMinter = ITokenController(tokenMinterAddress);
+        tokenMinterV2 = ITokenController(tokenMinterAddress);
     }
 
     /// @inheritdoc IAction
@@ -55,7 +55,7 @@ contract SweepCCTPV2Action is IAction, ISweepCCTPV2Action, OtimFee {
                 arguments.endBalance,
                 arguments.destinationCaller,
                 arguments.maxFee,
-                arguments.transferSpeed,
+                arguments.minFinalityThreshold,
                 hash(arguments.fee)
             )
         );
@@ -95,7 +95,7 @@ contract SweepCCTPV2Action is IAction, ISweepCCTPV2Action, OtimFee {
         }
 
         // get the CCTP burnLimitPerMessage for the token
-        uint256 burnLimitPerMessage = tokenMinter.burnLimitsPerMessage(arguments.token);
+        uint256 burnLimitPerMessage = tokenMinterV2.burnLimitsPerMessage(arguments.token);
 
         // if the burnLimitPerMessage is zero, the token is not supported
         if (burnLimitPerMessage == 0) {
@@ -116,9 +116,6 @@ contract SweepCCTPV2Action is IAction, ISweepCCTPV2Action, OtimFee {
         // slither-disable-next-line unused-return
         IERC20(arguments.token).approve(address(tokenMessengerV2), transferAmount);
 
-        // convert transfer speed to finality threshold
-        uint32 minFinalityThreshold = arguments.transferSpeed == TransferSpeed.FAST ? 1000 : 2000;
-
         // initiate CCTP V2 transfer
         tokenMessengerV2.depositForBurn(
             transferAmount,
@@ -127,7 +124,7 @@ contract SweepCCTPV2Action is IAction, ISweepCCTPV2Action, OtimFee {
             arguments.token,
             arguments.destinationCaller,
             arguments.maxFee,
-            minFinalityThreshold
+            arguments.minFinalityThreshold
         );
 
         // charge the fee

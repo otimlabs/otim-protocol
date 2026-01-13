@@ -73,7 +73,7 @@ contract EstimateTransferCCTPV2GasConstant is InstructionForkTestContext {
         arguments.destinationMintRecipient = bytes32(uint256(1));
         arguments.destinationCaller = bytes32(0);
         arguments.maxFee = 1e6;
-        arguments.transferSpeed = ITransferCCTPV2Action.TransferSpeed.FAST;
+        arguments.minFinalityThreshold = 1000;
 
         // assume amount is greater than maxFee for CCTP V2 validation
         vm.assume(amount > arguments.maxFee);

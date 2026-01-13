@@ -47,7 +47,7 @@ contract SweepCCTPV2Test is InstructionForkTestContext {
         endBalance: DEFAULT_END_BALANCE,
         destinationCaller: bytes32(0),
         maxFee: 1e6,
-        transferSpeed: ISweepCCTPV2Action.TransferSpeed.FAST,
+        minFinalityThreshold: 1000,
         fee: DEFAULT_FEE
     });
 
@@ -101,7 +101,7 @@ contract SweepCCTPV2Test is InstructionForkTestContext {
 
     /// @notice test that sweeping USDC via CCTP V2 with standard transfer works as expected
     function test_sweepCCTPV2_standardTransfer() public {
-        DEFAULT_ACTION_ARGS.transferSpeed = ISweepCCTPV2Action.TransferSpeed.STANDARD;
+        DEFAULT_ACTION_ARGS.minFinalityThreshold = 2000;
         DEFAULT_ACTION_ARGS.maxFee = 0;
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));

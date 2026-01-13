@@ -47,7 +47,7 @@ contract TransferCCTPV2Test is InstructionForkTestContext {
         destinationMintRecipient: bytes32(uint256(1)),
         destinationCaller: bytes32(0),
         maxFee: 1e6,
-        transferSpeed: ITransferCCTPV2Action.TransferSpeed.FAST,
+        minFinalityThreshold: 1000,
         schedule: DEFAULT_SCHEDULE,
         fee: DEFAULT_FEE
     });
@@ -104,7 +104,7 @@ contract TransferCCTPV2Test is InstructionForkTestContext {
 
     /// @notice test that transferring USDC via CCTP V2 with standard transfer works as expected
     function test_transferCCTPV2_standardTransfer() public {
-        DEFAULT_ACTION_ARGS.transferSpeed = ITransferCCTPV2Action.TransferSpeed.STANDARD;
+        DEFAULT_ACTION_ARGS.minFinalityThreshold = 2000;
         DEFAULT_ACTION_ARGS.maxFee = 0;
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));

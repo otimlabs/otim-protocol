@@ -70,7 +70,7 @@ contract EstimateSweepCCTPV2GasConstant is InstructionForkTestContext {
         arguments.destinationMintRecipient = bytes32(uint256(1));
         arguments.destinationCaller = bytes32(0);
         arguments.maxFee = 1e6;
-        arguments.transferSpeed = ISweepCCTPV2Action.TransferSpeed.FAST;
+        arguments.minFinalityThreshold = 1000;
         arguments.threshold = threshold;
         arguments.endBalance = endBalance;
         // fuzz test must pass argument validation
