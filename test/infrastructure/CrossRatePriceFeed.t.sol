@@ -33,6 +33,16 @@ contract CrossRatePriceFeedTest is Test {
         crossRatePriceFeed = new CrossRatePriceFeed(USDC_USD_FEED, ETH_USD_FEED, USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT);
     }
 
+    /// @notice Helper function to warp time so the price feeds are fresh
+    function _warpToFreshPrice() internal {
+        (,,, uint256 numeratorUpdatedAt,) = usdcUsdFeed.latestRoundData();
+        (,,, uint256 denominatorUpdatedAt,) = ethUsdFeed.latestRoundData();
+
+        // Warp to the later of the two update times to ensure both are fresh
+        uint256 latestUpdate = numeratorUpdatedAt > denominatorUpdatedAt ? numeratorUpdatedAt : denominatorUpdatedAt;
+        vm.warp(latestUpdate);
+    }
+
     /// @notice test constructor reverts with zero numerator feed
     function test_constructor_numeratorZeroAddress() public {
         vm.expectRevert();
@@ -111,14 +121,16 @@ contract CrossRatePriceFeedTest is Test {
     }
 
     /// @notice test latestRoundData returns roundId == 1
-    function test_latestRoundData_roundIdOne() public view {
+    function test_latestRoundData_roundIdOne() public {
+        _warpToFreshPrice();
         (uint80 roundId,,,,) = crossRatePriceFeed.latestRoundData();
 
         assertEq(roundId, 1);
     }
 
     /// @notice test latestRoundData uses earlier updated at timestamp
-    function test_latestRoundData_usesEarlierUpdatedAt() public view {
+    function test_latestRoundData_usesEarlierUpdatedAt() public {
+        _warpToFreshPrice();
         (,,, uint256 numeratorUpdatedAt,) = usdcUsdFeed.latestRoundData();
         (,,, uint256 denominatorUpdatedAt,) = ethUsdFeed.latestRoundData();
         (,,, uint256 crossUpdatedAt,) = crossRatePriceFeed.latestRoundData();
@@ -130,14 +142,16 @@ contract CrossRatePriceFeedTest is Test {
     }
 
     /// @notice test latestRoundData returns startedAt == 0
-    function test_latestRoundData_startedAtZero() public view {
+    function test_latestRoundData_startedAtZero() public {
+        _warpToFreshPrice();
         (,, uint256 startedAt,,) = crossRatePriceFeed.latestRoundData();
 
         assertEq(startedAt, 0);
     }
 
     /// @notice test latestRoundData returns answeredInRound == 0
-    function test_latestRoundData_answeredInRoundZero() public view {
+    function test_latestRoundData_answeredInRoundZero() public {
+        _warpToFreshPrice();
         (,,,, uint80 answeredInRound) = crossRatePriceFeed.latestRoundData();
 
         assertEq(answeredInRound, 0);
@@ -218,12 +232,14 @@ contract CrossRatePriceFeedTest is Test {
         crossRatePriceFeed =
             new CrossRatePriceFeed(address(overflowFeed), ETH_USD_FEED, USDC_USD_HEARTBEAT, ETH_USD_HEARTBEAT);
 
+        _warpToFreshPrice();
         vm.expectRevert(stdError.arithmeticError);
         crossRatePriceFeed.latestRoundData();
     }
 
     /// @notice test latestRoundData returns correct answer with values from Sepolia price feeds
-    function test_latestRoundData_realValuesFork() public view {
+    function test_latestRoundData_realValuesFork() public {
+        _warpToFreshPrice();
         (, int256 numeratorAnswer,,,) = usdcUsdFeed.latestRoundData();
         (, int256 denominatorAnswer,,,) = ethUsdFeed.latestRoundData();
         (, int256 answer,,,) = crossRatePriceFeed.latestRoundData();
