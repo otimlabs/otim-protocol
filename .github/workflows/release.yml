@@ -1,0 +1,21 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 1' # Mondays at midnight UTC
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: go-semantic-release/action@2e9dc4247a6004f8377781bef4cb9dad273a741f # v1.24.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          force-bump-patch-version: true # ensure patch version updates trigger releases

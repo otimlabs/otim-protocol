@@ -5,16 +5,16 @@ Thank you for your Pull Request! Please provide the details below to help with c
 ## Motivation
 
 <!--
-Add your Linear issue ID using the format "ENG-123". This can automatically update
-the issue status using Linear's magic words. Examples of magic words:
-- Closing: closes, fixes, resolves, completes
-- Non-closing: ref, references, related to, contributes to
+Add your GitHub issue ID using the format "#123". This can automatically update
+the issue status using GitHub's closing keywords. Examples of closing keywords:
+- Closing: closes, fixes, resolves
+- Non-closing: ref, references, related to, see
 
-For PRs without a Linear issue, briefly explain why you're making this change.
-Keep it concise - if the explanation becomes lengthy, consider creating a Linear ticket.
+For PRs without a GitHub issue, briefly explain why you're making this change.
+Keep it concise - if the explanation becomes lengthy, consider creating a GitHub issue.
 -->
 
-[Linear Issue ID (if applicable)](https://linear.app/otim/team/ENG/all)
+[GitHub Issue (if applicable)](https://github.com/otimlabs/otim-protocol/issues)
 
 ## Solution
 
