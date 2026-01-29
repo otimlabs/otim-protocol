@@ -38,9 +38,11 @@ contract CrossRatePriceFeedTest is Test {
         (,,, uint256 numeratorUpdatedAt,) = usdcUsdFeed.latestRoundData();
         (,,, uint256 denominatorUpdatedAt,) = ethUsdFeed.latestRoundData();
 
-        // Warp to the later of the two update times to ensure both are fresh
-        uint256 latestUpdate = numeratorUpdatedAt > denominatorUpdatedAt ? numeratorUpdatedAt : denominatorUpdatedAt;
-        vm.warp(latestUpdate);
+        // Warp to just before the earliest feed expiration
+        uint256 numeratorExpiry = numeratorUpdatedAt + USDC_USD_HEARTBEAT;
+        uint256 denominatorExpiry = denominatorUpdatedAt + ETH_USD_HEARTBEAT;
+        uint256 minExpiry = numeratorExpiry < denominatorExpiry ? numeratorExpiry : denominatorExpiry;
+        vm.warp(minExpiry - 1);
     }
 
     /// @notice test constructor reverts with zero numerator feed
