@@ -7,3 +7,4 @@ updates:
     # Check for updates to GitHub Actions every week
     interval: "weekly"
     day: "monday"
+    timezone: "America/New_York"
