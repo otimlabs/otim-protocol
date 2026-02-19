@@ -69,7 +69,6 @@ contract EstimateRequestDepositERC7540GasConstant is InstructionForkTestContext 
         IRequestDepositERC7540Action.RequestDepositERC7540 memory arguments
     ) public {
         arguments.vault = address(mockVault);
-        arguments.recipient = address(user);
         arguments.controller = address(user);
         arguments.minTotalShares = 1;
 

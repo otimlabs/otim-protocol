@@ -39,7 +39,6 @@ contract RequestDepositERC7540Action is IAction, IRequestDepositERC7540Action, I
                 ARGUMENTS_TYPEHASH,
                 arguments.vault,
                 arguments.assets,
-                arguments.recipient,
                 arguments.controller,
                 arguments.minDeposit,
                 arguments.minTotalShares,
@@ -64,8 +63,8 @@ contract RequestDepositERC7540Action is IAction, IRequestDepositERC7540Action, I
         // if first execution, validate the input
         if (executionState.executionCount == 0) {
             if (
-                arguments.vault == address(0) || arguments.assets == 0 || arguments.recipient == address(0)
-                    || arguments.controller == address(0) || arguments.minTotalShares == 0
+                arguments.vault == address(0) || arguments.assets == 0 || arguments.controller == address(0)
+                    || arguments.minTotalShares == 0
             ) {
                 revert InvalidArguments();
             }

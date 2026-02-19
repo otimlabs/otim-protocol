@@ -37,7 +37,6 @@ contract SweepRequestDepositERC7540Action is IAction, ISweepRequestDepositERC754
             abi.encode(
                 ARGUMENTS_TYPEHASH,
                 arguments.vault,
-                arguments.recipient,
                 arguments.controller,
                 arguments.threshold,
                 arguments.endBalance,
@@ -63,7 +62,7 @@ contract SweepRequestDepositERC7540Action is IAction, ISweepRequestDepositERC754
         // if first execution, validate the input
         if (executionState.executionCount == 0) {
             if (
-                arguments.vault == address(0) || arguments.recipient == address(0) || arguments.controller == address(0)
+                arguments.vault == address(0) || arguments.controller == address(0)
                     || arguments.endBalance > arguments.threshold || arguments.minTotalShares == 0
             ) {
                 revert InvalidArguments();

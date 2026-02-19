@@ -34,7 +34,6 @@ contract SweepRequestDepositERC7540Test is InstructionTestContext {
     ERC7540DepositMock public mockVault = new ERC7540DepositMock(IERC20(underlyingVault));
 
     address public DEFAULT_VAULT = address(mockVault);
-    address public DEFAULT_RECIPIENT = address(user);
     address public DEFAULT_CONTROLLER = address(user);
     uint256 public DEFAULT_THRESHOLD;
     uint256 public DEFAULT_END_BALANCE;
@@ -61,7 +60,6 @@ contract SweepRequestDepositERC7540Test is InstructionTestContext {
 
         DEFAULT_ACTION_ARGS = ISweepRequestDepositERC7540Action.SweepRequestDepositERC7540({
             vault: DEFAULT_VAULT,
-            recipient: DEFAULT_RECIPIENT,
             controller: DEFAULT_CONTROLLER,
             threshold: DEFAULT_THRESHOLD,
             endBalance: DEFAULT_END_BALANCE,
@@ -95,20 +93,6 @@ contract SweepRequestDepositERC7540Test is InstructionTestContext {
     /// @notice test that validation fails with vault == address(0)
     function test_sweepRequestDepositERC7540_vaultZero() public {
         DEFAULT_ACTION_ARGS.vault = address(0);
-
-        buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
-
-        bytes memory result = abi.encodeWithSelector(InvalidArguments.selector);
-        vm.expectRevert(abi.encodeWithSelector(IOtimDelegate.ActionExecutionFailed.selector, instructionId, result));
-
-        vm.resetGasMetering();
-        user.executeInstruction(instruction, instructionSig);
-        vm.pauseGasMetering();
-    }
-
-    /// @notice test that validation fails with recipient == address(0)
-    function test_sweepRequestDepositERC7540_recipientZero() public {
-        DEFAULT_ACTION_ARGS.recipient = address(0);
 
         buildInstruction(DEFAULT_SALT, DEFAULT_MAX_EXECUTIONS, DEFAULT_ACTION, abi.encode(DEFAULT_ACTION_ARGS));
 

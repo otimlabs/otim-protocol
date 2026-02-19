@@ -4,11 +4,11 @@ pragma solidity ^0.8.26;
 import {IOtimFee} from "../fee-models/interfaces/IOtimFee.sol";
 
 bytes32 constant INSTRUCTION_TYPEHASH = keccak256(
-    "Instruction(uint256 salt,uint256 maxExecutions,address action,SweepRequestDepositERC7540 sweepRequestDepositERC7540)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)SweepRequestDepositERC7540(address vault,address recipient,address controller,uint256 threshold,uint256 endBalance,uint256 minDeposit,uint256 minTotalShares,Fee fee)"
+    "Instruction(uint256 salt,uint256 maxExecutions,address action,SweepRequestDepositERC7540 sweepRequestDepositERC7540)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)SweepRequestDepositERC7540(address vault,address controller,uint256 threshold,uint256 endBalance,uint256 minDeposit,uint256 minTotalShares,Fee fee)"
 );
 
 bytes32 constant ARGUMENTS_TYPEHASH = keccak256(
-    "SweepRequestDepositERC7540(address vault,address recipient,address controller,uint256 threshold,uint256 endBalance,uint256 minDeposit,uint256 minTotalShares,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)"
+    "SweepRequestDepositERC7540(address vault,address controller,uint256 threshold,uint256 endBalance,uint256 minDeposit,uint256 minTotalShares,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)"
 );
 
 /// @title ISweepRequestDepositERC7540Action
@@ -17,7 +17,6 @@ bytes32 constant ARGUMENTS_TYPEHASH = keccak256(
 interface ISweepRequestDepositERC7540Action is IOtimFee {
     /// @notice arguments for the SweepRequestDepositERC7540Action contract
     /// @param vault - the address of the ERC7540 vault to request deposit to
-    /// @param recipient - the intended receiver of shares when the deposit is later claimed
     /// @param controller - the ERC7540 controller for the request
     /// @param threshold - the account's underlying balance threshold to trigger the sweep
     /// @param endBalance - the account's balance after the sweep
@@ -26,7 +25,6 @@ interface ISweepRequestDepositERC7540Action is IOtimFee {
     /// @param fee - the fee Otim will charge for the request
     struct SweepRequestDepositERC7540 {
         address vault;
-        address recipient;
         address controller;
         uint256 threshold;
         uint256 endBalance;
