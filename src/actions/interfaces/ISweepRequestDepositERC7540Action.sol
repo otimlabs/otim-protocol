@@ -4,11 +4,11 @@ pragma solidity ^0.8.26;
 import {IOtimFee} from "../fee-models/interfaces/IOtimFee.sol";
 
 bytes32 constant INSTRUCTION_TYPEHASH = keccak256(
-    "Instruction(uint256 salt,uint256 maxExecutions,address action,SweepRequestDepositERC7540 sweepRequestDepositERC7540)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)SweepRequestDepositERC7540(address vault,address recipient,address controller,uint256 threshold,uint256 endBalance,Fee fee)"
+    "Instruction(uint256 salt,uint256 maxExecutions,address action,SweepRequestDepositERC7540 sweepRequestDepositERC7540)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)SweepRequestDepositERC7540(address vault,address recipient,address controller,uint256 threshold,uint256 endBalance,uint256 minDeposit,uint256 minTotalShares,Fee fee)"
 );
 
 bytes32 constant ARGUMENTS_TYPEHASH = keccak256(
-    "SweepRequestDepositERC7540(address vault,address recipient,address controller,uint256 threshold,uint256 endBalance,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)"
+    "SweepRequestDepositERC7540(address vault,address recipient,address controller,uint256 threshold,uint256 endBalance,uint256 minDeposit,uint256 minTotalShares,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)"
 );
 
 /// @title ISweepRequestDepositERC7540Action

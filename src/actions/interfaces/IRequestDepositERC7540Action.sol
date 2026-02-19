@@ -5,11 +5,11 @@ import {IInterval} from "../schedules/interfaces/IInterval.sol";
 import {IOtimFee} from "../fee-models/interfaces/IOtimFee.sol";
 
 bytes32 constant INSTRUCTION_TYPEHASH = keccak256(
-    "Instruction(uint256 salt,uint256 maxExecutions,address action,RequestDepositERC7540 requestDepositERC7540)RequestDepositERC7540(address vault,uint256 assets,address recipient,address controller,uint256 minTotalShares,Schedule schedule,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)Schedule(uint256 startAt,uint256 startBy,uint256 interval,uint256 timeout)"
+    "Instruction(uint256 salt,uint256 maxExecutions,address action,RequestDepositERC7540 requestDepositERC7540)RequestDepositERC7540(address vault,uint256 assets,address recipient,address controller,uint256 minDeposit,uint256 minTotalShares,Schedule schedule,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)Schedule(uint256 startAt,uint256 startBy,uint256 interval,uint256 timeout)"
 );
 
 bytes32 constant ARGUMENTS_TYPEHASH = keccak256(
-    "RequestDepositERC7540(address vault,uint256 assets,address recipient,address controller,uint256 minTotalShares,Schedule schedule,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)Schedule(uint256 startAt,uint256 startBy,uint256 interval,uint256 timeout)"
+    "RequestDepositERC7540(address vault,uint256 assets,address recipient,address controller,uint256 minDeposit,uint256 minTotalShares,Schedule schedule,Fee fee)Fee(address token,uint256 maxBaseFeePerGas,uint256 maxPriorityFeePerGas,uint256 executionFee)Schedule(uint256 startAt,uint256 startBy,uint256 interval,uint256 timeout)"
 );
 
 /// @title IRequestDepositERC7540Action
