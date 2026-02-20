@@ -33,7 +33,7 @@ contract EstimateSweepRequestDepositERC7540GasConstant is InstructionForkTestCon
     ERC4626Mock public underlyingVault;
     ERC7540DepositMock public mockVault;
 
-    uint256 public constant SWEEP_REQUEST_DEPOSIT_ERC7540_GAS_CONSTANT = 105_000;
+    uint256 public constant SWEEP_REQUEST_DEPOSIT_ERC7540_GAS_CONSTANT = 104_500;
     uint256 public constant USER_MINT_AMOUNT = 100_000e6;
 
     constructor() {

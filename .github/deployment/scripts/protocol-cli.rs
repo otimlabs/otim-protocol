@@ -369,6 +369,20 @@ fn get_contract_mapping() -> HashMap<String, TierConfig> {
                     source_path: "src/actions/CallOnceAction.sol:CallOnceAction",
                     constructor_type: ConstructorType::Action,
                 }),
+                ("RequestDepositERC7540Action".to_string(), ContractDetails {
+                    script: Some("DeployRequestDepositERC7540Action".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_REQUEST_DEPOSIT_ERC7540_ACTION_ADDRESS"),
+                    chain_config_key: Some("actions.RequestDepositERC7540".to_string()),
+                    source_path: "src/actions/RequestDepositERC7540Action.sol:RequestDepositERC7540Action",
+                    constructor_type: ConstructorType::Action,
+                }),
+                ("SweepRequestDepositERC7540Action".to_string(), ContractDetails {
+                    script: Some("DeploySweepRequestDepositERC7540Action".to_string()),
+                    expected_addr_envvar: Some("EXPECTED_SWEEP_REQUEST_DEPOSIT_ERC7540_ACTION_ADDRESS"),
+                    chain_config_key: Some("actions.SweepRequestDepositERC7540".to_string()),
+                    source_path: "src/actions/SweepRequestDepositERC7540Action.sol:SweepRequestDepositERC7540Action",
+                    constructor_type: ConstructorType::Action,
+                }),
             ]),
         }),
     ])

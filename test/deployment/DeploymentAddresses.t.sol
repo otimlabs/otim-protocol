@@ -26,6 +26,8 @@ import {DepositERC4626Action} from "../../src/actions/DepositERC4626Action.sol";
 import {SweepDepositERC4626Action} from "../../src/actions/SweepDepositERC4626Action.sol";
 import {WithdrawERC4626Action} from "../../src/actions/WithdrawERC4626Action.sol";
 import {SweepWithdrawERC4626Action} from "../../src/actions/SweepWithdrawERC4626Action.sol";
+import {RequestDepositERC7540Action} from "../../src/actions/RequestDepositERC7540Action.sol";
+import {SweepRequestDepositERC7540Action} from "../../src/actions/SweepRequestDepositERC7540Action.sol";
 
 contract DeploymentAddressesTest is Test {
     // expected core addresses
@@ -54,6 +56,8 @@ contract DeploymentAddressesTest is Test {
     address constant EXPECTED_SWEEP_DEPOSIT_ERC4626_ACTION_ADDRESS = 0x0B7B5eB78e9823A886E886194a49aF9aCfb430b3;
     address constant EXPECTED_WITHDRAW_ERC4626_ACTION_ADDRESS = 0x819a73E0C7a8678e209398176C9C74aba1186DC2;
     address constant EXPECTED_SWEEP_WITHDRAW_ERC4626_ACTION_ADDRESS = 0x745f88d2A24a788d4d2ee24166AD8416417128A9;
+    address constant EXPECTED_REQUEST_DEPOSIT_ERC7540_ACTION_ADDRESS = 0xd44A65F7709CE56086A0ddB0663871be0F6dAf87;
+    address constant EXPECTED_SWEEP_REQUEST_DEPOSIT_ERC7540_ACTION_ADDRESS = 0x04c4f5736161C55224AB8C5d9394adC258DE5517;
 
     ////////////////////
     // Core addresses //
@@ -181,5 +185,15 @@ contract DeploymentAddressesTest is Test {
     function test_sweepWithdrawERC4626Action_deployedAddress() public {
         address deployed = address(new SweepWithdrawERC4626Action{salt: bytes32(0)}(address(0), address(0), 0));
         assertEq(deployed, EXPECTED_SWEEP_WITHDRAW_ERC4626_ACTION_ADDRESS);
+    }
+
+    function test_requestDepositERC7540Action_deployedAddress() public {
+        address deployed = address(new RequestDepositERC7540Action{salt: bytes32(0)}(address(0), address(0), 0));
+        assertEq(deployed, EXPECTED_REQUEST_DEPOSIT_ERC7540_ACTION_ADDRESS);
+    }
+
+    function test_sweepRequestDepositERC7540Action_deployedAddress() public {
+        address deployed = address(new SweepRequestDepositERC7540Action{salt: bytes32(0)}(address(0), address(0), 0));
+        assertEq(deployed, EXPECTED_SWEEP_REQUEST_DEPOSIT_ERC7540_ACTION_ADDRESS);
     }
 }
