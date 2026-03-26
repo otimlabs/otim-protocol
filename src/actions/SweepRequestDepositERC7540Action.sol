@@ -91,6 +91,9 @@ contract SweepRequestDepositERC7540Action is IAction, ISweepRequestDepositERC754
         // initialize request amount
         uint256 requestAmount = balance - arguments.endBalance;
 
+        // slither-disable-start reentrancy-balance
+        // False positive: detector links IERC20.balanceOf above to the check below, but that check uses
+        // IERC7540.pendingDepositRequest (vault state), not token balance.
         // approve the vault to pull assets from the executing account (owner)
         // slither-disable-next-line unused-return
         IERC20(underlyingToken).approve(arguments.vault, requestAmount);
@@ -106,6 +109,7 @@ contract SweepRequestDepositERC7540Action is IAction, ISweepRequestDepositERC754
         ) {
             revert MaxDepositTooLow();
         }
+        // slither-disable-end reentrancy-balance
 
         // charge the fee
         chargeFee(startGas - gasleft(), arguments.fee);
