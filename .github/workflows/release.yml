@@ -18,4 +18,4 @@ jobs:
       - uses: go-semantic-release/action@2e9dc4247a6004f8377781bef4cb9dad273a741f # v1.24.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          force-bump-patch-version: true # ensure patch version updates trigger releases
+          allow-initial-development-versions: true
